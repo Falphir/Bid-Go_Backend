@@ -1,0 +1,35 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "master", "develop", "feature/*" ]
+  pull_request:
+    branches: [ "master", "develop", "feature/*" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release 
+    - name: Test
+      run: dotnet test --verbosity detailed
+    - name: Test with coverage
+      run: dotnet test --collect:"XPlat Code Coverage" --verbosity detailed
+    - name: Upload code coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: '**/coverage.cobertura.xml'
