@@ -18,15 +18,20 @@ X Story Points
 ## Critérios de Aceitação
 
 - [ ] **1ºCritério: \
-  Given:** **\
-  When:** **\
-  Then:** 
+  **Given:**
+  **When:**
+  **Then:** 
 - [ ] **2ºCritério: \
-  Given:** **\
-  When:** **\
-  Then:** 
+  **Given:**
+  **When:**
+  **Then:**
+- [ ] **3ºCritério: \
+  **Given:**
+  **When:**
+  **Then:** 
 
 ## Tarefas
 
 - [ ] 
+- [ ]
 - [ ]
