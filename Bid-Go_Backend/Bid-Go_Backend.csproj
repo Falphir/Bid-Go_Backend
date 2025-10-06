@@ -47,4 +47,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Migrations\" />
+    <Folder Include="Data\Models\DTOs\" />
+    <Folder Include="Data\Repositories\" />
+  </ItemGroup>
+
 </Project>
