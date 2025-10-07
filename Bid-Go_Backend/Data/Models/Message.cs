@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,10 +20,16 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         public DateTime TimeStamp { get; set; }
 
-        [Required]
         public int ChatId { get; set; }
-
         public Chat Chat { get; set; } = null!;
 
+
+        [ForeignKey(nameof(Driver))]
+        public int DriverId { get; set; }
+        public Driver? Driver { get; set; } = null;
+
+        [ForeignKey(nameof(Company))]
+        public int CompanyId { get; set; }
+        public Company? Company { get; set; } = null;
     }
 }

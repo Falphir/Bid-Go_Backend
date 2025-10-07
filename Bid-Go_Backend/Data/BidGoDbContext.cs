@@ -115,6 +115,30 @@ namespace Bid_Go_Backend.Data
                 .WithMany()
                 .HasForeignKey(t => t.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // TransportRequest -> Chat (1-to-1)
+            modelBuilder.Entity<TransportRequest>()
+                .HasOne(t => t.Chat)
+                .WithOne(c => c.TransportRequest)
+                .HasForeignKey<Chat>(c => c.TransportRequestId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Chat>()
+                .HasOne(t => t.TransportRequest)
+                .WithOne(c => c.Chat)
+                .HasForeignKey<Chat>(c => c.TransportRequestId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Chat -> Messages (1-to-many)
+            modelBuilder.Entity<Chat>()
+                .HasMany(c => c.Messages)
+                .WithOne(m => m.Chat)
+                .HasForeignKey(m => m.ChatId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

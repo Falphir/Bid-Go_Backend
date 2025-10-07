@@ -7,43 +7,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class teste1 : Migration
+    public partial class teste2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Chats",
-                columns: table => new
-                {
-                    ChatId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Chats", x => x.ChatId);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Notifications",
-                columns: table => new
-                {
-                    NotificationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Context = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Notifications", x => x.NotificationId);
-                })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -76,29 +45,6 @@ namespace Bid_Go_Backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Messages",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Context = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    ChatId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Messages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Messages_Chats_ChatId",
-                        column: x => x.ChatId,
-                        principalTable: "Chats",
-                        principalColumn: "ChatId",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -231,6 +177,100 @@ namespace Bid_Go_Backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "Chats",
+                columns: table => new
+                {
+                    ChatId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    TransportRequestId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.ChatId);
+                    table.ForeignKey(
+                        name: "FK_Chats_TransportRequests_TransportRequestId",
+                        column: x => x.TransportRequestId,
+                        principalTable: "TransportRequests",
+                        principalColumn: "TransporRequestId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    NotificationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Context = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    BidId = table.Column<int>(type: "int", nullable: true),
+                    TransportRequestId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.NotificationId);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Bids_BidId",
+                        column: x => x.BidId,
+                        principalTable: "Bids",
+                        principalColumn: "BidId");
+                    table.ForeignKey(
+                        name: "FK_Notifications_TransportRequests_TransportRequestId",
+                        column: x => x.TransportRequestId,
+                        principalTable: "TransportRequests",
+                        principalColumn: "TransporRequestId");
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Context = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ChatId = table.Column<int>(type: "int", nullable: false),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Chats_ChatId",
+                        column: x => x.ChatId,
+                        principalTable: "Chats",
+                        principalColumn: "ChatId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Bids_DriverId",
                 table: "Bids",
@@ -242,9 +282,40 @@ namespace Bid_Go_Backend.Migrations
                 column: "TransportRequestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Chats_TransportRequestId",
+                table: "Chats",
+                column: "TransportRequestId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Messages_ChatId",
                 table: "Messages",
                 column: "ChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_CompanyId",
+                table: "Messages",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_DriverId",
+                table: "Messages",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_BidId",
+                table: "Notifications",
+                column: "BidId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_TransportRequestId",
+                table: "Notifications",
+                column: "TransportRequestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_CompanyId",
@@ -282,9 +353,6 @@ namespace Bid_Go_Backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Bids");
-
-            migrationBuilder.DropTable(
                 name: "Messages");
 
             migrationBuilder.DropTable(
@@ -297,10 +365,13 @@ namespace Bid_Go_Backend.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
-                name: "TransportRequests");
+                name: "Chats");
 
             migrationBuilder.DropTable(
-                name: "Chats");
+                name: "Bids");
+
+            migrationBuilder.DropTable(
+                name: "TransportRequests");
 
             migrationBuilder.DropTable(
                 name: "Users");

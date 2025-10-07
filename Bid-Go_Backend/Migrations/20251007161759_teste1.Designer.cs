@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251007150545_teste1")]
+    [Migration("20251007161759_teste1")]
     partial class teste1
     {
         /// <inheritdoc />
@@ -69,7 +69,13 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("TransportRequestId")
+                        .HasColumnType("int");
+
                     b.HasKey("ChatId");
+
+                    b.HasIndex("TransportRequestId")
+                        .IsUnique();
 
                     b.ToTable("Chats");
                 });
@@ -85,10 +91,16 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Context")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
+
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime(6)");
@@ -96,6 +108,10 @@ namespace Bid_Go_Backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DriverId");
 
                     b.ToTable("Messages");
                 });
@@ -108,6 +124,9 @@ namespace Bid_Go_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("NotificationId"));
 
+                    b.Property<int?>("BidId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Context")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -116,10 +135,22 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int?>("TransportRequestId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("NotificationId");
+
+                    b.HasIndex("BidId");
+
+                    b.HasIndex("TransportRequestId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
                 });
@@ -377,6 +408,17 @@ namespace Bid_Go_Backend.Migrations
                     b.Navigation("TransportRequest");
                 });
 
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.Chat", b =>
+                {
+                    b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", "TransportRequest")
+                        .WithOne("Chat")
+                        .HasForeignKey("Bid_Go_Backend.Data.Models.Chat", "TransportRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TransportRequest");
+                });
+
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Message", b =>
                 {
                     b.HasOne("Bid_Go_Backend.Data.Models.Chat", "Chat")
@@ -385,7 +427,46 @@ namespace Bid_Go_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Bid_Go_Backend.Data.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Chat");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.Notification", b =>
+                {
+                    b.HasOne("Bid_Go_Backend.Data.Models.Bid", "Bid")
+                        .WithMany()
+                        .HasForeignKey("BidId");
+
+                    b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", "TransportRequest")
+                        .WithMany()
+                        .HasForeignKey("TransportRequestId");
+
+                    b.HasOne("Bid_Go_Backend.Data.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bid");
+
+                    b.Navigation("TransportRequest");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Payment", b =>
@@ -445,6 +526,9 @@ namespace Bid_Go_Backend.Migrations
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.TransportRequest", b =>
                 {
                     b.Navigation("Bids");
+
+                    b.Navigation("Chat")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
