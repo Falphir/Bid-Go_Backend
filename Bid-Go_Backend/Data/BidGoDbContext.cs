@@ -139,6 +139,21 @@ namespace Bid_Go_Backend.Data
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //Configuração 1:1 entre TransportRequest e Payment
+            modelBuilder.Entity<TransportRequest>()
+            .HasOne(tr => tr.Payment) // TransportRequest TEM UM Payment
+            .WithOne(p => p.TransportRequest) // Payment TEM UM TransportRequest
+            .HasForeignKey<Payment>(p => p.TransportRequestId) 
+            .IsRequired() // obrigatório
+            .OnDelete(DeleteBehavior.Cascade);
+
+            //TransportRequest 1:N Reviews
+            modelBuilder.Entity<TransportRequest>()
+             .HasMany(tr => tr.Reviews)
+             .WithOne(r => r.TransportRequest)
+             .HasForeignKey(r => r.TransportRequestId)
+             .IsRequired()
+             .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

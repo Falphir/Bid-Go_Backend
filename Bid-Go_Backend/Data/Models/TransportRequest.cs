@@ -12,7 +12,7 @@ namespace Bid_Go_Backend.Data.Models
     public class TransportRequest
     {
         [Key]
-        public int TransporRequestId { get; set; }
+        public int TransportRequestId { get; set; }
 
         [Required]
         public string Origin { get; set; } = string.Empty;
@@ -49,7 +49,13 @@ namespace Bid_Go_Backend.Data.Models
 
         public Chat Chat { get; set; } = null!;
 
+        //Relação 1:1 com Payment
+        public Payment? Payment { get; set; }
+
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
 
     }
 }

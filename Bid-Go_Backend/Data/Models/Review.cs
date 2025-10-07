@@ -26,5 +26,12 @@ namespace Bid_Go_Backend.Data.Models
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
         public Company Company { get; set; } = null;
+
+        //Relação 1:N com TransportRequest
+        [Required]
+        [ForeignKey(nameof(TransportRequest))]
+        public int TransportRequestId { get; set; }
+        public TransportRequest TransportRequest { get; set; } = null!;
+
     }
 }

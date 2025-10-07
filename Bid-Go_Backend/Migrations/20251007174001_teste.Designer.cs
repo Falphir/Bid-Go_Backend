@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251007161759_teste1")]
-    partial class teste1
+    [Migration("20251007174001_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -181,11 +181,17 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<float>("Tax")
                         .HasColumnType("float");
 
+                    b.Property<int>("TransportRequestId")
+                        .HasColumnType("int");
+
                     b.HasKey("PaymentId");
 
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("DriverId");
+
+                    b.HasIndex("TransportRequestId")
+                        .IsUnique();
 
                     b.ToTable("Payments");
                 });
@@ -215,11 +221,16 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("TransportRequestId")
+                        .HasColumnType("int");
+
                     b.HasKey("ReviewId");
 
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("DriverId");
+
+                    b.HasIndex("TransportRequestId");
 
                     b.ToTable("Reviews");
 
@@ -230,11 +241,11 @@ namespace Bid_Go_Backend.Migrations
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.TransportRequest", b =>
                 {
-                    b.Property<int>("TransporRequestId")
+                    b.Property<int>("TransportRequestId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransporRequestId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransportRequestId"));
 
                     b.Property<DateTime>("CollectDate")
                         .HasColumnType("datetime(6)");
@@ -272,7 +283,7 @@ namespace Bid_Go_Backend.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("TransporRequestId");
+                    b.HasKey("TransportRequestId");
 
                     b.HasIndex("CompanyId");
 
@@ -483,9 +494,17 @@ namespace Bid_Go_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", "TransportRequest")
+                        .WithOne("Payment")
+                        .HasForeignKey("Bid_Go_Backend.Data.Models.Payment", "TransportRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Company");
 
                     b.Navigation("Driver");
+
+                    b.Navigation("TransportRequest");
                 });
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Review", b =>
@@ -502,9 +521,17 @@ namespace Bid_Go_Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", "TransportRequest")
+                        .WithMany("Reviews")
+                        .HasForeignKey("TransportRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Company");
 
                     b.Navigation("Driver");
+
+                    b.Navigation("TransportRequest");
                 });
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.TransportRequest", b =>
@@ -529,6 +556,10 @@ namespace Bid_Go_Backend.Migrations
 
                     b.Navigation("Chat")
                         .IsRequired();
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

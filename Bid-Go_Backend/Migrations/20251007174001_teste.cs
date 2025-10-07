@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class teste2 : Migration
+    public partial class teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,76 +49,10 @@ namespace Bid_Go_Backend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Payments",
-                columns: table => new
-                {
-                    PaymentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    GrossValue = table.Column<float>(type: "float", nullable: false),
-                    NetValue = table.Column<float>(type: "float", nullable: false),
-                    Tax = table.Column<float>(type: "float", nullable: false),
-                    PaymentStatus = table.Column<int>(type: "int", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: false),
-                    DriverId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payments", x => x.PaymentId);
-                    table.ForeignKey(
-                        name: "FK_Payments_Users_CompanyId",
-                        column: x => x.CompanyId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Payments_Users_DriverId",
-                        column: x => x.DriverId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Reviews",
-                columns: table => new
-                {
-                    ReviewId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Classification = table.Column<decimal>(type: "decimal(3,2)", nullable: false),
-                    DriverId = table.Column<int>(type: "int", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: false),
-                    Discriminator = table.Column<string>(type: "varchar(13)", maxLength: 13, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ServiceQuality = table.Column<int>(type: "int", nullable: true),
-                    ClientSuport = table.Column<int>(type: "int", nullable: true),
-                    Punctuality = table.Column<int>(type: "int", nullable: true),
-                    Behavior = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Users_CompanyId",
-                        column: x => x.CompanyId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Users_DriverId",
-                        column: x => x.DriverId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "TransportRequests",
                 columns: table => new
                 {
-                    TransporRequestId = table.Column<int>(type: "int", nullable: false)
+                    TransportRequestId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Origin = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -137,7 +71,7 @@ namespace Bid_Go_Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TransportRequests", x => x.TransporRequestId);
+                    table.PrimaryKey("PK_TransportRequests", x => x.TransportRequestId);
                     table.ForeignKey(
                         name: "FK_TransportRequests_Users_CompanyId",
                         column: x => x.CompanyId,
@@ -166,7 +100,7 @@ namespace Bid_Go_Backend.Migrations
                         name: "FK_Bids_TransportRequests_TransportRequestId",
                         column: x => x.TransportRequestId,
                         principalTable: "TransportRequests",
-                        principalColumn: "TransporRequestId",
+                        principalColumn: "TransportRequestId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Bids_Users_DriverId",
@@ -193,8 +127,88 @@ namespace Bid_Go_Backend.Migrations
                         name: "FK_Chats_TransportRequests_TransportRequestId",
                         column: x => x.TransportRequestId,
                         principalTable: "TransportRequests",
-                        principalColumn: "TransporRequestId",
+                        principalColumn: "TransportRequestId",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    PaymentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    GrossValue = table.Column<float>(type: "float", nullable: false),
+                    NetValue = table.Column<float>(type: "float", nullable: false),
+                    Tax = table.Column<float>(type: "float", nullable: false),
+                    PaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    TransportRequestId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.PaymentId);
+                    table.ForeignKey(
+                        name: "FK_Payments_TransportRequests_TransportRequestId",
+                        column: x => x.TransportRequestId,
+                        principalTable: "TransportRequests",
+                        principalColumn: "TransportRequestId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Payments_Users_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Payments_Users_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    ReviewId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Classification = table.Column<decimal>(type: "decimal(3,2)", nullable: false),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false),
+                    TransportRequestId = table.Column<int>(type: "int", nullable: false),
+                    Discriminator = table.Column<string>(type: "varchar(13)", maxLength: 13, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ServiceQuality = table.Column<int>(type: "int", nullable: true),
+                    ClientSuport = table.Column<int>(type: "int", nullable: true),
+                    Punctuality = table.Column<int>(type: "int", nullable: true),
+                    Behavior = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
+                    table.ForeignKey(
+                        name: "FK_Reviews_TransportRequests_TransportRequestId",
+                        column: x => x.TransportRequestId,
+                        principalTable: "TransportRequests",
+                        principalColumn: "TransportRequestId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Users_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Users_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -224,7 +238,7 @@ namespace Bid_Go_Backend.Migrations
                         name: "FK_Notifications_TransportRequests_TransportRequestId",
                         column: x => x.TransportRequestId,
                         principalTable: "TransportRequests",
-                        principalColumn: "TransporRequestId");
+                        principalColumn: "TransportRequestId");
                     table.ForeignKey(
                         name: "FK_Notifications_Users_UserId",
                         column: x => x.UserId,
@@ -328,6 +342,12 @@ namespace Bid_Go_Backend.Migrations
                 column: "DriverId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Payments_TransportRequestId",
+                table: "Payments",
+                column: "TransportRequestId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reviews_CompanyId",
                 table: "Reviews",
                 column: "CompanyId");
@@ -336,6 +356,11 @@ namespace Bid_Go_Backend.Migrations
                 name: "IX_Reviews_DriverId",
                 table: "Reviews",
                 column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_TransportRequestId",
+                table: "Reviews",
+                column: "TransportRequestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TransportRequests_CompanyId",
