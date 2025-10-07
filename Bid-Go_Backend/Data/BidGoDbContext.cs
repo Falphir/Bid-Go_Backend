@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
-namespace Bid_Go_Backend.Data2
+namespace Bid_Go_Backend.Data
 {
 
     public class BidGoDbContext : DbContext
@@ -54,67 +54,67 @@ namespace Bid_Go_Backend.Data2
                 v => v.ToString(),
                 v => (ERequestStatus)Enum.Parse(typeof(ERequestStatus), v));
 
-            modelBuilder.Entity<Utilizador>()
-                .HasDiscriminator<ECargo>("Cargo")
-                .HasValue<Utilizador>(ECargo.Voluntario)
-                .HasValue<Anfitriao>(ECargo.Anfitriao)
-                .HasValue<Administrador>(ECargo.Admin);
+            // Configuração da herança (TPH)
+            modelBuilder.Entity<User>()
+                .HasDiscriminator<string>("UserType")
+                .HasValue<User>("User")
+                .HasValue<Company>("Company")
+                .HasValue<Driver>("Driver");
 
-            modelBuilder.Entity<Utilizador>()
-                .Property(p => p.Cargo)
-                .HasConversion(cargoEnumConverter);
-
-            modelBuilder.Entity<CandidaturaAnfitriao>()
-                .Property(p => p.Estado)
-                .HasConversion(candidaturaEstadoEnumConverter);
-            
-            modelBuilder.Entity<Campanha>()
-                .Property(p => p.Estado)
-                .HasConversion(campanhaEstadoEnumConverter);
-
-            modelBuilder.Entity<Campanha>()
-                .Property(p => p.TipoCampanha)
-                .HasConversion(campanhaTipoEnumConverter);
-
-            modelBuilder.Entity<Encomenda>()
-                .Property(p => p.Estado)
-                .HasConversion(encomendaEstadoEnumConverter);
-
-            modelBuilder.Entity<Produto>()
-                .Property(p => p.Tamanho)
-                .HasConversion(produtoTamanhoEnumConverter);
-
-            modelBuilder.Entity<Ticket>()
-                .Property(p => p.Estado)
-                .HasConversion(ticketEstadoEnumConverter);
-
-            modelBuilder.Entity<Ticket>()
-                .Property(p => p.Prioridade)
-                .HasDefaultValue(false);
-
-            modelBuilder.Entity<Utilizador>()
-                .Property(p => p.Membership)
-                .HasDefaultValue(0);
-
-            modelBuilder.Entity<Utilizador>()
-                .HasIndex(p => p.Email)
+            // Definir propriedades únicas
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<Doacao>()
-                .Property(p => p.Valor)
-                .HasPrecision(10, 2);
+            // Precisões de valores monetários
+            modelBuilder.Entity<Bid>()
+                .Property(b => b.Value)
+                .HasPrecision(18, 2);
 
-            modelBuilder.Entity<Produto>()
-                .Property(p => p.Preco)
-                .HasPrecision(10, 2);
+            modelBuilder.Entity<TransportRequest>()
+                .Property(t => t.Weight)
+                .HasPrecision(18, 2);
 
-            modelBuilder.Entity<Encomenda>()
-                .Property(p => p.ValorTotal)
-                .HasPrecision(10, 2);
+            modelBuilder.Entity<TransportRequest>()
+                .Property(t => t.Volume)
+                .HasPrecision(18, 2);
 
-            modelBuilder.Entity<Campanha>()
-                .Property(p => p.QuantiaAngariada)
-                .HasPrecision(10, 2);
+            // Relações e chaves estrangeiras
+            modelBuilder.Entity<Bid>()
+                .HasOne(b => b.Driver)
+                .WithMany()
+                .HasForeignKey(b => b.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReviewCompany>()
+                .HasOne(r => r.Company)
+                .WithMany()
+                .HasForeignKey(r => r.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReviewCompany>()
+                .HasOne(r => r.Driver)
+                .WithMany()
+                .HasForeignKey(r => r.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReviewDriver>()
+                .HasOne(r => r.Company)
+                .WithMany()
+                .HasForeignKey(r => r.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReviewDriver>()
+                .HasOne(r => r.Driver)
+                .WithMany()
+                .HasForeignKey(r => r.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransportRequest>()
+                .HasOne(t => t.Company)
+                .WithMany()
+                .HasForeignKey(t => t.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

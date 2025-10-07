@@ -46,5 +46,8 @@ namespace Bid_Go_Backend.Data.Models
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
         public Company? Company { get; set; } = null;
+
+        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+
     }
 }

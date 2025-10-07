@@ -18,5 +18,13 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         [Column(TypeName = "decimal(3,2)")]
         public decimal Classification {  get; set; }
+
+        [ForeignKey(nameof(Driver))]
+        public int DriverId { get; set; }
+        public Driver Driver { get; set; } = null;
+
+        [ForeignKey(nameof(Company))]
+        public int CompanyId { get; set; }
+        public Company Company { get; set; } = null;
     }
 }

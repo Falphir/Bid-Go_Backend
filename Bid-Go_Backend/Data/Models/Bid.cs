@@ -13,7 +13,7 @@ namespace Bid_Go_Backend.Data.Models
     {
     
         [Key]
-        public int LicitationId { get; set; }
+        public int BidId { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
