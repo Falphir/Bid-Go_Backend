@@ -211,16 +211,17 @@ namespace Bid_Go_Backend.Migrations
                     Term = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     DriverId = table.Column<int>(type: "int", nullable: false),
-                    TransportRequestTransporRequestId = table.Column<int>(type: "int", nullable: true)
+                    TransportRequestId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Bids", x => x.BidId);
                     table.ForeignKey(
-                        name: "FK_Bids_TransportRequests_TransportRequestTransporRequestId",
-                        column: x => x.TransportRequestTransporRequestId,
+                        name: "FK_Bids_TransportRequests_TransportRequestId",
+                        column: x => x.TransportRequestId,
                         principalTable: "TransportRequests",
-                        principalColumn: "TransporRequestId");
+                        principalColumn: "TransporRequestId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Bids_Users_DriverId",
                         column: x => x.DriverId,
@@ -236,9 +237,9 @@ namespace Bid_Go_Backend.Migrations
                 column: "DriverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bids_TransportRequestTransporRequestId",
+                name: "IX_Bids_TransportRequestId",
                 table: "Bids",
-                column: "TransportRequestTransporRequestId");
+                column: "TransportRequestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ChatId",

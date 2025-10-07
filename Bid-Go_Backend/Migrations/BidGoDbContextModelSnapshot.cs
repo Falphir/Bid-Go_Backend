@@ -36,7 +36,7 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<DateTime>("Term")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("TransportRequestTransporRequestId")
+                    b.Property<int>("TransportRequestId")
                         .HasColumnType("int");
 
                     b.Property<int>("Type")
@@ -50,7 +50,7 @@ namespace Bid_Go_Backend.Migrations
 
                     b.HasIndex("DriverId");
 
-                    b.HasIndex("TransportRequestTransporRequestId");
+                    b.HasIndex("TransportRequestId");
 
                     b.ToTable("Bids");
                 });
@@ -363,11 +363,15 @@ namespace Bid_Go_Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", null)
+                    b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", "TransportRequest")
                         .WithMany("Bids")
-                        .HasForeignKey("TransportRequestTransporRequestId");
+                        .HasForeignKey("TransportRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Driver");
+
+                    b.Navigation("TransportRequest");
                 });
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Message", b =>

@@ -28,5 +28,9 @@ namespace Bid_Go_Backend.Data.Models
         [ForeignKey(nameof(Driver))]
         public int DriverId { get; set; }
         public Driver? Driver { get; set; } = null;
+
+        [ForeignKey(nameof(TransportRequest))]
+        public int TransportRequestId { get; set; }
+        public TransportRequest TransportRequest { get; set; } = null!;
     }
 }
