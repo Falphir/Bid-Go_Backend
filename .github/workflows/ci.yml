@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "main", "develop", "feature/*" ]
+    branches: [ "master", "develop", "feature/*" ]
   pull_request:
-    branches: [ "main", "develop", "feature/*" ]
+    branches: [ "master", "develop", "feature/*" ]
 
 jobs:
   build:
@@ -36,7 +36,6 @@ jobs:
       
     - name: Upload code coverage report
       uses: actions/upload-artifact@v4
-      overwrite: true
       with:
-        name: code-coverage-report
+        name: code-coverage-report-${{ matrix.os }}
         path: '**/coverage.cobertura.xml'
