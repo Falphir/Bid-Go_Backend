@@ -18,7 +18,7 @@ namespace Bid_Go_Backend.Data.Models
         public string Origin { get; set; } = string.Empty;
 
         [Required]
-        public string Destiny { get; set; } = string.Empty;
+        public string Destination { get; set; } = string.Empty;
 
         [Required]
         public string Package { get; set; } = string.Empty;
@@ -32,7 +32,19 @@ namespace Bid_Go_Backend.Data.Models
         public decimal Volume { get; set; }
 
         [Required]
-        public DateTime CollectDate { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Length { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Width { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Height { get; set; }
+
+        [Required]
+        public DateTime PickupDate { get; set; }
 
         [Required]
         public DateTime DeliveryDate { get; set; }

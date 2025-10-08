@@ -28,8 +28,8 @@ namespace Bid_Go_Backend.Data.Models
 
         [Required]
         [Phone]
-        [MaxLength(20)]
-        public string PhoneNumber { get; set; } = string.Empty;
+        [MaxLength(9)]
+        public int PhoneNumber { get; set; }
 
         [Required]
         [MaxLength(20)]
