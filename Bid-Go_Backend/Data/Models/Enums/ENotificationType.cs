@@ -8,7 +8,7 @@ namespace Bid_Go_Backend.Data.Models.Enums
 {
     public enum ENotificationType
     {
-        Acepted,
+        Accepted,
         Rejected,
         Canceled,
         New_message,
