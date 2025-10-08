@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models.Enums
 {
-    public enum EChatStatus
+    public enum EPaymentMethod
     {
-        Active,
-        Archived,
-        Canceled
+        PayPal,
+        Stripe
     }
 }

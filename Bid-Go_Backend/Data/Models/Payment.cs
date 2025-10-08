@@ -26,7 +26,8 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         public EPaymentStatus PaymentStatus { get; set; }
 
-        //public EPaymentMethod PaymentMethod { get; set; }
+        [Required]
+        public EPaymentMethod PaymentMethod { get; set; }
 
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }

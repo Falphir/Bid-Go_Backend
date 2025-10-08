@@ -23,7 +23,7 @@ namespace Bid_Go_Backend.Data.Models
         public DateTime Term { get; set; }
 
         [Required]
-        public ENotificationType Type { get; set; }
+        public EBidStatus Status { get; set; }
 
         [ForeignKey(nameof(Driver))]
         public int DriverId { get; set; }
