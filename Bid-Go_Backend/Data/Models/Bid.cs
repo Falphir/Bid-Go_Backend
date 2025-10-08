@@ -20,7 +20,7 @@ namespace Bid_Go_Backend.Data.Models
         public decimal Value { get; set; }
 
         [Required]
-        public DateTime Term { get; set; }
+        public DateTime DeliveryDeadline { get; set; }
 
         [Required]
         public EBidStatus Status { get; set; }

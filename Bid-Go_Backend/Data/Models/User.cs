@@ -33,7 +33,7 @@ namespace Bid_Go_Backend.Data.Models
 
         [Required]
         [MaxLength(20)]
-        public string NIF { get; set; } = string.Empty;
+        public int NIF { get; set; } 
     }
 
 
