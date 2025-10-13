@@ -11,7 +11,6 @@ namespace Bid_Go_Backend.Data.Models
 {
     public class Bid
     {
-    
         [Key]
         public int BidId { get; set; }
 

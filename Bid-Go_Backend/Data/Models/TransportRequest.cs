@@ -67,7 +67,5 @@ namespace Bid_Go_Backend.Data.Models
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
-
-
     }
 }

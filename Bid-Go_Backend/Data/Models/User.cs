@@ -35,7 +35,5 @@ namespace Bid_Go_Backend.Data.Models
         [MaxLength(20)]
         public int NIF { get; set; } 
     }
-
-
 }
 

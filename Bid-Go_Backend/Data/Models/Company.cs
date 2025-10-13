@@ -9,7 +9,6 @@ namespace Bid_Go_Backend.Data.Models
 {
     public class Company : User
     {
-
         [Required]
         [MaxLength(100)]
         public string CompanyName { get; set; } = string.Empty;
@@ -17,6 +16,5 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         [MaxLength(150)]
         public string Address { get; set; } = string.Empty;
-
     }
 }

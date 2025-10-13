@@ -21,8 +21,8 @@ namespace Bid_Go_Backend.Data.Models
         public DateTime TimeStamp { get; set; }
 
         public int ChatId { get; set; }
-        public Chat Chat { get; set; } = null!;
 
+        public Chat Chat { get; set; } = null!;
 
         [ForeignKey(nameof(Driver))]
         public int DriverId { get; set; }

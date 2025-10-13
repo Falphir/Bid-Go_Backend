@@ -13,11 +13,14 @@ namespace Bid_Go_Backend.Data.Models
     {
         [Key]
         public int NotificationId { get; set; }
+
         [Required]
         [MaxLength(256)]
         public string Context { get; set; } = string.Empty;
+
         [Required]
         public DateTime TimeStamp { get; set; }
+
         [Required]
         public ENotificationType Type  { get; set; }
 

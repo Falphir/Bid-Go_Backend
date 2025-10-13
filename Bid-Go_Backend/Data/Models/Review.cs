@@ -32,6 +32,5 @@ namespace Bid_Go_Backend.Data.Models
         [ForeignKey(nameof(TransportRequest))]
         public int TransportRequestId { get; set; }
         public TransportRequest TransportRequest { get; set; } = null!;
-
     }
 }
