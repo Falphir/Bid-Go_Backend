@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bid_Go_Backend.Data.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
