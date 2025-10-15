@@ -1,4 +1,4 @@
-﻿using Bid_Go_Backend.Data.Models.Enums;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,24 +9,22 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
 {
-    public class Licitation
+    public class ReviewDriver : Review
     {
-    
-        [Key]
-        public int LicitationId { get; set; }
+        [Required]
+        [Range(0,5)]
+        public int Punctuality { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Value { get; set; }
-
-        [Required]
-        public DateTime Term { get; set; }
-
-        [Required]
-        public ENotificationType Type { get; set; }
+        [Range(0, 5)]
+        public int Behavior { get; set; }
 
         [ForeignKey(nameof(Driver))]
         public int DriverId { get; set; }
         public Driver? Driver { get; set; } = null;
+
+        [ForeignKey(nameof(Company))]
+        public int CompanyId { get; set; }
+        public Company? Company { get; set; } = null;
     }
 }

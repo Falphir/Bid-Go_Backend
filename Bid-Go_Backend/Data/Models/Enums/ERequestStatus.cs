@@ -10,7 +10,9 @@ namespace Bid_Go_Backend.Data.Models.Enums
     {
         Active,
         Canceled,
-        Concluded,
-        Pending
+        Completed,
+        Pending,
+        Instransit,
+        WaitingPickup
     }
 }

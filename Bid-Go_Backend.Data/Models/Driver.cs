@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
 {
-    public class Company : User
+    public class Driver : User
     {
         [Required]
-        [MaxLength(100)]
-        public string CompanyName { get; set; } = string.Empty;
+        [MaxLength(256)]
+        public string DriverLicense { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(150)]
-        public string Address { get; set; } = string.Empty;
+        [MaxLength(256)]
+        public string Insurance { get; set; } = string.Empty;
+
+
     }
 }

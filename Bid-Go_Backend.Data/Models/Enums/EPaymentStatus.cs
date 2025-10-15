@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models.Enums
 {
-    public enum EChatStatus
+    public enum EPaymentStatus
     {
-        Active,
-        Archived,
-        Canceled
+        Pendent,
+        Confirmed,
+        Failed,
+        Finished,
+        Reimbursement
     }
 }

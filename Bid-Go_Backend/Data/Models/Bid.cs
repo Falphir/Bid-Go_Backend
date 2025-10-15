@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bid_Go_Backend.Data.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,27 +9,25 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
 {
-    public abstract class Review
+    public class Bid
     {
         [Key]
-        public int ReviewId { get; set; }
-        [Required]
-        public DateTime TimeStamp { get; set; } = DateTime.Now;
+        public int BidId { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(3,2)")]
-        public decimal Classification {  get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Value { get; set; }
+
+        [Required]
+        public DateTime DeliveryDeadline { get; set; }
+
+        [Required]
+        public EBidStatus Status { get; set; }
 
         [ForeignKey(nameof(Driver))]
         public int DriverId { get; set; }
-        public Driver Driver { get; set; } = null;
+        public Driver? Driver { get; set; } = null;
 
-        [ForeignKey(nameof(Company))]
-        public int CompanyId { get; set; }
-        public Company Company { get; set; } = null;
-
-        //Relação 1:N com TransportRequest
-        [Required]
         [ForeignKey(nameof(TransportRequest))]
         public int TransportRequestId { get; set; }
         public TransportRequest TransportRequest { get; set; } = null!;

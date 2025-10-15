@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bid_Go_Backend.Data.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,28 +9,24 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
 {
-    public class Message
+    public class Bid
     {
+    
         [Key]
-        public int Id { get; set; }
+        public int BidId { get; set; }
 
         [Required]
-        [MaxLength(256)]
-        public string Context { get; set; } = string.Empty;
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Value { get; set; }
 
         [Required]
-        public DateTime TimeStamp { get; set; }
+        public DateTime Term { get; set; }
 
-        public int ChatId { get; set; }
-
-        public Chat Chat { get; set; } = null!;
+        [Required]
+        public ENotificationType Type { get; set; }
 
         [ForeignKey(nameof(Driver))]
         public int DriverId { get; set; }
         public Driver? Driver { get; set; } = null;
-
-        [ForeignKey(nameof(Company))]
-        public int CompanyId { get; set; }
-        public Company? Company { get; set; } = null;
     }
 }

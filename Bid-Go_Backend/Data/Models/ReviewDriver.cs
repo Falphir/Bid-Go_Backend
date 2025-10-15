@@ -18,13 +18,5 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         [Range(0, 5)]
         public int Behavior { get; set; }
-
-        [ForeignKey(nameof(Driver))]
-        public int DriverId { get; set; }
-        public Driver? Driver { get; set; } = null;
-
-        [ForeignKey(nameof(Company))]
-        public int CompanyId { get; set; }
-        public Company? Company { get; set; } = null;
     }
 }

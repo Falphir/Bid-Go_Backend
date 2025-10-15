@@ -8,10 +8,11 @@ namespace Bid_Go_Backend.Data.Models.Enums
 {
     public enum EPaymentStatus
     {
-        Pendent,
+        Pending,
         Confirmed,
         Failed,
         Finished,
-        Reimbursement
+        Refund,
+        Canceled
     }
 }

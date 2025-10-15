@@ -26,8 +26,7 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         public EPaymentStatus PaymentStatus { get; set; }
 
-        [Required]
-        public EPaymentMethod PaymentMethod { get; set; }
+        //public EPaymentMethod PaymentMethod { get; set; }
 
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
@@ -37,10 +36,5 @@ namespace Bid_Go_Backend.Data.Models
         public int DriverId { get; set; }
         public Driver? Driver { get; set; } = null;
 
-        [Required]
-        [ForeignKey(nameof(TransportRequest))]
-        public int TransportRequestId { get; set; }
-
-        public TransportRequest TransportRequest { get; set; } = null!;
     }
 }

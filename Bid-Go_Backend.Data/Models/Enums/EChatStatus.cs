@@ -9,7 +9,6 @@ namespace Bid_Go_Backend.Data.Models.Enums
     public enum EChatStatus
     {
         Active,
-        Archived,
-        Canceled
+        Archived
     }
 }

@@ -16,7 +16,5 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         [MaxLength(256)]
         public string Insurance { get; set; } = string.Empty;
-
-
     }
 }

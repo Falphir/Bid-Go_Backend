@@ -1,5 +1,4 @@
-﻿using Bid_Go_Backend.Data.Models.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,12 +28,14 @@ namespace Bid_Go_Backend.Data.Models
 
         [Required]
         [Phone]
-        [MaxLength(9)]
-        public int PhoneNumber { get; set; }
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
-        public int NIF { get; set; } 
+        public string NIF { get; set; } = string.Empty;
     }
+
+
 }
 
