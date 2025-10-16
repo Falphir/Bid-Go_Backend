@@ -11,8 +11,7 @@ using System.Threading.Tasks;
     {
         public class BidUpdateDTO
         {
-            [Key]
-
+      
             [Required]
             [Column(TypeName = "decimal(18,2)")]
             public decimal Value { get; set; }

@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
+using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +51,7 @@ namespace Bid_Go_Backend.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.DriverId == bidDto.DriverId && b.TransportRequestId == bidDto.TransportRequestId);
 
-            if (existingBid != null)
+            if (existingBid != null && existingBid.Status != EBidStatus.Canceled)
                 return Conflict("You have already submitted a bid for this transport request. Please update it instead.");
 
 

@@ -11,9 +11,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs
 {
     public class BidDTO
     {
-        [Key]
-        public int BidId { get; set; }
-
+     
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Value { get; set; }
