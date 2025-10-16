@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class teste : Migration
+    public partial class test1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,10 +27,8 @@ namespace Bid_Go_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PhoneNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    NIF = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PhoneNumber = table.Column<int>(type: "int", maxLength: 9, nullable: false),
+                    NIF = table.Column<int>(type: "int", maxLength: 20, nullable: false),
                     UserType = table.Column<string>(type: "varchar(8)", maxLength: 8, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
@@ -56,13 +54,16 @@ namespace Bid_Go_Backend.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Origin = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Destiny = table.Column<string>(type: "longtext", nullable: false)
+                    Destination = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Package = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Weight = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Volume = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    CollectDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Length = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Width = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PickupDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DeliveryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Image = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -88,8 +89,8 @@ namespace Bid_Go_Backend.Migrations
                     BidId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Value = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Term = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
+                    DeliveryDeadline = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     DriverId = table.Column<int>(type: "int", nullable: false),
                     TransportRequestId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -142,6 +143,7 @@ namespace Bid_Go_Backend.Migrations
                     NetValue = table.Column<float>(type: "float", nullable: false),
                     Tax = table.Column<float>(type: "float", nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false),
                     DriverId = table.Column<int>(type: "int", nullable: false),
                     TransportRequestId = table.Column<int>(type: "int", nullable: false)

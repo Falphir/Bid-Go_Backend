@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251007174001_teste")]
-    partial class teste
+    [Migration("20251016094555_test1")]
+    partial class test1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,16 +33,16 @@ namespace Bid_Go_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BidId"));
 
+                    b.Property<DateTime>("DeliveryDeadline")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("DriverId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Term")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("TransportRequestId")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("TransportRequestId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Value")
@@ -175,6 +175,9 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<float>("NetValue")
                         .HasColumnType("float");
 
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
@@ -247,22 +250,25 @@ namespace Bid_Go_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransportRequestId"));
 
-                    b.Property<DateTime>("CollectDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DeliveryDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Destiny")
+                    b.Property<string>("Destination")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<decimal>("Height")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Image")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<decimal>("Length")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Origin")
                         .IsRequired()
@@ -271,6 +277,9 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<string>("Package")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<DateTime>("PickupDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -281,6 +290,9 @@ namespace Bid_Go_Backend.Migrations
 
                     b.Property<decimal>("Weight")
                         .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Width")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("TransportRequestId");
@@ -303,10 +315,9 @@ namespace Bid_Go_Backend.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
-                    b.Property<string>("NIF")
-                        .IsRequired()
+                    b.Property<int>("NIF")
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -318,10 +329,9 @@ namespace Bid_Go_Backend.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                    b.Property<int>("PhoneNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("int");
 
                     b.Property<string>("UserType")
                         .IsRequired()
