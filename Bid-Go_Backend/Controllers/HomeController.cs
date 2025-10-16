@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
+    /*
     [ApiController]
     [Route("/")] // Rota raiz
     public class HomeController : ControllerBase
@@ -17,5 +18,5 @@ namespace Bid_Go_Backend.Controllers
             return Ok(new { message = "API funcionando!" });
         }
     }
-
+    */
 }

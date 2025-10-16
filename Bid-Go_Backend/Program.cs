@@ -1,4 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Bids;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -22,7 +24,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "BidGo",
@@ -31,18 +32,16 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-
-
-
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
+builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
+
+
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -75,5 +74,6 @@ app.UseExceptionHandler(config =>
 });
 
 app.MapControllers();
+
 
 app.Run();
