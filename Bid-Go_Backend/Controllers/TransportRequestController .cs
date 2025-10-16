@@ -40,7 +40,7 @@ namespace Bid_Go_Backend.Controllers
             catch (Exception ex)
             {
                 // Erro inesperado
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado: " + ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
 

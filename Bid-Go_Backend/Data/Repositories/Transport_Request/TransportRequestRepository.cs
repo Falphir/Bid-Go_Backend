@@ -57,8 +57,8 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             if (request == null)
                 return null;
 
-            if (request.Status != ERequestStatus.Active)
-                throw new InvalidOperationException("Só é possível atualizar pedidos ativos antes do leilão.");
+            if (request.Status != ERequestStatus.Draft)
+                throw new InvalidOperationException("Não é possível atualizar o pedido pois este está ativo.");
 
             if (dto.PickupDate.HasValue && dto.DeliveryDate.HasValue &&
                 dto.PickupDate.Value >= dto.DeliveryDate.Value)

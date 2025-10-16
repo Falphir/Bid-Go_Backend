@@ -21,26 +21,4 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public string Image { get; set; } = string.Empty;
         public int CompanyId { get; set; }
     }
-
-    public class UpdateTransportRequestDTO
-    {
-        public string? Origin { get; set; }
-        public string? Destination { get; set; }
-        public DateTime? PickupDate { get; set; }
-        public DateTime? DeliveryDate { get; set; }
-        public decimal? Weight { get; set; }
-        public decimal? Volume { get; set; }
-        public string? Image { get; set; }
-    }
-
-    public class TransportRequestResponseDTO
-    {
-        public int Id { get; set; }
-        public string Origin { get; set; } = string.Empty;
-        public string Destination { get; set; } = string.Empty;
-        public DateTime PickupDate { get; set; }
-        public DateTime DeliveryDate { get; set; }
-        public string Image { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-    }
 }
