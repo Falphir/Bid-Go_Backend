@@ -1,4 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -30,9 +32,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
-
-
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
@@ -40,16 +40,18 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
+
+
 var app = builder.Build();
 
 
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
+    c.RoutePrefix = "";
+});
+
 
 app.UseExceptionHandler(config =>
 {
