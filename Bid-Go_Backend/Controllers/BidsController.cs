@@ -1,8 +1,10 @@
-﻿using Bid_Go_Backend.Data.Models;
+﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
-using Bid_Go_Backend.Data.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -12,26 +14,50 @@ namespace Bid_Go_Backend.Controllers
     {
 
         private readonly IBidCRUD _bidCrud;
-
-        public BidsController(IBidCRUD bidCrud)
+        private readonly BidGoDbContext _ctx;
+        public BidsController(IBidCRUD bidCrud, BidGoDbContext ctx)
         {
             _bidCrud = bidCrud;
+            _ctx = ctx;
         }
 
 
         [HttpPost]
         public async Task<IActionResult> AddBid([FromBody] BidDTO bidDto)
         {
-            if (bidDto.Value <= 0 || bidDto.DeliveryDeadline <= DateTime.Now)
+            var transportRequest = await _ctx.TransportRequests
+                .AsNoTracking()
+                .FirstOrDefaultAsync(tr => tr.TransportRequestId == bidDto.TransportRequestId);
 
-                return BadRequest("Bid value must be greater than zero.");
+
+
+            if (bidDto.Value <= 0 )
+
+                return BadRequest("Bid value must be greater than zero .");
+
+            if (transportRequest == null)
+                return NotFound("Transport request not found.");
+
+            if (bidDto.DeliveryDeadline <= transportRequest.PickupDate)
+            {
+                return BadRequest("The bid's delivery deadline need to be later than the transport request's pickup Date ");
+            }
+
+            if (bidDto.DeliveryDeadline > transportRequest.DeliveryDate)
+                return BadRequest("The bid's delivery deadline cannot be later than the transport request's delivery date.");
+
+            var existingBid = await _ctx.Bids
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.DriverId == bidDto.DriverId && b.TransportRequestId == bidDto.TransportRequestId);
+
+            if (existingBid != null)
+                return Conflict("You have already submitted a bid for this transport request. Please update it instead.");
 
 
             var bid = new Bid
             {
                 Value = bidDto.Value,
                 DeliveryDeadline = bidDto.DeliveryDeadline,
-                Status = bidDto.Status,
                 DriverId = bidDto.DriverId,
                 TransportRequestId = bidDto.TransportRequestId
 
