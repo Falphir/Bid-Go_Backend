@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bid_Go_Backend.Data.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +20,6 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public decimal? Width { get; set; }
         public decimal? Height { get; set; }
         public string? Image { get; set; }
+        public ERequestStatus Status { get; internal set; }
     }
 }

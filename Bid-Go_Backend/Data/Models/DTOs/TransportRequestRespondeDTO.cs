@@ -19,5 +19,6 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public decimal? Width { get; set; }
         public decimal? Height { get; set; }
         public string? Image { get; set; }
+     
     }
 }

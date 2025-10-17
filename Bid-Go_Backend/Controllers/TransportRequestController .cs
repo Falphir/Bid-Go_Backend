@@ -26,8 +26,7 @@ namespace Bid_Go_Backend.Controllers
                 return BadRequest(ModelState);
 
             try
-            {
-                
+            { 
                 if (dto.PickupDate >= dto.DeliveryDate)
                     return BadRequest(new { message = "A data de recolha deve ser anterior à data de entrega." });
 
@@ -225,7 +224,8 @@ namespace Bid_Go_Backend.Controllers
                     Length = r.Length,
                     Width = r.Width,
                     Height = r.Height,
-                    Image = r.Image
+                    Image = r.Image,
+                    Status = r.Status
                 }).ToList();
 
                 return Ok(response);
@@ -237,8 +237,6 @@ namespace Bid_Go_Backend.Controllers
 
 
         }
-
-
 
     }
 }
