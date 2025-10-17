@@ -33,6 +33,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
+
 
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
