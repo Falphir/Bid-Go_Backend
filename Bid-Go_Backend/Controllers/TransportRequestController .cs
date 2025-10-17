@@ -49,6 +49,7 @@ namespace Bid_Go_Backend.Controllers
                     PickupDate = dto.PickupDate,
                     DeliveryDate = dto.DeliveryDate,
                     Image = dto.Image,
+                    MaxPrice = dto.MaxPrice,
                     CompanyId = dto.CompanyId,
                     Status = ERequestStatus.Draft
                 };
@@ -81,11 +82,14 @@ namespace Bid_Go_Backend.Controllers
                 if (dto.Image != null && string.IsNullOrWhiteSpace(dto.Image))
                     return BadRequest(new { message = "A imagem é obrigatória para publicar o pedido." });
 
-                if (dto.Weight.HasValue && dto.Weight <= 0)
+                if (dto.Weight.HasValue && dto.Weight < 0)
                     return BadRequest(new { message = "O peso deve ser superior a zero." });
 
-                if (dto.Volume.HasValue && dto.Volume <= 0)
+                if (dto.Volume.HasValue && dto.Volume < 0)
                     return BadRequest(new { message = "O volume deve ser superior a zero." });
+
+                if (!dto.MaxPrice.HasValue || dto.MaxPrice.Value < 20)
+                    return BadRequest(new { message = "O preço deve ser superior ou igual a vinte." });
 
                 // Procura o request 
                 var existingRequest = await _repository.GetByIdAsync(id);
@@ -128,6 +132,9 @@ namespace Bid_Go_Backend.Controllers
 
                 if (!string.IsNullOrWhiteSpace(dto.Image))
                     existingRequest.Image = dto.Image;
+
+                if (dto.MaxPrice.HasValue)
+                    existingRequest.MaxPrice = dto.MaxPrice.Value;
 
                 var updatedRequest = await _repository.UpdateAsync(id, existingRequest);
                 return Ok(updatedRequest);
@@ -188,7 +195,8 @@ namespace Bid_Go_Backend.Controllers
                     Length = alvo.Length,
                     Width = alvo.Width,
                     Height = alvo.Height,
-                    Image = alvo.Image
+                    Image = alvo.Image,
+                    MaxPrice = alvo.MaxPrice
                 };
 
                 return Ok(responseDto);
@@ -225,6 +233,7 @@ namespace Bid_Go_Backend.Controllers
                     Width = r.Width,
                     Height = r.Height,
                     Image = r.Image,
+                    MaxPrice = r.MaxPrice,
                     Status = r.Status
                 }).ToList();
 
