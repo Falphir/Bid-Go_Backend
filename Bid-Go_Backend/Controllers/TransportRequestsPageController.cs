@@ -75,6 +75,7 @@ namespace Bid_Go_Backend.Controllers
                     Length = alvo.Length,
                     Width = alvo.Width,
                     Height = alvo.Height,
+                    MaxPrice = alvo.MaxPrice,
                     Image = alvo.Image
                 };
 

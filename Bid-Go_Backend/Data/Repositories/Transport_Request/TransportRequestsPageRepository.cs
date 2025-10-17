@@ -27,8 +27,6 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
         )
         {
             var query = _context.TransportRequests
-                .Include(tr => tr.Company)
-                .Include(tr => tr.Payment)
                 .Where(tr => tr.Status == ERequestStatus.Active)
                 .AsQueryable();
 
@@ -62,7 +60,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
         public async Task<TransportRequest?> GetByIdAsync(int id)
         {
             return await _context.TransportRequests
-                .Include(tr => tr.Company)
+                .Where(tr => tr.Status == ERequestStatus.Active)
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == id);
         }
     }
