@@ -31,6 +31,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
         {
             return await _context.TransportRequests
                 .Where(r => r.CompanyId == companyId)
+                .OrderBy(r => r.PickupDate)
                 .ToListAsync();
         }
 
@@ -46,9 +47,10 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var alvo = await _context.TransportRequests.FindAsync(id);
+            var alvo = await _context.TransportRequests
+            .FirstOrDefaultAsync(r => r.TransportRequestId == id);
 
-            if(alvo == null)
+            if (alvo == null)
             {
                 return false;
             }
