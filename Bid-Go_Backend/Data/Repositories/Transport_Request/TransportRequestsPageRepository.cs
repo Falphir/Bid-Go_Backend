@@ -22,7 +22,8 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
         public async Task<IEnumerable<TransportRequest>> GetActiveAsync(
             string? origin = null,
             string? destination = null,
-            DateTime? deliveryDate = null
+            DateTime? deliveryDate = null,
+            string? priceOrder = null
         )
         {
             var query = _context.TransportRequests
@@ -47,6 +48,13 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
                 query = query.Where(tr => tr.DeliveryDate.Date == deliveryDate.Value.Date);
             }
 
+            query = priceOrder?.ToLower() switch
+            {
+                "asc" => query.OrderBy(tr => tr.MaxPrice),
+                "desc" => query.OrderByDescending(tr => tr.MaxPrice),
+                _ => query.OrderBy(tr => tr.TransportRequestId)
+            };
+
 
             return await query.ToListAsync();
         }
@@ -55,7 +63,6 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
         {
             return await _context.TransportRequests
                 .Include(tr => tr.Company)
-                .Include(tr => tr.Payment)
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == id);
         }
     }

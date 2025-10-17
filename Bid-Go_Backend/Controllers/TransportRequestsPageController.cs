@@ -27,23 +27,25 @@ namespace Bid_Go_Backend.Controllers
         public async Task<ActionResult<IEnumerable<TransportRequestsPageDTO>>> GetActive(
             [FromQuery] string? origin,
             [FromQuery] string? destination,
-            [FromQuery] DateTime? deliveryDate
+            [FromQuery] DateTime? deliveryDate,
+            [FromQuery] string? priceOrder
         )
         {
-            var requests = await _repository.GetActiveAsync(origin, destination, deliveryDate);
+            var requests = await _repository.GetActiveAsync(origin, destination, deliveryDate, priceOrder);
 
             if (!requests.Any())
                 return Ok(new { message = "Não existem pedidos ativos no momento." });
 
             var dtoList = requests.Select(tr => new TransportRequestsPageDTO
             {
-              
+
                 Origin = tr.Origin,
                 Destination = tr.Destination,
                 Package = tr.Package,
                 PickupDate = tr.PickupDate,
                 DeliveryDate = tr.DeliveryDate,
-                Image = tr.Image
+                Image = tr.Image,
+                MaxPrice = tr.MaxPrice
             });
 
             return Ok(dtoList);

@@ -12,7 +12,8 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
          Task<IEnumerable<TransportRequest>> GetActiveAsync(
             string? origin = null,
             string? destination = null,
-            DateTime? deliveryDate = null
+            DateTime? deliveryDate = null,
+            string? priceOrder = null
         );
 
         Task<TransportRequest?> GetByIdAsync(int id);
