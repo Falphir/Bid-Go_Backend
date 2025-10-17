@@ -1,10 +1,7 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using System;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 {
@@ -12,88 +9,48 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
     {
         private readonly BidGoDbContext _context;
 
-
         public TransportRequestRepository(BidGoDbContext context)
         {
             _context = context;
         }
 
-        public async Task<TransportRequest> CreateAsync(CreateTransportRequestDTO dto)
+        public async Task<TransportRequest> CreateAsync(TransportRequest request)
         {
-            // Validação: datas coerentes
-            if (dto.PickupDate >= dto.DeliveryDate)
-                throw new ArgumentException("A data de recolha deve ser anterior à data de entrega.");
-
-            // Validação: imagem obrigatória
-            if (string.IsNullOrWhiteSpace(dto.Image))
-                throw new ArgumentException("A imagem é obrigatória para publicar o pedido.");
-
-            var request = new TransportRequest
-            {
-                Origin = dto.Origin,
-                Destination = dto.Destination,
-                Package = dto.Package,
-                Weight = dto.Weight,
-                Volume = dto.Volume,
-                Length = dto.Length,
-                Width = dto.Width,
-                Height = dto.Height,
-                PickupDate = dto.PickupDate,
-                DeliveryDate = dto.DeliveryDate,
-                Image = dto.Image,
-                CompanyId = dto.CompanyId,
-                Status = ERequestStatus.Active 
-            };
-
+            request.Status = Models.Enums.ERequestStatus.Active;
             _context.TransportRequests.Add(request);
             await _context.SaveChangesAsync();
-
             return request;
         }
 
-        public async Task<TransportRequest?> UpdateAsync(int id, UpdateTransportRequestDTO dto)
+        public async Task<TransportRequest?> GetByIdAsync(int id)
         {
-            var request = await _context.TransportRequests.FindAsync(id);
-            if (request == null)
-                return null;
+            return await _context.TransportRequests.FindAsync(id);
+        }
 
-            if (request.Status != ERequestStatus.Draft)
-                throw new InvalidOperationException("Não é possível atualizar o pedido pois este está ativo.");
+        public async Task<TransportRequest> UpdateAsync(int id,TransportRequest request)
+        {
 
-            if (dto.PickupDate.HasValue && dto.DeliveryDate.HasValue &&
-                dto.PickupDate.Value >= dto.DeliveryDate.Value)
-                throw new ArgumentException("A data de recolha deve ser anterior à de entrega.");
-
-            if (!string.IsNullOrEmpty(dto.Image))
-                request.Image = dto.Image;
-
-            request.Origin = dto.Origin ?? request.Origin;
-            request.Destination = dto.Destination ?? request.Destination;
-            request.Weight = dto.Weight ?? request.Weight;
-            request.Volume = dto.Volume ?? request.Volume;
-            request.PickupDate = dto.PickupDate ?? request.PickupDate;
-            request.DeliveryDate = dto.DeliveryDate ?? request.DeliveryDate;
-
+ 
             _context.TransportRequests.Update(request);
             await _context.SaveChangesAsync();
-
             return request;
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var request = await _context.TransportRequests.FindAsync(id);
-            if (request == null)
+            var alvo = await _context.TransportRequests.FindAsync(id);
+
+            if(alvo == null)
+            {
                 return false;
+            }
 
-            if (request.Status != ERequestStatus.Active)
-                throw new InvalidOperationException("Só é possível cancelar pedidos ativos.");
 
-            _context.TransportRequests.Remove(request);
+            _context.TransportRequests.Remove(alvo);
             await _context.SaveChangesAsync();
             return true;
         }
-
 
     }
 }

@@ -10,8 +10,10 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
 {
     public interface ITransportRequestRepository
     {
-        Task<TransportRequest> CreateAsync(CreateTransportRequestDTO dto);
-        Task<TransportRequest?> UpdateAsync(int id, UpdateTransportRequestDTO dto);
+        Task<TransportRequest> CreateAsync(TransportRequest transportRequest);
+        Task<TransportRequest?> UpdateAsync(int id, TransportRequest transportRequest);
         Task<bool> DeleteAsync(int id);
+        Task<TransportRequest> GetByIdAsync(int id);
+      
     }
 }
