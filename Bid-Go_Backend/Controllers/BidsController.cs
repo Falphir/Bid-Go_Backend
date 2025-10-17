@@ -22,7 +22,7 @@ namespace Bid_Go_Backend.Controllers
             _ctx = ctx;
         }
 
-
+        // POST /api/bids
         [HttpPost]
         public async Task<IActionResult> AddBid([FromBody] BidDTO bidDto)
         {
@@ -31,13 +31,15 @@ namespace Bid_Go_Backend.Controllers
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == bidDto.TransportRequestId);
 
 
+            if (transportRequest == null)
+                return NotFound("Transport request not found.");
+
+            if(transportRequest.Status != ERequestStatus.Active)
+                return BadRequest("Cannot place a bid on a transport request that is not open.");
 
             if (bidDto.Value <= 0 )
 
                 return BadRequest("Bid value must be greater than zero .");
-
-            if (transportRequest == null)
-                return NotFound("Transport request not found.");
 
             if (bidDto.DeliveryDeadline <= transportRequest.PickupDate)
             {
@@ -49,10 +51,14 @@ namespace Bid_Go_Backend.Controllers
 
             var existingBid = await _ctx.Bids
                 .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.DriverId == bidDto.DriverId && b.TransportRequestId == bidDto.TransportRequestId);
+                .Where(b => b.DriverId == bidDto.DriverId && b.TransportRequestId == bidDto.TransportRequestId)
+                .ToListAsync();
+                    
+            bool hasActiveBid = existingBid.Any(b => b.Status != EBidStatus.Canceled);
 
-            if (existingBid != null && existingBid.Status != EBidStatus.Canceled)
-                return Conflict("You have already submitted a bid for this transport request. Please update it instead.");
+
+            if(hasActiveBid)
+                return BadRequest("Driver already has an active bid for this transport request.");
 
 
             var bid = new Bid
@@ -71,7 +77,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBid(int id, [FromBody] BidUpdateDTO updateDTO)
         {
             if(!ModelState.IsValid)
@@ -93,7 +99,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
 
-        // GET /licitacoes?pedidoId={id}
+        // GET /licitacoes?bid={id}
         [HttpGet]
         public async Task<IActionResult> GetBidsById([FromQuery] int bidId)
         {
@@ -103,14 +109,40 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
+
+        // GET /api/bids?transportRequestId=X
+        [HttpGet("by-request/{transportRequestId}")]
+        public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
+        {
+           
+            var bids = await _bidCrud.GetBidByTransportRequestAsync(transportRequestId);
+
+            if (bids == null || !bids.Any())
+                return NotFound("No bids found for the given transport request ID.");
+            return Ok(bids);
+        }
+
+        // GET /api/bids?transportRequestId=X&status=Y
+        [HttpGet("by-request/{transportRequestId}/status/{status}")]
+        public async Task<IActionResult> GetBidsByTransportRequestAndStatus(int transportRequestId, EBidStatus status)
+        {
+
+            var bids = await _bidCrud.GetBidByTransportRequestAndStatusAsync(transportRequestId, status);
+
+            if ( bids == null || !bids.Any())
+                return NotFound("No bids found for the given transport request ID and status.");
+            return Ok(bids);
+        }
+
+
         // DELETE /licitacoes/{id}
-        [HttpDelete("{id}")]
+        [HttpPatch("{id}/cancel")]
         public async Task<IActionResult> CancelBid(int id)
         {
             var success = await _bidCrud.CancelBidAsync(id);
             if (!success)
-                return BadRequest("Licitação não encontrada ou já cancelada.");
-            return Ok("Licitação cancelada com sucesso.");
+                return NotFound("Only pending bids can be canceled");
+            return Ok("Bid canceled successfully.");
         }
     }
 }

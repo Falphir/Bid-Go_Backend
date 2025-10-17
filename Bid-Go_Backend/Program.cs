@@ -54,8 +54,6 @@ app.UseSwaggerUI(c=>
 c.RoutePrefix = "";
 });
 
-
-
 app.UseExceptionHandler(config =>
 {
     config.Run(async context =>

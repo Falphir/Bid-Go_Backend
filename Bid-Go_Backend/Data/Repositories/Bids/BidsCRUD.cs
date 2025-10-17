@@ -45,8 +45,6 @@ namespace Bid_Go_Backend.Repositories.BidRepo
 
         }
 
-
-
         //Get bid by id
         public async Task<Bid?> GetBidByIdAsync(int id)
         {
@@ -56,14 +54,39 @@ namespace Bid_Go_Backend.Repositories.BidRepo
         }
 
 
+
+        //Get bids by transport request id
+        public async Task<List<Bid>> GetBidByTransportRequestAsync(int transportRequestId)
+        {
+            return await _ctx.Bids
+                .AsNoTracking()
+                .Where(b => b.TransportRequestId == transportRequestId
+                && b.Status != EBidStatus.Canceled
+                && b.Status != EBidStatus.Expired)
+                .ToListAsync();
+
+        }
+
+
+        //Get bids by transport request id and status
+        public async Task<IEnumerable<Bid>> GetBidByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status)
+        {
+            return await _ctx.Bids
+                .AsNoTracking()
+                .Where(b => b.TransportRequestId == transportRequestId && b.Status == status)
+                .ToListAsync();
+        }
+
         //Cancel bid
         public async Task<bool> CancelBidAsync(int id)
         {
             var existingBid = await _ctx.Bids.FindAsync(id);
-            if (existingBid == null)
+            if (existingBid == null || existingBid.Status != EBidStatus.Pendent)
             {
                 return false;
             }
+
+
             existingBid.Status = EBidStatus.Canceled;
             await _ctx.SaveChangesAsync();
             return true;
