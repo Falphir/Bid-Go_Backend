@@ -201,6 +201,44 @@ namespace Bid_Go_Backend.Controllers
 
         }
 
+        [HttpGet("company/{companyId}")]
+        public async Task<IActionResult> GetByCompany(int companyId)
+        {
+
+            try
+            {
+                var requests = await _repository.GetAllByCompanyAsync(companyId);
+
+                if (requests == null)
+                    return NotFound("Não foram encontrados pedidos de transporte da company");
+
+                var response = requests.Select(r => new TransportRequestResponseDTO
+                {
+                  
+                    Origin = r.Origin,
+                    Destination = r.Destination,
+                    Package = r.Package,
+                    PickupDate = r.PickupDate,
+                    DeliveryDate = r.DeliveryDate,
+                    Weight = r.Weight,
+                    Volume = r.Volume,
+                    Length = r.Length,
+                    Width = r.Width,
+                    Height = r.Height,
+                    Image = r.Image
+                }).ToList();
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+            }
+
+
+        }
+
+
 
     }
 }
