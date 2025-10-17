@@ -20,7 +20,7 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                var updatedRequest = await _repository.UpdateRequestStatusAsync(requestID, dto);
+                var updatedRequest = await _repository.UpdateRequestStatusAsync(requestID, dto.Status);
                 return Ok(updatedRequest);
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace Bid_Go_Backend.Controllers
             try
             {
                 var dto = new RequestStatusDTO { Status = Data.Models.Enums.ERequestStatus.Canceled };
-                var updatedRequest = await _repository.UpdateRequestStatusAsync(requestID, dto);
+                var updatedRequest = await _repository.UpdateRequestStatusAsync(requestID, dto.Status);
                 return Ok(updatedRequest);
             }
             catch (Exception ex)
