@@ -6,6 +6,6 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
 {
     public interface ITransportRequestRepository
     {
-        Task<TransportRequest> UpdateRequestStatusAsync(int id, ERequestStatus status);
+        Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus status);
     }
 }

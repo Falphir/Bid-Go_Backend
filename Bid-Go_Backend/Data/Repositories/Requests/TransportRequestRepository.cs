@@ -18,13 +18,24 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
             _context = context;
         }
 
-        public async Task<TransportRequest> UpdateRequestStatusAsync(int id, ERequestStatus status)
+        public async Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus status)
         {
             var request = await _context.TransportRequests.FindAsync(id);
             if (request == null)
             {
                 throw new Exception("Transport request not found");
             }
+
+            if (request.CompanyId != companyID && (request.Status != ERequestStatus.Active && request.Status != ERequestStatus.Instransit))
+            {
+                throw new InvalidOperationException("Não tem permissão para atualizar o estado deste pedido.");
+            }
+
+            if (status == ERequestStatus.Canceled && (request.Status != ERequestStatus.Active && request.Status != ERequestStatus.Instransit))
+            {
+                throw new InvalidOperationException("Só é possível cancelar pedidos ativos ou em trânsito.");
+            }
+
             request.Status = status;
             _context.TransportRequests.Update(request);
             await _context.SaveChangesAsync();
