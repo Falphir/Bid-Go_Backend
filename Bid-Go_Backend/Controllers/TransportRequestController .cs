@@ -51,7 +51,7 @@ namespace Bid_Go_Backend.Controllers
                     DeliveryDate = dto.DeliveryDate,
                     Image = dto.Image,
                     CompanyId = dto.CompanyId,
-                    Status = ERequestStatus.Active
+                    Status = ERequestStatus.Draft
                 };
 
                 var created = await _repository.CreateAsync(request);
@@ -163,5 +163,44 @@ namespace Bid_Go_Backend.Controllers
                 return StatusCode(500, new { message = "Erro ao eliminar o pedido: " + ex.Message });
             }
         }
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+
+            try
+            {
+                var alvo = await _repository.GetByIdAsync(id);
+
+                if (alvo == null)
+                    return NotFound("Pedido de transporte não existe");
+
+                var responseDto = new TransportRequestResponseDTO
+                {
+                
+                    Origin = alvo.Origin,
+                    Destination = alvo.Destination,
+                    Package = alvo.Package,
+                    PickupDate = alvo.PickupDate,
+                    DeliveryDate = alvo.DeliveryDate,
+                    Weight = alvo.Weight,
+                    Volume = alvo.Volume,
+                    Length = alvo.Length,
+                    Width = alvo.Width,
+                    Height = alvo.Height,
+                    Image = alvo.Image
+                };
+
+                return Ok(responseDto);
+            }catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+            }
+           
+
+        }
+
+
     }
 }
