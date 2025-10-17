@@ -41,7 +41,7 @@ namespace Bid_Go_Backend.Controllers
                 b.BidId,
                 b.Value,
                 b.DeliveryDeadline,
-                Driver = new { b.Driver.Name, b.Driver.Email }
+                Driver = new { b.DriverId, b.Driver.Name, b.Driver.Email }
             });
 
             return Ok(result);
