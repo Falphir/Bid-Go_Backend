@@ -37,7 +37,6 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 
         public async Task<TransportRequest> UpdateAsync(int id,TransportRequest request)
         {
-
  
             _context.TransportRequests.Update(request);
             await _context.SaveChangesAsync();

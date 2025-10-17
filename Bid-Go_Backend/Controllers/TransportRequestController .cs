@@ -36,6 +36,10 @@ namespace Bid_Go_Backend.Controllers
                 if (dto.Weight <= 0 || dto.Volume <= 0)
                     return BadRequest(new { message = "O peso e o volume devem ser superiores a zero." });
 
+                if (dto.MaxPrice < 20)
+                    return BadRequest(new { message = "O preço deve ser superior ou igual a vinte." });
+
+
                 var request = new TransportRequest
                 {
                     Origin = dto.Origin,
@@ -49,6 +53,7 @@ namespace Bid_Go_Backend.Controllers
                     PickupDate = dto.PickupDate,
                     DeliveryDate = dto.DeliveryDate,
                     Image = dto.Image,
+                    MaxPrice = dto.MaxPrice,
                     CompanyId = dto.CompanyId,
                     Status = ERequestStatus.Draft
                 };
@@ -75,6 +80,15 @@ namespace Bid_Go_Backend.Controllers
             try
             {
                 // Validações 
+  
+                var existingRequest = await _repository.GetByIdAsync(id);
+
+                if (existingRequest == null)
+                    return NotFound(new { message = "Pedido de transporte não existe." });
+
+                if (existingRequest.Status != ERequestStatus.Draft)
+                    return BadRequest(new { message = "Só é possível atualizar pedidos com estado DRAFT." });
+
                 if (dto.PickupDate.HasValue && dto.DeliveryDate.HasValue && dto.PickupDate >= dto.DeliveryDate)
                     return BadRequest(new { message = "A data de recolha deve ser anterior à data de entrega." });
 
@@ -87,13 +101,11 @@ namespace Bid_Go_Backend.Controllers
                 if (dto.Volume.HasValue && dto.Volume <= 0)
                     return BadRequest(new { message = "O volume deve ser superior a zero." });
 
-                // Procura o request 
-                var existingRequest = await _repository.GetByIdAsync(id);
-                if (existingRequest == null)
-                    return NotFound(new { message = "Pedido de transporte não existe." });
 
-                if (existingRequest.Status != ERequestStatus.Draft)
-                    return BadRequest(new { message = "Só é possível atualizar pedidos com estado DRAFT." });
+                if (!dto.MaxPrice.HasValue || dto.MaxPrice.Value < 20)
+                    return BadRequest(new { message = "O preço deve ser superior ou igual a vinte." });
+
+            
 
                 // Assim vai atualizar os campos que queremos meter no body
                 if (!string.IsNullOrWhiteSpace(dto.Origin))
@@ -129,6 +141,9 @@ namespace Bid_Go_Backend.Controllers
                 if (!string.IsNullOrWhiteSpace(dto.Image))
                     existingRequest.Image = dto.Image;
 
+                if (dto.MaxPrice.HasValue)
+                    existingRequest.MaxPrice = dto.MaxPrice.Value;
+
                 var updatedRequest = await _repository.UpdateAsync(id, existingRequest);
                 return Ok(updatedRequest);
             }
@@ -155,7 +170,7 @@ namespace Bid_Go_Backend.Controllers
                     return Conflict(new { message = "Apenas pedidos ativos podem ser eliminados." });
 
                 await _repository.DeleteAsync(id);
-                return NoContent();
+                return Ok(new { message = "Pedido eliminado com sucesso." });
             }
             catch (Exception ex)
             {
@@ -177,7 +192,7 @@ namespace Bid_Go_Backend.Controllers
 
                 var responseDto = new TransportRequestResponseDTO
                 {
-                
+
                     Origin = alvo.Origin,
                     Destination = alvo.Destination,
                     Package = alvo.Package,
@@ -188,7 +203,8 @@ namespace Bid_Go_Backend.Controllers
                     Length = alvo.Length,
                     Width = alvo.Width,
                     Height = alvo.Height,
-                    Image = alvo.Image
+                    Image = alvo.Image,
+                    MaxPrice = alvo.MaxPrice
                 };
 
                 return Ok(responseDto);
@@ -213,7 +229,7 @@ namespace Bid_Go_Backend.Controllers
 
                 var response = requests.Select(r => new TransportRequestResponseDTO
                 {
-                  
+
                     Origin = r.Origin,
                     Destination = r.Destination,
                     Package = r.Package,
@@ -225,6 +241,7 @@ namespace Bid_Go_Backend.Controllers
                     Width = r.Width,
                     Height = r.Height,
                     Image = r.Image,
+                    MaxPrice = r.MaxPrice,
                     Status = r.Status
                 }).ToList();
 
