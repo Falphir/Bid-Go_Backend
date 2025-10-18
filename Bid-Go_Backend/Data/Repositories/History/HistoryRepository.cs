@@ -2,24 +2,35 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xunit.Abstractions;
 
 namespace Bid_Go_Backend.Data.Repositories.Requests
 {
     public class HistoryRepository : IHistoryRepository
     {
         private readonly BidGoDbContext _context;
-        public HistoryRepository(BidGoDbContext context)
+        private readonly ILogger<HistoryRepository> _logger;
+        public HistoryRepository(BidGoDbContext context, ILogger<HistoryRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<List<BidHistoryDTO>> GetDriverHistoryAsync(int driverId)
         {
+
+            var test = await _context.Bids
+                .Where(b => b.DriverId == driverId)
+                .ToListAsync();
+
+            _logger.LogInformation("Bids encontradas: {Count}", test.Count);
+
             var bidHistory = await (
                 from bid in _context.Bids
                 join transport in _context.TransportRequests
@@ -31,9 +42,7 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
                     equals new { review.TransportRequestId, review.DriverId }
                     into reviewGroup
                 from review in reviewGroup.DefaultIfEmpty()
-
                 where bid.DriverId == driverId
-
                 select new BidHistoryDTO
                 {
                     CompanyName = company.CompanyName,
@@ -43,11 +52,12 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
                     Status = bid.Status,
                     Date = new DateTime(2024, 1, 1),
                     Rating = review != null ? review.Classification : (int?)null
+
                 }
             ).ToListAsync();
-
             return bidHistory;
         }
+
 
 
         //public async Task<List<TransportHistoryDTO>> GetTransportHistoryAsync(int companyId)
