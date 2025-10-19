@@ -11,6 +11,6 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
     {
         Task<List<BidHistoryDTO>> GetDriverHistoryAsync(int driverId);
 
-        //Task<List<TransportHistoryDTO>> GetTransportHistoryAsync(int companyId);
+        Task<List<TransportHistoryDTO>> GetTransportHistoryAsync(int companyId);
     }
 }

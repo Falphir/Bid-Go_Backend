@@ -1,5 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
+using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,13 +25,6 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
 
         public async Task<List<BidHistoryDTO>> GetDriverHistoryAsync(int driverId)
         {
-
-            var test = await _context.Bids
-                .Where(b => b.DriverId == driverId)
-                .ToListAsync();
-
-            _logger.LogInformation("Bids encontradas: {Count}", test.Count);
-
             var bidHistory = await (
                 from bid in _context.Bids
                 join transport in _context.TransportRequests
@@ -60,8 +54,36 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
 
 
 
-        //public async Task<List<TransportHistoryDTO>> GetTransportHistoryAsync(int companyId)
-        //{
-        //}
-    }
+        public async Task<List<TransportHistoryDTO>> GetTransportHistoryAsync(int companyId)
+        {
+            var history = await (
+                from transport in _context.TransportRequests
+
+                join bid in _context.Bids
+                    on transport.TransportRequestId equals bid.TransportRequestId into bidsGroup
+                from bid in bidsGroup
+                    .Where(b => b.Status == EBidStatus.Accepted)
+                    .DefaultIfEmpty()
+                join driver in _context.Users.OfType<Driver>()
+                    on bid.DriverId equals driver.Id into driverGroup
+                from driver in driverGroup.DefaultIfEmpty()
+
+                where transport.CompanyId == companyId
+
+                select new TransportHistoryDTO
+                {
+                    TransportRequestId = transport.TransportRequestId,
+                    Package = transport.Package,
+                    Name = driver != null ? driver.Name : "Sem condutor atribuído",
+                    Date = new DateTime(2024, 1, 1), 
+                    Destination = transport.Destination,
+                    Price = bid != null ? bid.Value : 0,
+                    Status = transport.Status.ToString()
+                }
+            ).ToListAsync();
+
+            _logger.LogInformation("Histórico de transportes obtido: {Count}", history.Count);
+            return history;
+        }
+    }   
 }

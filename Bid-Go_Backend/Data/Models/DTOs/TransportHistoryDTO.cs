@@ -8,9 +8,9 @@ namespace Bid_Go_Backend.Data.Models.DTOs
 {
     public class TransportHistoryDTO
     {
-        public int RequestId { get; set; } 
+        public int TransportRequestId { get; set; } 
         public required string Package { get; set; }
-        public required string DriverName { get; set; } 
+        public required string Name { get; set; }
         public DateTime Date { get; set; }        
         public required string Destination { get; set; }
         public decimal Price { get; set; }
