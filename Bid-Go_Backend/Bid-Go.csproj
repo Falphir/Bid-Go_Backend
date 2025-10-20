@@ -11,8 +11,22 @@
 
   <ItemGroup>
     <Compile Remove="Data\Migrations\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
+    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
+    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta\**" />
     <None Remove="Data\Migrations\**" />
+    <None Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
+    <None Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <None Remove="Data\Repositories\Interfaces\NovaPasta\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove=".env.cs" />
+    <Compile Remove="Controllers\TestController.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,6 +69,12 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

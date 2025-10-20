@@ -26,14 +26,22 @@ namespace Bid_Go_Backend.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Email inválido." });
 
+
+            Console.WriteLine($"Email do request: '{request.Email}'");
+            Console.WriteLine($"Password do request: '{request.Password}'");
+            Console.WriteLine($"Email do DB: '{user.Email}'");
+            Console.WriteLine($"Password do DB: '{user.Password}'");
+
             if (user.Password != request.Password)
                 return Unauthorized(new { message = "Password incorreta." });
 
 
             var token = _authService.GenerateJwtToken(user);
+        
 
             return Ok(new LoginResponseDto
             {
+
                 Token = token,
                 Expiration = DateTime.UtcNow.AddMinutes(60)
             });

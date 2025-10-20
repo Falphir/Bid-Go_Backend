@@ -1,4 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +36,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 
@@ -47,12 +50,12 @@ var app = builder.Build();
 
 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
+    c.RoutePrefix = "";
+});
 
 app.UseExceptionHandler(config =>
 {
