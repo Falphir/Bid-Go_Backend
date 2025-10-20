@@ -27,6 +27,8 @@
   <ItemGroup>
     <Compile Remove=".env.cs" />
     <Compile Remove="Controllers\TestController.cs" />
+    <Compile Remove="Controllers\teste.cs" />
+    <Compile Remove="Controllers\TesteController.cs" />
   </ItemGroup>
 
   <ItemGroup>
