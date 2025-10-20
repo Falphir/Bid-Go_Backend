@@ -22,47 +22,36 @@ namespace Bid_Go_Backend.Repositories.ProfileRepo
         }
 
 
-        public async Task UpdateDriverAsync(int id, DriverProfileDTO dto)
-
+        public async Task<bool> UpdateDriverAsync(int id, DriverProfileDTO dto)
         {
-
             var driver = await _ctx.Drivers.FindAsync(id);
             if (driver == null)
-            {
-                throw new Exception("Driver not found");
+                return false;
 
+            driver.Name = dto.Name;
+            driver.PhoneNumber = dto.PhoneNumber;
+            driver.DriverLicense = dto.DriverLicense;
+            driver.Insurance = dto.Insurance;
 
-                driver.Name = dto.Name;
-                driver.PhoneNumber = dto.PhoneNumber;
-                driver.DriverLicense = dto.DriverLicense;
-                driver.Insurance = dto.Insurance;
-
-                _ctx.Drivers.Update(driver);
-                await _ctx.SaveChangesAsync();
-
-            }
+            _ctx.Drivers.Update(driver);
+            await _ctx.SaveChangesAsync();
+            return true;
         }
 
-        public async Task UpdateCompanyAsync(int id, CompanyProfileDTO dto)
-
+        public async Task<bool> UpdateCompanyAsync(int id, CompanyProfileDTO dto)
         {
-
             var company = await _ctx.Companies.FindAsync(id);
             if (company == null)
-            {
-                throw new Exception("Company not found");
+                return false;
 
+            company.Name = dto.Name;
+            company.PhoneNumber = dto.PhoneNumber;
+            company.CompanyName = dto.CompanyName;
+            company.Address = dto.Address;
 
-                company.Name = dto.Name;
-                company.PhoneNumber = dto.PhoneNumber;
-                company.CompanyName = dto.CompanyName;
-                company.Address = dto.Address;
-
-
-                _ctx.Companies.Update(company);
-                await _ctx.SaveChangesAsync();
-
-            }
+            _ctx.Companies.Update(company);
+            await _ctx.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> DeleteUserAsync(int id)

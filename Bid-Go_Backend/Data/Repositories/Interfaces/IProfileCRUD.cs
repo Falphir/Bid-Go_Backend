@@ -8,8 +8,8 @@ namespace Bid_Go_Backend.Repositories.Interface
     {
         Task<User?> GetUserByIdAsync(int id);
 
-        Task UpdateDriverAsync(int id, DriverProfileDTO dto);
-        Task UpdateCompanyAsync(int id, CompanyProfileDTO dto);
+        Task<bool> UpdateDriverAsync(int id, DriverProfileDTO dto);
+        Task<bool> UpdateCompanyAsync(int id, CompanyProfileDTO dto);
         Task<bool> DeleteUserAsync(int id);
 
     }

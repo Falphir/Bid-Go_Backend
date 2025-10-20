@@ -15,7 +15,7 @@ namespace Bid_Go_Backend.Controllers
     public class ProfileController : ControllerBase
     {
 
-        private readonly IProfileCrud  _profileCrud;
+        private readonly IProfileCrud _profileCrud;
         private readonly BidGoDbContext _ctx;
         public ProfileController(IProfileCrud profileCrud, BidGoDbContext ctx)
         {
@@ -29,10 +29,10 @@ namespace Bid_Go_Backend.Controllers
         {
             var user = await _profileCrud.GetUserByIdAsync(id);
 
-            if(user == null)
+            if (user == null)
                 return NotFound("User not found");
 
-            if(user is Driver driver)
+            if (user is Driver driver)
                 return Ok(new DriverProfileDTO
                 {
                     Id = driver.Id,
@@ -60,30 +60,34 @@ namespace Bid_Go_Backend.Controllers
             return BadRequest("Uknown user type");
         }
 
-        // PUT /utilizadores/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProfile(int id, [FromBody] object dto)
+        // PUT /api/utilizadores/motorista/{id}
+        [HttpPut("motorista/{id}")]
+        public async Task<IActionResult> UpdateDriverProfile(int id, [FromBody] DriverProfileDTO dto)
         {
-            var user = await _profileCrud.GetUserByIdAsync(id);
-            if (user == null)
-                return NotFound("User not found.");
+            var success = await _profileCrud.UpdateDriverAsync(id, dto);
+            if (!success)
+                return NotFound("Driver not found.");
 
-            // Aqui, no futuro, vamos validar com JWT se o utilizador é o mesmo
-
-            if (user is Driver)
-            {
-                var driverDto = JsonConvert.DeserializeObject<DriverProfileDTO>(dto.ToString()!);
-                await _profileCrud.UpdateDriverAsync(id, driverDto);
-            }
-            else if (user is Company)
-            {
-                var companyDto = JsonConvert.DeserializeObject<CompanyProfileDTO>(dto.ToString()!);
-                await _profileCrud.UpdateCompanyAsync(id, companyDto);
-            }
-
-            return Ok("Profile updated successfully.");
+            return Ok("Driver profile updated successfully.");
         }
+
+        // PUT /api/utilizadores/empresa/{id}
+        [HttpPut("empresa/{id}")]
+        public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
+        {
+            var success = await _profileCrud.UpdateCompanyAsync(id, dto);
+            if (!success)
+                return NotFound("Company not found.");
+
+            return Ok("Company profile updated successfully.");
+        }
+
+   
+
+        
+        
         // DELETE /utilizadores/{id}
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
