@@ -48,45 +48,77 @@ namespace Bid_Go_Backend.Repositories.BidRepo
                 .ToListAsync();
         }
 
-        //Cancel bid
-        public async Task<bool> AcceptBidAsync(int id)
+        //Accept bid
+        public async Task AcceptBidAsync(int id)
         {
             var existingBid = await _ctx.Bids
                 .Include(b => b.TransportRequest)
                 .FirstOrDefaultAsync(b => b.BidId == id);
 
-            if (existingBid == null || existingBid.Status != EBidStatus.Pendent)
-                return false;
+            if (existingBid == null)
+                throw new Exception("Bid not found.");
 
-            //Verify if the bid is alyready accepted
+            if (existingBid.Status != EBidStatus.Pendent)
+                throw new Exception("The bid is not pending and cannot be accepted");
 
-            bool hasAcceptedBid = await _ctx.Bids
-                .AnyAsync(b => b.TransportRequestId == existingBid.TransportRequestId && b.Status == EBidStatus.Accepted);
+            if (existingBid.TransportRequest == null)
+                throw new Exception("Associated transport request not found");
 
-            if (hasAcceptedBid)
-                return false;
+        
+            if (existingBid.TransportRequest.Status != ERequestStatus.Active)
+                throw new Exception("The transport request is not active.");
 
+           
+            bool alreadyAccepted = await _ctx.Bids
+                .AnyAsync(b => b.TransportRequestId == existingBid.TransportRequestId
+                               && b.Status == EBidStatus.Accepted);
 
+            if (alreadyAccepted)
+                throw new Exception("There is already an accepted bid for this request");
+
+        
             existingBid.Status = EBidStatus.Accepted;
 
-
-            //Reject other bids for the same transport request
-
+          
             var otherBids = await _ctx.Bids
-                .Where(b=> b.TransportRequestId == existingBid.TransportRequestId && b.BidId != id && b.Status == EBidStatus.Pendent)
+                .Where(b => b.TransportRequestId == existingBid.TransportRequestId && b.BidId != id)
                 .ToListAsync();
 
             foreach (var bid in otherBids)
                 bid.Status = EBidStatus.Rejected;
 
-
-            if (existingBid.TransportRequest != null)
-                existingBid.TransportRequest.Status = ERequestStatus.Pending;
+       
+            existingBid.TransportRequest.Status = ERequestStatus.Pending;
 
             await _ctx.SaveChangesAsync();
+        }
 
-            return true;
 
+        public async Task RejectBidAsync(int id)
+        {
+
+            var existingBid = await _ctx.Bids
+                .Include(b => b.TransportRequest)
+                .FirstOrDefaultAsync(b => b.BidId == id);
+
+            if (existingBid == null)
+                throw new Exception("Bid not found.");
+
+
+            if (existingBid.Status != EBidStatus.Pendent)
+                throw new Exception("The bid is not pending and cannot be rejected");
+
+            if (existingBid.TransportRequest == null)
+                throw new Exception("Associated transport request not found");
+
+
+            if (existingBid.TransportRequest.Status != ERequestStatus.Active)
+                throw new Exception("The transport request is not active.");
+
+
+            existingBid.Status = EBidStatus.Rejected;
+
+            await _ctx.SaveChangesAsync();
         }
 
     }

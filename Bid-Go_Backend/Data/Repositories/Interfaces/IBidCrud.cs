@@ -14,6 +14,8 @@ namespace Bid_Go_Backend.Repositories.Interface
         Task<Bid?> GetBidByIdAsync(int id);
         Task<List<Bid>> GetBidByTransportRequestAsync(int transportRequestId);
         Task<IEnumerable<Bid>> GetBidByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status);
-        Task<bool> AcceptBidAsync(int id);
+        Task AcceptBidAsync(int id);
+
+        Task RejectBidAsync(int id);
     }
 }

@@ -22,7 +22,7 @@ namespace Bid_Go_Backend.Controllers
             _ctx = ctx;
         }
 
-   
+
         // GET /licitacoes?bid={id}
         [HttpGet]
         public async Task<IActionResult> GetBidsById([FromQuery] int bidId)
@@ -38,7 +38,7 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("by-request/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
-           
+
             var bids = await _bidCrud.GetBidByTransportRequestAsync(transportRequestId);
 
             if (bids == null || !bids.Any())
@@ -53,20 +53,41 @@ namespace Bid_Go_Backend.Controllers
 
             var bids = await _bidCrud.GetBidByTransportRequestAndStatusAsync(transportRequestId, status);
 
-            if ( bids == null || !bids.Any())
+            if (bids == null || !bids.Any())
                 return NotFound("No bids found for the given transport request ID and status.");
             return Ok(bids);
         }
 
 
-        // DELETE /licitacoes/{id}
+        //Post /licitacoes/{id}
         [HttpPost("{id}/accept")]
         public async Task<IActionResult> AcceptBid(int id)
         {
-            var result = await _bidCrud.AcceptBidAsync(id);
-            if (!result)
-                return BadRequest("ERRO A ACEITAR");
-            return Ok("Bid canceled successfully.");
+            try
+            {
+                await _bidCrud.AcceptBidAsync(id);
+                return Ok(new { message = "Bid successfully accepted" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
+        //Post /bid/{id}
+        [HttpPost("{id}/reject")]
+        public async Task<IActionResult> RejectedBid(int id)
+        {
+            try
+            {
+                await _bidCrud.RejectBidAsync(id);
+                return Ok(new { message = "Bid successfully rejected" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
     }
 }
