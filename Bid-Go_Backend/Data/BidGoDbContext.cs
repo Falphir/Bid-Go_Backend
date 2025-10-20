@@ -61,6 +61,12 @@ namespace Bid_Go_Backend.Data
                 .HasValue<Company>("Company")
                 .HasValue<Driver>("Driver");
 
+            // Configuração discriminator para Reviews
+            modelBuilder.Entity<Review>()
+               .HasDiscriminator<string>("Discriminator")
+               .HasValue<ReviewCompany>("Driver")
+               .HasValue<ReviewDriver>("Company");
+
             // Definir propriedades únicas
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)

@@ -1,6 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Review;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -45,7 +45,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-
+builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
 
 var app = builder.Build();
 

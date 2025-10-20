@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models.DTOs
 {
-    public class ReviewRequestServiceDTO
+    public class ReviewByServiceDTO
     {
         public DateTime TimeStamp { get; set; } = DateTime.Now;
         public decimal Classification { get; set; }
-        public int DriverId { get; set; }
-        public int CompanyId { get; set; }
-        public int TransportRequestId { get; set; }
-        public required string Discriminator { get; set; }
+        public int Name { get; set; } // Name de quem dá a review
         public int Punctuality { get; set; }
         public int Behavior { get; set; }
         public int ServiceQuality { get; set; }
