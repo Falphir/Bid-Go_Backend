@@ -1,6 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
-using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.ProfileRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -40,7 +40,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 
-builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 
 var app = builder.Build();
 
