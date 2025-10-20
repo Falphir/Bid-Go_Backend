@@ -13,14 +13,17 @@
     <Compile Remove="Data\Migrations\**" />
     <Compile Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
     <Compile Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
     <Compile Remove="Data\Repositories\Interfaces\NovaPasta\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
     <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
     <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
     <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta\**" />
     <None Remove="Data\Migrations\**" />
     <None Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
     <None Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <None Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
     <None Remove="Data\Repositories\Interfaces\NovaPasta\**" />
   </ItemGroup>
 

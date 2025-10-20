@@ -1,5 +1,4 @@
 ﻿using Bid_Go_Backend.Data;
-using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,6 +15,7 @@ using System.Text;
 using System.Text.Json;
 using Stripe;
 using Microsoft.Extensions.Options;
+using Bid_Go_Backend.Data.Repositories.Login;
 
 var builder = WebApplication.CreateBuilder(args);
 

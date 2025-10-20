@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bid_Go_Backend.Data.Repositories
+namespace Bid_Go_Backend.Data.Repositories.Login
 {
     public class UserRepository : IUserRepository
     {
