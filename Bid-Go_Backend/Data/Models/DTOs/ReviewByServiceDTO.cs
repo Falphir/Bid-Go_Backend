@@ -10,10 +10,10 @@ namespace Bid_Go_Backend.Data.Models.DTOs
     {
         public DateTime TimeStamp { get; set; } = DateTime.Now;
         public decimal Classification { get; set; }
-        public int Name { get; set; } // Name de quem dá a review
-        public int Punctuality { get; set; }
-        public int Behavior { get; set; }
-        public int ServiceQuality { get; set; }
-        public int ClientSuport { get; set; }
+        public required string Name { get; set; } // Name de quem dá a review
+        public int? Punctuality { get; set; } 
+        public int? Behavior { get; set; }
+        public int? ServiceQuality { get; set; }
+        public int? ClientSuport { get; set; }
     }
 }

@@ -10,6 +10,6 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
     public interface IReviewRequestServiceRepository
     {
         Task<bool> SubmitReviewAsync(ReviewRequestServiceDTO reviewDTO);
-        //Task<ReviewByServiceDTO?> GetReviewByServiceIdAsync(int transportRequestId);
+        Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId);
     }
 }

@@ -107,5 +107,55 @@ namespace Bid_Go_Backend.Data.Repositories.Review
 
             return true;
         }
+
+        public async Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId)
+        {
+            var transport = await _context.TransportRequests
+                .FirstOrDefaultAsync(t => t.TransportRequestId == transportRequestId);
+
+            if (transport == null)
+                throw new InvalidOperationException("Serviço não encontrado.");
+
+            var companyReviews = await _context.Reviews
+                .OfType<ReviewCompany>()
+                .Where(r => r.TransportRequestId == transportRequestId)
+                .Join(
+                    _context.Users,
+                    review => review.DriverId,
+                    user => user.Id,
+                    (review, user) => new ReviewByServiceDTO
+                    {
+                        TimeStamp = review.TimeStamp,
+                        Classification = review.Classification,
+                        Name = user.Name,
+                        ServiceQuality = review.ServiceQuality,
+                        ClientSuport = review.ClientSuport,
+                        Punctuality = null,
+                        Behavior = null
+                    }
+                ).ToListAsync();
+
+            var driverReviews = await _context.Reviews
+                .OfType<ReviewDriver>()
+                .Where(r => r.TransportRequestId == transportRequestId)
+                .Join(
+                    _context.Users,
+                    review => review.CompanyId,
+                    user => user.Id,
+                    (review, user) => new ReviewByServiceDTO
+                    {
+                        TimeStamp = review.TimeStamp,
+                        Classification = review.Classification,
+                        Name = user.Name,
+                        Punctuality = review.Punctuality,
+                        Behavior = review.Behavior,
+                        ServiceQuality = null,
+                        ClientSuport = null
+                    }
+                ).ToListAsync();
+
+            return companyReviews.Concat(driverReviews);
+        }
+
     }
 }

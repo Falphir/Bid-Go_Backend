@@ -49,18 +49,22 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
-        //[HttpGet("get-review/{transportRequestId}")]
-        //public async Task<IActionResult> GetReviewByServiceId(int transportRequestId)
-        //{
-        //    var review = await repository.GetReviewByServiceIdAsync(transportRequestId);
-        //    if (review != null)
-        //    {
-        //        return Ok(review);
-        //    }
-        //    else
-        //    {
-        //        return NotFound(new { message = "Review not found." });
-        //    }
-        //}
+        [HttpGet("avaliacoes/{request_id}")]
+        public async Task<IActionResult> GetReviewsByService(int request_id)
+        {
+            try
+            {
+                var reviews = await repository.GetReviewByServiceIdAsync(request_id);
+                return Ok(reviews);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado.", detail = ex.Message });
+            }
+        }
     }
 }
