@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251016111723_teste1")]
+    [Migration("20251017154725_teste1")]
     partial class teste1
     {
         /// <inheritdoc />
@@ -413,7 +413,7 @@ namespace Bid_Go_Backend.Migrations
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Bid", b =>
                 {
                     b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
-                        .WithMany()
+                        .WithMany("Bids")
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -570,6 +570,11 @@ namespace Bid_Go_Backend.Migrations
                     b.Navigation("Payment");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.Driver", b =>
+                {
+                    b.Navigation("Bids");
                 });
 #pragma warning restore 612, 618
         }
