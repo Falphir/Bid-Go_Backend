@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -31,6 +32,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
+builder.Services.AddAuthorization();
+builder.Services.AddScoped<AuthService>();
 
 
 
@@ -73,6 +76,9 @@ app.UseExceptionHandler(config =>
         }
     });
 });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
