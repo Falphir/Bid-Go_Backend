@@ -16,35 +16,6 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             _ctx = ctx;
         }
 
-
-        //Create a new bid
-        public async Task<Bid> CreateBidAsync(Bid bid)
-        {
-            bid.Status = EBidStatus.Pendent;
-            _ctx.Bids.Add(bid);
-            await _ctx.SaveChangesAsync();
-            return bid;
-        }
-
-        //Update bid
-        public async Task<Bid?> UpdateBidAsync(int id, Bid bid)
-        {
-
-            var existingBid = await _ctx.Bids.FindAsync(id);
-         
-            if(existingBid == null || existingBid.Status != EBidStatus.Pendent)
-            {
-                return null;
-            }
-
-            existingBid.Value = bid.Value;
-            existingBid.DeliveryDeadline = bid.DeliveryDeadline;
-
-            await _ctx.SaveChangesAsync();
-            return existingBid;
-
-        }
-
         //Get bid by id
         public async Task<Bid?> GetBidByIdAsync(int id)
         {
@@ -78,20 +49,45 @@ namespace Bid_Go_Backend.Repositories.BidRepo
         }
 
         //Cancel bid
-        public async Task<bool> CancelBidAsync(int id)
+        public async Task<bool> AcceptBidAsync(int id)
         {
-            var existingBid = await _ctx.Bids.FindAsync(id);
+            var existingBid = await _ctx.Bids
+                .Include(b => b.TransportRequest)
+                .FirstOrDefaultAsync(b => b.BidId == id);
+
             if (existingBid == null || existingBid.Status != EBidStatus.Pendent)
-            {
                 return false;
-            }
+
+            //Verify if the bid is alyready accepted
+
+            bool hasAcceptedBid = await _ctx.Bids
+                .AnyAsync(b => b.TransportRequestId == existingBid.TransportRequestId && b.Status == EBidStatus.Accepted);
+
+            if (hasAcceptedBid)
+                return false;
 
 
-            existingBid.Status = EBidStatus.Canceled;
+            existingBid.Status = EBidStatus.Accepted;
+
+
+            //Reject other bids for the same transport request
+
+            var otherBids = await _ctx.Bids
+                .Where(b=> b.TransportRequestId == existingBid.TransportRequestId && b.BidId != id && b.Status == EBidStatus.Pendent)
+                .ToListAsync();
+
+            foreach (var bid in otherBids)
+                bid.Status = EBidStatus.Rejected;
+
+
+            if (existingBid.TransportRequest != null)
+                existingBid.TransportRequest.Status = ERequestStatus.Pending;
+
             await _ctx.SaveChangesAsync();
+
             return true;
 
         }
-      
+
     }
 }
