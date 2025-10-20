@@ -23,14 +23,29 @@ namespace Bid_Go_Backend.Controllers
         [HttpPost("submit-review")]
         public async Task<IActionResult> SubmitReview([FromBody] ReviewRequestServiceDTO reviewDTO)
         {
-            bool result = await repository.SubmitReviewAsync(reviewDTO);
-            if (result)
+            try
             {
-                return Ok(new { message = "Review submitted successfully." });
+                bool result = await repository.SubmitReviewAsync(reviewDTO);
+                if (result)
+                {
+                    return Ok(new { message = "Review submetida com Sucesso." });
+                }
+                else
+                {
+                    return BadRequest(new { message = "Erro ao submeter a Review." });
+                }
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = "Failed to submit review." });
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado.", detail = ex.Message });
             }
         }
 

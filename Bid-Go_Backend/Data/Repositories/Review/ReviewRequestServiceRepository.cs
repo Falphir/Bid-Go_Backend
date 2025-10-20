@@ -25,7 +25,6 @@ namespace Bid_Go_Backend.Data.Repositories.Review
 
         public async Task<bool> SubmitReviewAsync(ReviewRequestServiceDTO reviewDto)
         {
-            // 1️⃣ Validar se o serviço existe e está concluído
             var transport = await _context.TransportRequests
                 .FirstOrDefaultAsync(t => t.TransportRequestId == reviewDto.TransportRequestId);
 
@@ -41,7 +40,6 @@ namespace Bid_Go_Backend.Data.Repositories.Review
                 throw new InvalidOperationException("O serviço ainda não está concluído.");
             }
 
-            // 2️⃣ Verificar se já existe avaliação para aquele serviço e partes
             bool reviewExists = reviewDto.Discriminator switch
             {
                 "Company" => await _context.Reviews
@@ -66,11 +64,10 @@ namespace Bid_Go_Backend.Data.Repositories.Review
             }
 
 
-            // 3️⃣ Validar nota
-            if (reviewDto.Classification < 1 || reviewDto.Classification > 5)
+            if (reviewDto.Classification < 0 || reviewDto.Classification > 5)
             {
                 throw new ArgumentOutOfRangeException(nameof(reviewDto.Classification),
-                    "A classificação deve estar entre 1 e 5.");
+                    "A classificação deve estar entre 0 e 5.");
             }
 
             Bid_Go_Backend.Data.Models.Review review;
