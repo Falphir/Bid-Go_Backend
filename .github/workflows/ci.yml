@@ -29,20 +29,13 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Run tests with coverage
-      run: |
-        dotnet test --configuration Release \
-          --collect:"XPlat Code Coverage" \
-          --results-directory ./TestResults \
-          --verbosity normal
+      run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults --verbosity normal
+
 
     - name: Generate coverage report
       if: success()
-      run: |
-        dotnet tool install -g dotnet-reportgenerator-globaltool
-        reportgenerator \
-          -reports:"**/coverage.cobertura.xml" \
-          -targetdir:"TestResults/CoverageReport" \
-          -reporttypes:Html
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool && reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:Html
+
 
     - name: Upload coverage report
       if: success()
