@@ -59,7 +59,7 @@ namespace Bid_Go_Backend.Data.Models
         public int CompanyId { get; set; }
         public Company? Company { get; set; } = null;
 
-        public Chat Chat { get; set; } = null!;
+        public Chats Chat { get; set; } = null!;
 
         //Relação 1:1 com Payment
         public Payment? Payment { get; set; }

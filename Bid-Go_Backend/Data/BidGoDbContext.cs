@@ -18,7 +18,7 @@ namespace Bid_Go_Backend.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Bid> Bids { get; set; }
-        public DbSet<Chat> Chats { get; set; }
+        public DbSet<Chats> Chats { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Payment> Payments { get; set; }
@@ -120,19 +120,19 @@ namespace Bid_Go_Backend.Data
             modelBuilder.Entity<TransportRequest>()
                 .HasOne(t => t.Chat)
                 .WithOne(c => c.TransportRequest)
-                .HasForeignKey<Chat>(c => c.TransportRequestId)
+                .HasForeignKey<Chats>(c => c.TransportRequestId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Chat>()
+            modelBuilder.Entity<Chats>()
                 .HasOne(t => t.TransportRequest)
                 .WithOne(c => c.Chat)
-                .HasForeignKey<Chat>(c => c.TransportRequestId)
+                .HasForeignKey<Chats>(c => c.TransportRequestId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Chat -> Messages (1-to-many)
-            modelBuilder.Entity<Chat>()
+            modelBuilder.Entity<Chats>()
                 .HasMany(c => c.Messages)
                 .WithOne(m => m.Chat)
                 .HasForeignKey(m => m.ChatId)

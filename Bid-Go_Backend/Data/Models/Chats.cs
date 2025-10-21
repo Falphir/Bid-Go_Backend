@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
 {
-    public class Chat
+    public class Chats
     {
         [Key]
         public int ChatId { get; set; }
