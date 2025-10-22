@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -48,26 +49,48 @@ namespace Bid_Go_Backend.Data.Repositories.Bids
             return bids.Where(b => eligibleDriverIds.Contains(b.DriverId));
         }
 
-        public async Task<Bid?> ExecuteAutomaticSelectionAsync(int transportRequestId)
+        public async Task<bool> IsTransportRequestCanceledAsync(int transportRequestId)
         {
+            return await _ctx.TransportRequests
+                .Where(tr => tr.TransportRequestId == transportRequestId)
+                .Select(tr => tr.Status == ERequestStatus.Canceled)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<AutomaticSelectionResult> ExecuteAutomaticSelectionAsync(int transportRequestId)
+        {
+            if (await IsTransportRequestCanceledAsync(transportRequestId))
+                return new AutomaticSelectionResult
+                {
+                    Message = "The transport request is canceled."
+                };
+
+            var allBids = await _ctx.Bids
+                .Include(b => b.Driver)
+                .Where(b => b.TransportRequestId == transportRequestId)
+                .ToListAsync();
+
+            if (!allBids.Any())
+                return new AutomaticSelectionResult
+                {
+                    Message = "No bids were submitted for this transport request."
+                };
+
             var eligibleBids = await GetEligibleBidsAsync(transportRequestId);
 
             if (!eligibleBids.Any())
-                return null;
+                return new AutomaticSelectionResult
+                {
+                    Message = "No eligible bids found for this transport request."
+                };
 
             var minPrice = eligibleBids.Min(b => b.Value);
-            var lowestBids = eligibleBids
-                .Where(b => b.Value == minPrice)
-                .ToList();
+            var lowestBids = eligibleBids.Where(b => b.Value == minPrice).ToList();
 
             if (lowestBids.Count == 1)
-                return lowestBids.First();
+                return new AutomaticSelectionResult { SelectedBid = lowestBids.First() };
 
-            var driverIds = lowestBids
-                .Select(b => b.DriverId)
-                .Distinct()
-                .ToList();
-
+            var driverIds = lowestBids.Select(b => b.DriverId).Distinct().ToList();
             var reputations = await _ctx.Reviews
                 .Where(r => driverIds.Contains(r.DriverId))
                 .GroupBy(r => r.DriverId)
@@ -92,12 +115,12 @@ namespace Bid_Go_Backend.Data.Repositories.Bids
                 .Select(b => b.Bid)
                 .ToList();
 
-            if (bestReputationBids.Count == 1)
-                return bestReputationBids.First();
+            var selectedBid = bestReputationBids.Count == 1
+                ? bestReputationBids.First()
+                : bestReputationBids.OrderBy(b => b.BidId).First();
 
-            return bestReputationBids
-                .OrderBy(b => b.BidId)
-                .First();
+            return new AutomaticSelectionResult { SelectedBid = selectedBid };
         }
+
     }
 }

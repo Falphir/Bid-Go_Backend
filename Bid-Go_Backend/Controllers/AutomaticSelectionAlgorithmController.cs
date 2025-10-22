@@ -19,13 +19,13 @@ namespace Bid_Go_Backend.Controllers
         {
             var result = await _selectionRepo.ExecuteAutomaticSelectionAsync(transportRequestId);
 
-            if (result == null)
-                return NotFound("Nenhuma proposta elegível encontrada para este pedido.");
+            if (!result.Success)
+                return BadRequest(result.Message);
 
             return Ok(new
             {
-                message = "Seleção automática executada com sucesso.",
-                selectedBid = result
+                message = "Automatic selection executed successfully.",
+                selectedBid = result.SelectedBid
             });
         }
     }
