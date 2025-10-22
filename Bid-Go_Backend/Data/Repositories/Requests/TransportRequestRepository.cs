@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,28 +19,61 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
             _context = context;
         }
 
-        public async Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus status)
+        public async Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus)
         {
             var request = await _context.TransportRequests.FindAsync(id);
             if (request == null)
             {
-                throw new Exception("Transport request not found");
+                throw new Exception("Transport request not found.");
             }
 
-            if (request.CompanyId != companyID && (request.Status != ERequestStatus.Active && request.Status != ERequestStatus.Instransit))
+            var user = await _context.Users.FindAsync(companyID);
+            if (user == null)
             {
-                throw new InvalidOperationException("Não tem permissão para atualizar o estado deste pedido.");
+                throw new InvalidOperationException("Utilizador não encontrado.");
             }
 
-            if (status == ERequestStatus.Canceled && (request.Status != ERequestStatus.Active && request.Status != ERequestStatus.Instransit))
+            bool isValidTransition = false;
+            string userRole;
+
+            if (user is Company)
             {
-                throw new InvalidOperationException("Só é possível cancelar pedidos ativos ou em trânsito.");
+                userRole = "Company";
+                isValidTransition = request.Status switch
+                {
+                    ERequestStatus.Active => newStatus is ERequestStatus.Pending or ERequestStatus.Canceled,
+                    ERequestStatus.Pending => newStatus == ERequestStatus.WaitingPickup,
+                    _ => false
+                };
+            }
+            else if (user is Driver)
+            {
+                userRole = "Driver";
+                isValidTransition = request.Status switch
+                {
+                    ERequestStatus.WaitingPickup => newStatus == ERequestStatus.InTransit,
+                    ERequestStatus.InTransit => newStatus is ERequestStatus.Completed or ERequestStatus.Canceled,
+                    _ => false
+                };
+            }
+            else
+            {
+                throw new InvalidOperationException("Tipo de utilizador não suportado.");
             }
 
-            request.Status = status;
+            if (!isValidTransition)
+            {
+                throw new InvalidOperationException(
+                    $"Não é possível mudar o estado de '{request.Status}' para '{newStatus}' para o tipo '{userRole}'.");
+            }
+
+            // Atualiza o estado
+            request.Status = newStatus;
             _context.TransportRequests.Update(request);
             await _context.SaveChangesAsync();
+
             return request;
         }
+
     }
 }

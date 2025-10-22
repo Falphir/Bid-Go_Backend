@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Repositories.BidRepo;
+using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -33,7 +34,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
@@ -44,6 +44,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 
 var app = builder.Build();
 

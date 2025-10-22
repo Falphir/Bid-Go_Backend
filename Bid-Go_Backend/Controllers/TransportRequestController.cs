@@ -42,12 +42,12 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [HttpPut("{requestID}/canceled")]
-        public async Task<IActionResult> CancelRequestStatus(int requestID)
+        public async Task<IActionResult> CancelRequestStatus(int requestID, int companyID)
         {
             try
             {
                 var dto = new RequestStatusDTO { Status = Data.Models.Enums.ERequestStatus.Canceled };
-                var updatedRequest = await _repository.UpdateRequestStatusAsync(requestID, dto.Status);
+                var updatedRequest = await _repository.UpdateRequestStatusAsync(requestID, companyID, dto.Status);
 
                 if (updatedRequest == null)
                     return NotFound(new { message = $"Pedido com ID {requestID} não encontrado." });
