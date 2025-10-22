@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Repositories.BidRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -42,16 +43,19 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 
+builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+
 var app = builder.Build();
 
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
-    c.RoutePrefix = "";
-});
 
+app.UseSwagger();
+app.UseSwaggerUI(c=>
+{
+
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
+c.RoutePrefix = "";
+});
 
 app.UseExceptionHandler(config =>
 {

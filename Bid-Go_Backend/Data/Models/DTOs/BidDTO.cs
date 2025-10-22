@@ -7,26 +7,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bid_Go_Backend.Data.Models
+namespace Bid_Go_Backend.Data.Models.DTOs
 {
-    public class Bid
+    public class BidDTO
     {
-    
-        [Key]
-        public int BidId { get; set; }
-
+     
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Value { get; set; }
 
         [Required]
-        public DateTime Term { get; set; }
+        public DateTime DeliveryDeadline { get; set; }
 
-        [Required]
-        public ENotificationType Type { get; set; }
+        public int DriverId { get; set; }  
 
-        [ForeignKey(nameof(Driver))]
-        public int DriverId { get; set; }
-        public Driver? Driver { get; set; } = null;
+        public int TransportRequestId { get; set; } 
+
+
     }
 }
