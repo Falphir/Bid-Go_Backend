@@ -28,12 +28,25 @@ namespace Bid_Go_Backend.Repositories.ProfileRepo
             if (driver == null)
                 return false;
 
-            driver.Name = dto.Name;
-            driver.PhoneNumber = dto.PhoneNumber;
-            driver.DriverLicense = dto.DriverLicense;
-            driver.Insurance = dto.Insurance;
+            if (!string.IsNullOrEmpty(dto.Name))
+                driver.Name = dto.Name;
 
-            _ctx.Drivers.Update(driver);
+            if (!string.IsNullOrEmpty(dto.Email))
+                driver.Email = dto.Email;
+
+            if (dto.PhoneNumber.HasValue)
+                driver.PhoneNumber = dto.PhoneNumber.Value;
+
+            if (dto.NIF.HasValue)
+                driver.NIF = dto.NIF.Value;
+
+            if (!string.IsNullOrEmpty(dto.DriverLicense))
+                driver.DriverLicense = dto.DriverLicense;
+
+            if (!string.IsNullOrEmpty(dto.Insurance))
+                driver.Insurance = dto.Insurance;
+
+        
             await _ctx.SaveChangesAsync();
             return true;
         }
@@ -44,12 +57,27 @@ namespace Bid_Go_Backend.Repositories.ProfileRepo
             if (company == null)
                 return false;
 
-            company.Name = dto.Name;
-            company.PhoneNumber = dto.PhoneNumber;
-            company.CompanyName = dto.CompanyName;
-            company.Address = dto.Address;
+            if(!string.IsNullOrEmpty(dto.Name))
+                company.Name = dto.Name;
 
-            _ctx.Companies.Update(company);
+            if (!string.IsNullOrEmpty(dto.Email))
+                company.Email = dto.Email;
+
+            if (dto.PhoneNumber.HasValue)
+                company.PhoneNumber = dto.PhoneNumber.Value;
+
+            if (dto.NIF.HasValue)
+                company.NIF = dto.NIF.Value;
+
+            if (!string.IsNullOrEmpty(dto.CompanyName))
+                company.CompanyName = dto.CompanyName;
+
+            if (!string.IsNullOrEmpty(dto.Address))
+                company.Address = dto.Address;
+
+
+
+          
             await _ctx.SaveChangesAsync();
             return true;
         }

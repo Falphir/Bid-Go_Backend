@@ -8,12 +8,11 @@ namespace Bid_Go_Backend.Data.Models.DTOs
 {
     public class CompanyProfileDTO
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public int PhoneNumber { get; set; }
-        public int NIF { get; set; }
-        public string CompanyName { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
+        public string? Name { get; set; } 
+        public string? Email { get; set; } 
+        public int? PhoneNumber { get; set; }
+        public int? NIF { get; set; }
+        public string? CompanyName { get; set; } 
+        public string? Address { get; set; } 
     }
 }

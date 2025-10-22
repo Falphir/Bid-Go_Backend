@@ -7,6 +7,7 @@ using Bid_Go_Backend.Repositories.ProfileRepo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -35,7 +36,7 @@ namespace Bid_Go_Backend.Controllers
             if (user is Driver driver)
                 return Ok(new DriverProfileDTO
                 {
-                    Id = driver.Id,
+            
                     Name = driver.Name,
                     Email = driver.Email,
                     PhoneNumber = driver.PhoneNumber,
@@ -47,7 +48,7 @@ namespace Bid_Go_Backend.Controllers
             if (user is Company company)
                 return Ok(new CompanyProfileDTO
                 {
-                    Id = company.Id,
+                
                     Name = company.Name,
                     Email = company.Email,
                     PhoneNumber = company.PhoneNumber,
@@ -60,32 +61,40 @@ namespace Bid_Go_Backend.Controllers
             return BadRequest("Uknown user type");
         }
 
-        // PUT /api/utilizadores/motorista/{id}
-        [HttpPut("motorista/{id}")]
-        public async Task<IActionResult> UpdateDriverProfile(int id, [FromBody] DriverProfileDTO dto)
+        // PUT /api/utilizadores/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProfile(int id, [FromBody] object dto)
         {
-            var success = await _profileCrud.UpdateDriverAsync(id, dto);
-            if (!success)
-                return NotFound("Driver not found.");
+            var user = await _profileCrud.GetUserByIdAsync(id);
+            if (user == null)
+                return NotFound("User not found.");
 
-            return Ok("Driver profile updated successfully.");
+            bool success = false;
+
+            if (user is Driver)
+            {
+                var driverDto = dto as DriverProfileDTO;
+                success = await _profileCrud.UpdateDriverAsync(id, driverDto!);
+            }
+            else if (user is Company)
+            {
+                var companyDto = dto as CompanyProfileDTO;
+                success = await _profileCrud.UpdateCompanyAsync(id, companyDto!);
+            }
+            else
+            {
+                return BadRequest("Unknown user type.");
+            }
+
+            if (!success)
+                return BadRequest("No valid fields provided for update.");
+
+            return Ok("Profile updated successfully.");
         }
 
-        // PUT /api/utilizadores/empresa/{id}
-        [HttpPut("empresa/{id}")]
-        public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
-        {
-            var success = await _profileCrud.UpdateCompanyAsync(id, dto);
-            if (!success)
-                return NotFound("Company not found.");
 
-            return Ok("Company profile updated successfully.");
-        }
 
-   
 
-        
-        
         // DELETE /utilizadores/{id}
 
         [HttpDelete("{id}")]
