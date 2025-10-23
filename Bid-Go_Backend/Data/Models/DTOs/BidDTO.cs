@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models.DTOs
 {
-    internal class BidDTO
+    public class BidDTO
     {
+        public int BidId { get; set; }
+        public int TransportRequestId { get; set; }
+        public decimal Value { get; set; }
+        public DateTime DeliveryDeadline { get; set; }
+        public int Status { get; set; }
+
+        public DriverDTO Driver { get; set; }
     }
 }
