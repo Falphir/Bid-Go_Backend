@@ -63,22 +63,24 @@ namespace Bid_Go_Backend.Controllers
 
         // PUT /api/utilizadores/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProfile(int id, [FromBody] object dto)
+        public async Task<IActionResult> UpdateProfile(int id, [FromBody] JsonElement dto)
         {
+            // Verifica se o utilizador existe
             var user = await _profileCrud.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound("User not found.");
 
             bool success = false;
 
+            // Detecta o tipo de utilizador dinamicamente
             if (user is Driver)
             {
-                var driverDto = dto as DriverProfileDTO;
+                var driverDto = JsonConvert.DeserializeObject<DriverProfileDTO>(dto.ToString());
                 success = await _profileCrud.UpdateDriverAsync(id, driverDto!);
             }
             else if (user is Company)
             {
-                var companyDto = dto as CompanyProfileDTO;
+                var companyDto = JsonConvert.DeserializeObject<CompanyProfileDTO>(dto.ToString());
                 success = await _profileCrud.UpdateCompanyAsync(id, companyDto!);
             }
             else
@@ -87,7 +89,7 @@ namespace Bid_Go_Backend.Controllers
             }
 
             if (!success)
-                return BadRequest("No valid fields provided for update.");
+                return BadRequest("No valid fields provided or user not found.");
 
             return Ok("Profile updated successfully.");
         }
