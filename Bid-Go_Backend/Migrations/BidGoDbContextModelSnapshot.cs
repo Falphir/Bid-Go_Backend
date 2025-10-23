@@ -247,6 +247,12 @@ namespace Bid_Go_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransportRequestId"));
 
+                    b.Property<DateTime>("BiddingEndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("BiddingStartDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
@@ -264,6 +270,9 @@ namespace Bid_Go_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsAutomaticSelectionEnabled")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<decimal>("Length")
                         .HasColumnType("decimal(18,2)");
 
@@ -277,6 +286,9 @@ namespace Bid_Go_Backend.Migrations
 
                     b.Property<DateTime>("PickupDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("SelectedBidId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -295,6 +307,9 @@ namespace Bid_Go_Backend.Migrations
                     b.HasKey("TransportRequestId");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("SelectedBidId")
+                        .IsUnique();
 
                     b.ToTable("TransportRequests");
                 });
@@ -549,7 +564,14 @@ namespace Bid_Go_Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Bid_Go_Backend.Data.Models.Bid", "SelectedBid")
+                        .WithOne()
+                        .HasForeignKey("Bid_Go_Backend.Data.Models.TransportRequest", "SelectedBidId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Company");
+
+                    b.Navigation("SelectedBid");
                 });
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Chat", b =>

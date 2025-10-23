@@ -58,39 +58,31 @@ namespace Bid_Go_Backend.Data.Repositories.Bids
         }
 
         public async Task<AutomaticSelectionResult> ExecuteAutomaticSelectionAsync(int transportRequestId)
-        {
-            if (await IsTransportRequestCanceledAsync(transportRequestId))
-                return new AutomaticSelectionResult
-                {
-                    Message = "The transport request is canceled."
-                };
+        { 
+            var transportRequest = await _ctx.TransportRequests
+                .Include(tr => tr.Bids)
+                .ThenInclude(b => b.Driver)
+                .FirstOrDefaultAsync(tr => tr.TransportRequestId == transportRequestId);
 
-            var allBids = await _ctx.Bids
-                .Include(b => b.Driver)
-                .Where(b => b.TransportRequestId == transportRequestId)
-                .ToListAsync();
+            if (transportRequest == null)
+                return new AutomaticSelectionResult { Message = "Transport request not found." };
 
-            if (!allBids.Any())
-                return new AutomaticSelectionResult
-                {
-                    Message = "No bids were submitted for this transport request."
-                };
+            // Validações
+            if (!transportRequest.IsAutomaticSelectionEnabled)
+                return new AutomaticSelectionResult { Message = "Automatic Selection is not enabled." };
 
-            var eligibleBids = await GetEligibleBidsAsync(transportRequestId);
+            if (transportRequest.BiddingEndDate > DateTime.UtcNow)
+                return new AutomaticSelectionResult { Message = "Bidding has not finished yet." };
 
-            if (!eligibleBids.Any())
-                return new AutomaticSelectionResult
-                {
-                    Message = "No eligible bids found for this transport request."
-                };
+            if (transportRequest.Status == ERequestStatus.Canceled)
+                return new AutomaticSelectionResult { Message = "The transport request is canceled." };
 
-            var minPrice = eligibleBids.Min(b => b.Value);
-            var lowestBids = eligibleBids.Where(b => b.Value == minPrice).ToList();
+            if (!transportRequest.Bids.Any())
+                return new AutomaticSelectionResult { Message = "No bids were submitted for this transport request." };
 
-            if (lowestBids.Count == 1)
-                return new AutomaticSelectionResult { SelectedBid = lowestBids.First() };
+            // Calcular reputações
+            var driverIds = transportRequest.Bids.Select(b => b.DriverId).Distinct().ToList();
 
-            var driverIds = lowestBids.Select(b => b.DriverId).Distinct().ToList();
             var reputations = await _ctx.Reviews
                 .Where(r => driverIds.Contains(r.DriverId))
                 .GroupBy(r => r.DriverId)
@@ -99,28 +91,36 @@ namespace Bid_Go_Backend.Data.Repositories.Bids
                     DriverId = g.Key,
                     AverageClassification = g.Average(r => r.Classification)
                 })
-                .ToListAsync();
+                .ToDictionaryAsync(r => r.DriverId, r => r.AverageClassification);
 
-            var bidsWithReputation = lowestBids
-                .Select(b => new
-                {
-                    Bid = b,
-                    Reputation = reputations.FirstOrDefault(r => r.DriverId == b.DriverId)?.AverageClassification ?? 0
-                })
+            // Filtrar bids elegíveis (reputação >= 3)
+            var eligibleBids = transportRequest.Bids
+                .Where(b => reputations.GetValueOrDefault(b.DriverId, 0) >= 3)
                 .ToList();
 
-            var maxReputation = bidsWithReputation.Max(b => b.Reputation);
-            var bestReputationBids = bidsWithReputation
-                .Where(b => b.Reputation == maxReputation)
-                .Select(b => b.Bid)
+            if (!eligibleBids.Any())
+                return new AutomaticSelectionResult { Message = "No eligible bids found for this transport request." };
+
+            // Selecionar Preço
+            var minPrice = eligibleBids.Min(b => b.Value);
+            var lowestBids = eligibleBids.Where(b => b.Value == minPrice).ToList();
+
+            // Desempate Reputação
+            var maxReputation = lowestBids.Max(b => reputations.GetValueOrDefault(b.DriverId, 0));
+            var bestBids = lowestBids
+                .Where(b => reputations.GetValueOrDefault(b.DriverId, 0) == maxReputation)
                 .ToList();
 
-            var selectedBid = bestReputationBids.Count == 1
-                ? bestReputationBids.First()
-                : bestReputationBids.OrderBy(b => b.BidId).First();
+            // Desempate ordem de submissão
+            var selectedBid = bestBids.Count == 1
+                ? bestBids.First()
+                : bestBids.OrderBy(b => b.BidId).First();
+
+            // Guardar Bid Selecionada na BD
+            transportRequest.SelectedBidId = selectedBid.BidId;
+            await _ctx.SaveChangesAsync();
 
             return new AutomaticSelectionResult { SelectedBid = selectedBid };
         }
-
     }
 }

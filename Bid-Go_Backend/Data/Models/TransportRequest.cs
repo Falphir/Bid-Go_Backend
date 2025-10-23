@@ -55,6 +55,19 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         public ERequestStatus Status { get; set; }
 
+        [Required]
+        public DateTime BiddingStartDate { get; set; }
+
+        [Required]
+        public DateTime BiddingEndDate { get; set; }
+
+        [Required]
+        public bool IsAutomaticSelectionEnabled { get; set; } = false;
+
+        [ForeignKey(nameof(SelectedBid))]
+        public int? SelectedBidId { get; set; }
+        public Bid? SelectedBid { get; set; }
+
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
         public Company? Company { get; set; } = null;
@@ -66,8 +79,6 @@ namespace Bid_Go_Backend.Data.Models
 
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
 
-        
-        
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }
