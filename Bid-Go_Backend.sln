@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bid-Go", "Bid-Go_Backend\Bid-Go.csproj", "{72083F1F-86AE-4F50-96C8-4980F718B91F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bid-Go.Tests", "Bid-Go.Tests\Bid-Go.Tests.csproj", "{AC5D9672-FA7C-4FBC-AAAE-3E89136E61B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{72083F1F-86AE-4F50-96C8-4980F718B91F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72083F1F-86AE-4F50-96C8-4980F718B91F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72083F1F-86AE-4F50-96C8-4980F718B91F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC5D9672-FA7C-4FBC-AAAE-3E89136E61B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC5D9672-FA7C-4FBC-AAAE-3E89136E61B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC5D9672-FA7C-4FBC-AAAE-3E89136E61B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC5D9672-FA7C-4FBC-AAAE-3E89136E61B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
