@@ -11,6 +11,12 @@ namespace Bid_Go_Backend.Repositories.Interface
 {
     public interface IBidCRUD
     {
+        Task<Bid> CreateBidAsync(Bid bid);
+        Task<Bid?> UpdateBidAsync(int id, Bid bid);
+        Task<Bid?> GetBidByIdAsync(int id);
+        Task<List<Bid>> GetBidByTransportRequestAsync(int transportRequestId);
+        Task<IEnumerable<Bid>> GetBidByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status);
+        Task<bool> CancelBidAsync(int id);
         Task<List<Bid>> GetActiveBidsByTransportRequestAsync(int transportRequestId, string? orderBy = "value", bool descending = false);
     }
 }
