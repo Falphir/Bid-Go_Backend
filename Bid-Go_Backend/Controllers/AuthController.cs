@@ -23,16 +23,11 @@ public class AuthController : ControllerBase
         if (user == null)
             return NotFound(new { message = "Utilizador não encontrado com esse email." });
 
-        // Gerar token e salvar no DB
-        user.PasswordResetToken = _authService.GeneratePasswordResetToken();
-        user.ResetTokenExpiryTime = DateTime.UtcNow.AddHours(1);
-        await _userRepository.UpdateAsync(user);
+        var token = _authService.GeneratePasswordResetToken();
+        _authService.SavePasswordResetToken(token, user.Email);
 
-        // Criar link apontando para frontend (ou apenas para testes)
-        var resetLink = $"https://meusite.com/reset-password?token={user.PasswordResetToken}";
-
-        // Mostrar no console (teste)
-        Console.WriteLine($"[TESTE] Link de recuperação: {resetLink}");
+        var resetLink = $"https://siteteste.com/reset-password?token={token}";
+        Console.WriteLine($"[TESTE] Link de recover: {resetLink}");
 
         return Ok(new { message = "Link de recuperação gerado (ver console para testes)." });
     }
@@ -40,14 +35,16 @@ public class AuthController : ControllerBase
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
     {
-        var user = await _userRepository.GetByResetTokenAsync(request.Token);
-        if (user == null || user.ResetTokenExpiryTime < DateTime.UtcNow)
+        var email = _authService.GetEmailFromToken(request.Token);
+        if (email == null)
             return BadRequest(new { message = "Token inválido ou expirado." });
 
-        // Atualiza a password (sem hash por enquanto)
-        user.Password = request.NewPassword;
-        user.PasswordResetToken = null;
-        user.ResetTokenExpiryTime = null;
+        var user = await _userRepository.GetByEmailAsync(email);
+        if (user == null)
+            return BadRequest(new { message = "Utilizador não encontrado." });
+
+        // Atualiza a password com hash
+        user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
         await _userRepository.UpdateAsync(user);
 
         return Ok(new { message = "Password alterada com sucesso." });

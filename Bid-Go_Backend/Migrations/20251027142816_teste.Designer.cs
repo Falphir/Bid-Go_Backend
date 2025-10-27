@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251027115245_teste")]
+    [Migration("20251027142816_teste")]
     partial class teste
     {
         /// <inheritdoc />
@@ -329,15 +329,9 @@ namespace Bid_Go_Backend.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("PasswordResetToken")
-                        .HasColumnType("longtext");
-
                     b.Property<int>("PhoneNumber")
                         .HasMaxLength(9)
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("ResetTokenExpiryTime")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserType")
                         .IsRequired()

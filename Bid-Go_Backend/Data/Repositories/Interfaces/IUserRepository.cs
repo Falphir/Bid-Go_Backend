@@ -10,7 +10,6 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
     public interface IUserRepository
     {
         Task<User?> GetByEmailAsync(string email);
-        Task<User?> GetByResetTokenAsync(string token);
         Task<User?> UpdateAsync(User user);
 
 

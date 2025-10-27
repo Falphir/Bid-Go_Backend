@@ -29,9 +29,6 @@ namespace Bid_Go_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PhoneNumber = table.Column<int>(type: "int", maxLength: 9, nullable: false),
                     NIF = table.Column<int>(type: "int", maxLength: 20, nullable: false),
-                    PasswordResetToken = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ResetTokenExpiryTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     UserType = table.Column<string>(type: "varchar(8)", maxLength: 8, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)

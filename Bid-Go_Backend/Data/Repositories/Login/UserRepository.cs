@@ -23,11 +23,6 @@ namespace Bid_Go_Backend.Data.Repositories.Login
             return await _ctx.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User?> GetByResetTokenAsync(string token)
-        {
-            return await _ctx.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == token);
-        }
-
         public async Task<User?> UpdateAsync(User user)
         {
             var existingUser = await _ctx.Users.FindAsync(user.Id);
