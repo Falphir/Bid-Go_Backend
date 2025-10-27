@@ -18,12 +18,22 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
 using System.Text.Json;
-
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
+
+//EmailService (SMTP)
+builder.Services.AddSingleton<EmailService>(sp =>
+    new EmailService(
+        smtpHost: "smtp.sapo.pt",
+        smtpPort: 587,
+        smtpUser: "bidandgo2025@sapo.pt",
+        smtpPass: "Bidandgo2025"
+    )
+);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

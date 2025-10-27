@@ -24,18 +24,5 @@ namespace Bid_Go_Backend.Services
         {
             return Guid.NewGuid().ToString("N"); 
         }
-
-        // Salva token na cache associado ao email do user
-        public void SavePasswordResetToken(string token, string email)
-        {
-            _cache.Set(token, email, TimeSpan.FromHours(1));
-        }
-
-        // Recupera email a partir do token
-        public string? GetEmailFromToken(string token)
-        {
-            _cache.TryGetValue(token, out string? email);
-            return email;
-        }
     }
 }

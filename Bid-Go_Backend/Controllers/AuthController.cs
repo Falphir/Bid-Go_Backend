@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -9,11 +10,19 @@ public class AuthController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly AuthService _authService;
+    private readonly EmailService _emailService;
+    private readonly IMemoryCache _cache;
 
-    public AuthController(IUserRepository userRepository, AuthService authService)
+    public AuthController(
+        IUserRepository userRepository,
+        AuthService authService,
+        EmailService emailService,
+        IMemoryCache cache)
     {
         _userRepository = userRepository;
         _authService = authService;
+        _emailService = emailService;
+        _cache = cache;
     }
 
     [HttpPost("recover-password")]
@@ -21,31 +30,40 @@ public class AuthController : ControllerBase
     {
         var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null)
-            return NotFound(new { message = "Utilizador não encontrado com esse email." });
+            return NotFound(new { message = "Utilizador não encontrado." });
 
+        // Gera token temporário
         var token = _authService.GeneratePasswordResetToken();
-        _authService.SavePasswordResetToken(token, user.Email);
 
-        var resetLink = $"https://siteteste.com/reset-password?token={token}";
-        Console.WriteLine($"[TESTE] Link de recover: {resetLink}");
+        // Guarda na cache por 1 hora
+        _cache.Set(token, user.Email, TimeSpan.FromHours(1));
 
-        return Ok(new { message = "Link de recuperação gerado (ver console para testes)." });
+        // token de reset
+        await _emailService.SendEmailAsync(
+            user.Email,
+            "Recuperação de password",
+            $"Tem aqui o seu token '{token}' para redefinir a sua password."
+        );
+
+        return Ok(new { message = "Instruções enviadas por email." });
     }
 
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
     {
-        var email = _authService.GetEmailFromToken(request.Token);
-        if (email == null)
+        if (!_cache.TryGetValue(request.Token, out string email))
             return BadRequest(new { message = "Token inválido ou expirado." });
 
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
-            return BadRequest(new { message = "Utilizador não encontrado." });
+            return NotFound(new { message = "Utilizador não encontrado." });
 
         // Atualiza a password com hash
         user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
         await _userRepository.UpdateAsync(user);
+
+        // Remove token da cache
+        _cache.Remove(request.Token);
 
         return Ok(new { message = "Password alterada com sucesso." });
     }
