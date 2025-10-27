@@ -10,7 +10,7 @@ namespace Bid_Go_Backend.Repositories.Interface
 
         Task<bool> UpdateDriverAsync(int id, DriverProfileDTO dto);
         Task<bool> UpdateCompanyAsync(int id, CompanyProfileDTO dto);
-        Task<bool> DeleteUserAsync(int id);
+        Task<bool> DeactivateUserAsync(int id);
 
     }
 }

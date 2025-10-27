@@ -36,7 +36,7 @@ namespace Bid_Go_Backend.Controllers
             if (user is Driver driver)
                 return Ok(new DriverProfileDTO
                 {
-            
+
                     Name = driver.Name,
                     Email = driver.Email,
                     PhoneNumber = driver.PhoneNumber,
@@ -48,7 +48,7 @@ namespace Bid_Go_Backend.Controllers
             if (user is Company company)
                 return Ok(new CompanyProfileDTO
                 {
-                
+
                     Name = company.Name,
                     Email = company.Email,
                     PhoneNumber = company.PhoneNumber,
@@ -98,12 +98,20 @@ namespace Bid_Go_Backend.Controllers
 
 
         // DELETE /utilizadores/{id}
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [HttpPut("{id}/desativar")]
+        public async Task<IActionResult> DeactivateUser(int id)
         {
-            await _profileCrud.DeleteUserAsync(id);
-            return Ok("User deleted successfully.");
+            try
+            {
+                await _profileCrud.DeactivateUserAsync(id);
+                return Ok("User deactivated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+
         }
     }
 }
