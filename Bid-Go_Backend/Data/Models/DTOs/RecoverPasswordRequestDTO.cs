@@ -8,6 +8,6 @@ namespace Bid_Go_Backend.Data.Models.DTOs
 {
     public class RecoverPasswordRequestDTO
     {
-        public string Email { get; set; } = null!;
+        public string Email { get; set; } = string.Empty;
     }
 }

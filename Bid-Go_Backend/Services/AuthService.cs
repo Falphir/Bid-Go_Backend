@@ -17,14 +17,11 @@ namespace Bid_Go_Backend.Services
             _config = config;
         }
 
+
         public string GeneratePasswordResetToken()
         {
-            var randomBytes = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
+            // Token seguro e aleatório
+            return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
         }
-
-
     }
 }
