@@ -33,7 +33,7 @@ namespace Bid_Go_Backend.Controllers
             Console.WriteLine($"Email do DB: '{user.Email}'");
             Console.WriteLine($"Password do DB: '{user.Password}'");
 
-            if (user.Password != request.Password)
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
                 return Unauthorized(new { message = "Password incorreta." });
 
 
