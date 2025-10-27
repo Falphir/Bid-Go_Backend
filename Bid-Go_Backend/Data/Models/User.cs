@@ -34,7 +34,11 @@ namespace Bid_Go_Backend.Data.Models
 
         [Required]
         [MaxLength(20)]
-        public int NIF { get; set; } 
+        public int NIF { get; set; }
+
+        public string? PasswordResetToken { get; set; }
+        public DateTime? ResetTokenExpiryTime { get; set; }
+
     }
 }
 

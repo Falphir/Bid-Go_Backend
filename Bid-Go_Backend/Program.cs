@@ -1,6 +1,9 @@
 ﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -41,6 +44,9 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 var app = builder.Build();
 
@@ -70,8 +76,8 @@ app.UseExceptionHandler(config =>
         }
         else
         {
-            // Caso seja outro tipo de erro
-            var result = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado." });
+            context.Response.StatusCode = 500; 
+            var result = JsonSerializer.Serialize(new { message = feature?.Error.Message });
             await context.Response.WriteAsync(result);
         }
     });
