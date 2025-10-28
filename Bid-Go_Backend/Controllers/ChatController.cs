@@ -2,11 +2,6 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -35,8 +30,8 @@ namespace Bid_Go_Backend.Controllers
             {
                 ChatId = chatId,
                 Context = dto.Context,
-                DriverId = (int)dto.DriverId,
-                CompanyId = (int)dto.CompanyId
+                DriverId = dto.DriverId ?? 0,
+                CompanyId = dto.CompanyId ?? 0
             };
 
             var result = await _chatRepository.SendMessageAsync(message);
@@ -48,6 +43,14 @@ namespace Bid_Go_Backend.Controllers
         {
             var messages = await _chatRepository.GetMessagesAsync(chatId);
             return Ok(messages);
+        }
+
+        //Cria o chat automaticamente quando há bid aceite
+        [HttpPost("create/{transportRequestId}")]
+        public async Task<IActionResult> CreateChatFromAcceptedBid(int transportRequestId)
+        {
+            var chat = await _chatRepository.CreateChatFromAcceptedBidAsync(transportRequestId);
+            return Ok(chat);
         }
     }
 }
