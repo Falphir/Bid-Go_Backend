@@ -81,8 +81,10 @@ namespace Bid_Go_Backend.Repositories.BidRepo
 
           
             var otherBids = await _ctx.Bids
-                .Where(b => b.TransportRequestId == existingBid.TransportRequestId && b.BidId != id)
-                .ToListAsync();
+            .Where(b => b.TransportRequestId == existingBid.TransportRequestId
+                     && b.BidId != id
+                     && b.Status == EBidStatus.Pendent)
+            .ToListAsync();
 
             foreach (var bid in otherBids)
                 bid.Status = EBidStatus.Rejected;
