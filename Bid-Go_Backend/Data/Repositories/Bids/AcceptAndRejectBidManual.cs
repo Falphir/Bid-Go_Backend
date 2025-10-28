@@ -7,11 +7,11 @@ using Bid_Go_Backend.Data.Models.Enums;
 
 namespace Bid_Go_Backend.Repositories.BidRepo
 {
-    public class BidsCRUD : IBidCRUD
+    public class AcceptAndRejectBidManual : IAcceptAndRejectBidManual
     {
         private readonly BidGoDbContext _ctx;
 
-        public BidsCRUD(BidGoDbContext ctx)
+        public AcceptAndRejectBidManual(BidGoDbContext ctx)
         {
             _ctx = ctx;
         }

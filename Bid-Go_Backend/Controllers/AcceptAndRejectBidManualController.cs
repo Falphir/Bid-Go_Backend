@@ -14,11 +14,11 @@ namespace Bid_Go_Backend.Controllers
     public class BidsController : ControllerBase
     {
 
-        private readonly IBidCRUD _bidCrud;
+        private readonly IAcceptAndRejectBidManual _AcceptOrReject;
         private readonly BidGoDbContext _ctx;
-        public BidsController(IBidCRUD bidCrud, BidGoDbContext ctx)
+        public BidsController(IAcceptAndRejectBidManual AcceptOrReject, BidGoDbContext ctx)
         {
-            _bidCrud = bidCrud;
+            _AcceptOrReject = AcceptOrReject;
             _ctx = ctx;
         }
 
@@ -27,7 +27,7 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBidsById([FromQuery] int bidId)
         {
-            var bids = await _bidCrud.GetBidByIdAsync(bidId);
+            var bids = await _AcceptOrReject.GetBidByIdAsync(bidId);
             if (bids == null)
                 return NotFound("No bids found for the given transport request ID.");
             return Ok(bids);
@@ -39,7 +39,7 @@ namespace Bid_Go_Backend.Controllers
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
 
-            var bids = await _bidCrud.GetBidByTransportRequestAsync(transportRequestId);
+            var bids = await _AcceptOrReject.GetBidByTransportRequestAsync(transportRequestId);
 
             if (bids == null || !bids.Any())
                 return NotFound("No bids found for the given transport request ID.");
@@ -51,7 +51,7 @@ namespace Bid_Go_Backend.Controllers
         public async Task<IActionResult> GetBidsByTransportRequestAndStatus(int transportRequestId, EBidStatus status)
         {
 
-            var bids = await _bidCrud.GetBidByTransportRequestAndStatusAsync(transportRequestId, status);
+            var bids = await _AcceptOrReject.GetBidByTransportRequestAndStatusAsync(transportRequestId, status);
 
             if (bids == null || !bids.Any())
                 return NotFound("No bids found for the given transport request ID and status.");
@@ -65,7 +65,7 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                await _bidCrud.AcceptBidAsync(id);
+                await _AcceptOrReject.AcceptBidAsync(id);
                 return Ok(new { message = "Bid successfully accepted" });
             }
             catch (Exception ex)
@@ -80,7 +80,7 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                await _bidCrud.RejectBidAsync(id);
+                await _AcceptOrReject.RejectBidAsync(id);
                 return Ok(new { message = "Bid successfully rejected" });
             }
             catch (Exception ex)

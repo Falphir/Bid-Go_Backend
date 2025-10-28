@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Repositories.Interface
 {
-    public interface IBidCRUD
+    public interface IAcceptAndRejectBidManual
     {
  
         Task<Bid?> GetBidByIdAsync(int id);
