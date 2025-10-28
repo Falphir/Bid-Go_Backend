@@ -11,12 +11,12 @@ namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
     [Route("api/bids")] // Rota raiz
-    public class BidsController : ControllerBase
+    public class AcceptAndRejectBidManualController: ControllerBase
     {
 
         private readonly IAcceptAndRejectBidManual _AcceptOrReject;
         private readonly BidGoDbContext _ctx;
-        public BidsController(IAcceptAndRejectBidManual AcceptOrReject, BidGoDbContext ctx)
+        public AcceptAndRejectBidManualController(IAcceptAndRejectBidManual AcceptOrReject, BidGoDbContext ctx)
         {
             _AcceptOrReject = AcceptOrReject;
             _ctx = ctx;

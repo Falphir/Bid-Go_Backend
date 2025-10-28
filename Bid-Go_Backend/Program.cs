@@ -40,7 +40,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 
-builder.Services.AddScoped<AcceptAndRejectBidManual, AcceptAndRejectBidManual>();
+builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 
 var app = builder.Build();
 
