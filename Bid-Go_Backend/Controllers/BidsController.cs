@@ -144,5 +144,31 @@ namespace Bid_Go_Backend.Controllers
                 return NotFound("Only pending bids can be canceled");
             return Ok("Bid canceled successfully.");
         }
+
+       
+
+        // GET /api/bids/active?transportRequestId=1&orderBy=value
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActiveBids(
+        [FromQuery] int transportRequestId,
+        [FromQuery] string orderBy = "value",
+        [FromQuery] bool descending = false)
+        {
+            var activeBids = await _bidCrud.GetActiveBidsByTransportRequestAsync(transportRequestId, orderBy, descending);
+
+            if (activeBids == null || !activeBids.Any())
+                return Ok(new { message = "No active bids found for this request.", bids = new List<object>() });
+
+            var result = activeBids.Select(b => new
+            {
+                b.BidId,
+                b.Value,
+                b.DeliveryDeadline,
+                Driver = new { b.DriverId, b.Driver.Name, b.Driver.Email }
+            });
+
+            return Ok(result);
+        }
     }
 }
+    
