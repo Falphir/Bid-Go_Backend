@@ -54,7 +54,7 @@ namespace Bid_Go_Backend.Controllers
                 .Where(b => b.DriverId == bidDto.DriverId && b.TransportRequestId == bidDto.TransportRequestId)
                 .ToListAsync();
                     
-            bool hasActiveBid = existingBid.Any(b => b.Status != EBidStatus.Canceled);
+            bool hasActiveBid = existingBid.Any(b => b.Status != EBidStatus.Canceled && b.Status != EBidStatus.Rejected);
 
 
             if(hasActiveBid)
