@@ -19,8 +19,36 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("{requestId}")]
         public async Task<IActionResult> GetChat(int requestId)
         {
-            var chat = await _chatRepository.GetChatByRequestIdAsync(requestId);
-            return Ok(chat);
+            try
+            {
+                var chat = await _chatRepository.GetChatByRequestIdAsync(requestId);
+                if (chat == null)
+                    return NotFound(new { message = "Chat não encontrado." });
+
+   
+                var chatDto = new ChatDTO
+                {
+                    ChatId = chat.ChatId,
+                    Status = chat.Status,
+                    TransportRequestId = chat.TransportRequestId,
+                    Messages = chat.Messages.Select(m => new MessageDTO
+                    {
+                        Context = m.Context, 
+                        DriverId = m.DriverId,
+                        CompanyId = m.CompanyId
+                    }).ToList()
+                };
+
+                return Ok(chatDto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado." });
+            }
         }
 
         [HttpPost("{chatId}/messages")]
@@ -35,8 +63,18 @@ namespace Bid_Go_Backend.Controllers
             };
 
             var result = await _chatRepository.SendMessageAsync(message);
-            return Ok(result);
+
+            var messageDto = new MessageDTO
+            {
+                Context = result.Context,
+                TimeStamp = result.TimeStamp,
+                DriverId = result.DriverId,
+                CompanyId = result.CompanyId
+            };
+
+            return Ok(messageDto);
         }
+
 
         [HttpGet("{chatId}/messages")]
         public async Task<IActionResult> GetMessages(int chatId)
