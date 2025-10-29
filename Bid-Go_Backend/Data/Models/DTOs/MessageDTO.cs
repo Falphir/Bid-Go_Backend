@@ -9,6 +9,8 @@ namespace Bid_Go_Backend.Data.Models.DTOs
     public class MessageDTO
     {
         public string Context { get; set; } = string.Empty;
-
+        public DateTime TimeStamp { get; set; }
+        public int? DriverId { get; set; }
+        public int? CompanyId { get; set; }
     }
 }

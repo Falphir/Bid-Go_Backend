@@ -76,34 +76,5 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
 
             return chat;
         }
-
-        public async Task<Chats?> GetChatByIdWithRequestAsync(int chatId)
-        {
-            return await _context.Chats
-                .Include(c => c.TransportRequest)
-                .FirstOrDefaultAsync(c => c.ChatId == chatId);
-        }
-
-        public async Task<Bid?> GetAcceptedBidAsync(int transportRequestId)
-        {
-            return await _context.Bids
-                .FirstOrDefaultAsync(b => b.TransportRequestId == transportRequestId && b.Status == EBidStatus.Accepted);
-        }
-
-        public async Task<Company?> GetCompanyByIdAsync(int companyId)
-        {
-            return await _context.Users
-                .OfType<Company>()
-                .FirstOrDefaultAsync(c => c.Id == companyId);
-        }
-
-        public async Task<Driver?> GetDriverByIdAsync(int driverId)
-        {
-            return await _context.Users
-                .OfType<Driver>()
-                .FirstOrDefaultAsync(d => d.Id == driverId);
-        }
-
-
     }
 }
