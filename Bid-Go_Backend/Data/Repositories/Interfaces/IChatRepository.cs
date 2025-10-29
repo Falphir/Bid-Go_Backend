@@ -13,5 +13,11 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
         Task<IEnumerable<Message>> GetMessagesAsync(int chatId);
         Task<Message> SendMessageAsync(Message message);
         Task<Chats> CreateChatFromAcceptedBidAsync(int transportRequestId);
+        Task<Bid?> GetAcceptedBidAsync(int transportRequestId);
+        Task<Chats?> GetChatByIdWithRequestAsync(int chatId);
+        Task<Company?> GetCompanyByIdAsync(int companyId);
+        Task<Driver?> GetDriverByIdAsync(int driverId);
+
+
     }
 }
