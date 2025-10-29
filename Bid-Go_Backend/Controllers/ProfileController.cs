@@ -33,6 +33,9 @@ namespace Bid_Go_Backend.Controllers
             if (user == null)
                 return NotFound("User not found");
 
+            if (!user.IsActive)
+                return Conflict("User is inactive and cannot be updated.");
+
             if (user is Driver driver)
                 return Ok(new DriverProfileDTO
                 {
@@ -65,14 +68,19 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProfile(int id, [FromBody] JsonElement dto)
         {
-            // Verifica se o utilizador existe
+           
             var user = await _profileCrud.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound("User not found.");
 
+
+            if (!user.IsActive) 
+                return BadRequest("This account is deactivated and cannot be updated.");
+
+
             bool success = false;
 
-            // Detecta o tipo de utilizador dinamicamente
+          
             if (user is Driver)
             {
                 var driverDto = JsonConvert.DeserializeObject<DriverProfileDTO>(dto.ToString());
