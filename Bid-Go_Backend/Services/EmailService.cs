@@ -19,7 +19,7 @@ namespace Bid_Go_Backend.Services
             _smtpPass = smtpPass;
         }
 
-        public async Task SendEmailAsync(string to, string subject, string body)
+        public virtual async Task SendEmailAsync(string to, string subject, string body)
         {
             using var client = new SmtpClient(_smtpHost, _smtpPort)
             {

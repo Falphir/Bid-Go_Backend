@@ -20,7 +20,7 @@ namespace Bid_Go_Backend.Services
         }
 
         // Gera um token aleatório
-        public string GeneratePasswordResetToken()
+        public virtual string GeneratePasswordResetToken()
         {
             return Guid.NewGuid().ToString("N"); 
         }
