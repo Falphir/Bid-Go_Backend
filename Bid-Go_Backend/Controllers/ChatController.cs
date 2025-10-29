@@ -54,26 +54,42 @@ namespace Bid_Go_Backend.Controllers
         [HttpPost("{chatId}/messages")]
         public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageDTO dto)
         {
-            var message = new Message
+            try
             {
-                ChatId = chatId,
-                Context = dto.Context,
-                DriverId = dto.DriverId ?? 0,
-                CompanyId = dto.CompanyId ?? 0
-            };
+                var message = new Message
+                {
+                    ChatId = chatId,
+                    Context = dto.Context,
+                    DriverId = dto.DriverId ?? 0,
+                    CompanyId = dto.CompanyId ?? 0
+                };
 
-            var result = await _chatRepository.SendMessageAsync(message);
+                var result = await _chatRepository.SendMessageAsync(message);
 
-            var messageDto = new MessageDTO
+                var messageDto = new MessageDTO
+                {
+                    Context = result.Context,
+                    TimeStamp = result.TimeStamp,
+                    DriverId = result.DriverId,
+                    CompanyId = result.CompanyId
+                };
+
+                return Ok(messageDto);
+            }
+            catch (InvalidOperationException ex)
             {
-                Context = result.Context,
-                TimeStamp = result.TimeStamp,
-                DriverId = result.DriverId,
-                CompanyId = result.CompanyId
-            };
-
-            return Ok(messageDto);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado." });
+            }
         }
+
 
 
         [HttpGet("{chatId}/messages")]

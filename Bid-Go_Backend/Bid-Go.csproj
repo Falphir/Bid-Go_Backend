@@ -11,8 +11,11 @@
 
   <ItemGroup>
     <Compile Remove="Data\Migrations\**" />
+    <Compile Remove="Services\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
+    <EmbeddedResource Remove="Services\**" />
     <None Remove="Data\Migrations\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>

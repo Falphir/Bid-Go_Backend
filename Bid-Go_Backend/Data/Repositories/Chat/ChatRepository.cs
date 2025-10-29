@@ -34,11 +34,48 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
 
         public async Task<Message> SendMessageAsync(Message message)
         {
+            // Busca o chat
+            var chat = await _context.Chats
+                .FirstOrDefaultAsync(c => c.ChatId == message.ChatId);
+
+            if (chat == null)
+                throw new KeyNotFoundException("Chat não encontrado.");
+
+            // Busca o TransportRequest associado
+            var request = await _context.TransportRequests
+                .FirstOrDefaultAsync(r => r.TransportRequestId == chat.TransportRequestId);
+
+            if (request != null && request.Status == ERequestStatus.Canceled)
+            {
+                // Atualiza o status do chat para Archived
+                chat.Status = EChatStatus.Archived;
+                await _context.SaveChangesAsync();
+
+                throw new InvalidOperationException("Não é possível enviar mensagens neste chat, pois o pedido foi cancelado.");
+            }
+
+            if (request != null && request.Status == ERequestStatus.Completed)
+            {
+                // Atualiza o status do chat para Archived
+                chat.Status = EChatStatus.Archived;
+                await _context.SaveChangesAsync();
+
+                throw new InvalidOperationException("Não é possível enviar mensagens neste chat, pois o pedido foi concluido.");
+            }
+
+            // Verifica se o chat já está arquivado ou cancelado
+            if (chat.Status == EChatStatus.Archived || chat.Status == EChatStatus.Canceled)
+                throw new InvalidOperationException("Não é possível enviar mensagens neste chat.");
+
+            // Adiciona a mensagem
             message.TimeStamp = DateTime.UtcNow;
             _context.Messages.Add(message);
+
             await _context.SaveChangesAsync();
+
             return message;
         }
+
 
         //Cria o chat a partir da bid aceite
         public async Task<Chats> CreateChatFromAcceptedBidAsync(int transportRequestId)
@@ -76,5 +113,18 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
 
             return chat;
         }
+
+        public async Task ArchiveChatByTransportRequestIdAsync(int transportRequestId)
+        {
+            var chat = await _context.Chats
+                .FirstOrDefaultAsync(c => c.TransportRequestId == transportRequestId);
+
+            if (chat == null)
+                throw new KeyNotFoundException("Chat não encontrado.");
+
+            chat.Status = EChatStatus.Archived;
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
