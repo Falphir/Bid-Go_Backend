@@ -34,14 +34,14 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
 
         public async Task<Message> SendMessageAsync(Message message)
         {
-            // Busca o chat
+            // Vai encontrar o chat
             var chat = await _context.Chats
                 .FirstOrDefaultAsync(c => c.ChatId == message.ChatId);
 
             if (chat == null)
                 throw new KeyNotFoundException("Chat não encontrado.");
 
-            // Busca o TransportRequest associado
+            // Vai encontrar o TransportRequest associado
             var request = await _context.TransportRequests
                 .FirstOrDefaultAsync(r => r.TransportRequestId == chat.TransportRequestId);
 
