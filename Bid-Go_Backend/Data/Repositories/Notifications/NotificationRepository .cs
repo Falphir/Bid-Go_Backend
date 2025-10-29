@@ -47,7 +47,7 @@ namespace Bid_Go_Backend.Data.Repositories.Notifications
                              .SendAsync("ReceiveNotification", new { context, type });
         }
 
-        public async Task<List<Notification>> GetNotificationsAsync(int userId, ENotificationType? type = null)
+        public async Task<List<Notification>> GetNotificationsAsync(int userId, ENotificationType? type = null, string order = "desc")
         {
             var query = _ctx.Notifications.AsQueryable();
             query = query.Where(n => n.UserId == userId);
@@ -55,7 +55,14 @@ namespace Bid_Go_Backend.Data.Repositories.Notifications
             if (type.HasValue)
                 query = query.Where(n => n.Type == type.Value);
 
-            return await query.OrderByDescending(n => n.TimeStamp).ToListAsync();
+            query = order.ToLower() switch
+            {
+                "asc" => query.OrderBy(n => n.TimeStamp),
+                _ => query.OrderByDescending(n => n.TimeStamp)
+            };
+
+            return await query.ToListAsync();
         }
+
     }
 }

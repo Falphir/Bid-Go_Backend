@@ -23,20 +23,11 @@ namespace Bid_Go_Backend.Controllers
         // GET /api/notifications?userId=1&type=BidAccepted&from=2025-10-01&to=2025-10-28&order=asc
         [HttpGet]
         public async Task<IActionResult> GetNotifications(
-            [FromQuery] int userId,
-            [FromQuery] ENotificationType? type,
-            [FromQuery] string order = "desc") // "asc" ou "desc"
+      [FromQuery] int userId,
+      [FromQuery] ENotificationType? type,
+      [FromQuery] string order = "desc") // "asc" ou "desc"
         {
-            var query = _repo.GetNotificationsAsync(userId, type);
-
-            var notifications = await query;
-
-            notifications = order.ToLower() switch
-            {
-                "asc" => notifications.OrderBy(n => n.TimeStamp).ToList(),
-                _ => notifications.OrderByDescending(n => n.TimeStamp).ToList()
-            };
-
+            var notifications = await _repo.GetNotificationsAsync(userId, type, order);
             return Ok(notifications);
         }
 

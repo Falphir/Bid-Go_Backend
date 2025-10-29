@@ -16,7 +16,7 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
 
         Task SendAsync(int userId, string context, ENotificationType type);
 
-        Task<List<Notification>> GetNotificationsAsync(int userId, ENotificationType? type = null);
+        Task<List<Notification>> GetNotificationsAsync(int userId, ENotificationType? type = null, string order = "desc");
     }
 
 }
