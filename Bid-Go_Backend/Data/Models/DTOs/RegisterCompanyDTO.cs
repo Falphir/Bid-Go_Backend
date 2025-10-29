@@ -33,7 +33,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs
         public int PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "O NIF é obrigatório.")]
-        [RegularExpression(@"^\d{9}$", ErrorMessage = "O NIF deve conter exatamente 9 dígitos.")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "O NIF deve conter exatamente 10 dígitos.")]
         public int NIF { get; set; }
     }
 }
