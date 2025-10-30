@@ -3,6 +3,7 @@ using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Interface;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography.X509Certificates;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -66,6 +67,22 @@ namespace Bid_Go_Backend.Repositories.ProfileRepo
             return true;
         }
 
+        public async Task<bool> ChangePasswordAsync(int id, string currentPassword, string newPassword)
+        {
+            var user = await GetUserByIdAsync(id);
+            if (user == null)
+                throw new Exception("User not found.");
+
+            if (!user.IsActive)
+                throw new Exception("User is inactive.");
+
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.Password))
+                throw new Exception("Current password is incorrect.");
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _ctx.SaveChangesAsync();
+            return true;
+        }
 
 
         //Deactivate account

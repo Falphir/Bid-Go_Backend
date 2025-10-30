@@ -4,9 +4,11 @@ using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
 namespace Bid_Go_Backend.Controllers
@@ -68,7 +70,7 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProfile(int id, [FromBody] JsonElement dto)
         {
-           
+
             var user = await _profileCrud.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound("User not found.");
@@ -84,11 +86,19 @@ namespace Bid_Go_Backend.Controllers
             if (user is Driver)
             {
                 var driverDto = JsonConvert.DeserializeObject<DriverProfileDTO>(dto.ToString());
+                var context = new ValidationContext(driverDto!);
+                var results = new List<ValidationResult>();
+                if (!Validator.TryValidateObject(driverDto!, context, results, true))
+                    return BadRequest(results.Select(r => r.ErrorMessage));
                 success = await _profileCrud.UpdateDriverAsync(id, driverDto!);
             }
             else if (user is Company)
             {
                 var companyDto = JsonConvert.DeserializeObject<CompanyProfileDTO>(dto.ToString());
+                var context = new ValidationContext(companyDto!);
+                var results = new List<ValidationResult>();
+                if (!Validator.TryValidateObject(companyDto!, context, results, true))
+                    return BadRequest(results.Select(r => r.ErrorMessage));
                 success = await _profileCrud.UpdateCompanyAsync(id, companyDto!);
             }
             else
@@ -102,7 +112,22 @@ namespace Bid_Go_Backend.Controllers
             return Ok("Profile updated successfully.");
         }
 
+        [HttpPut("{id}/ChangePassword")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            try
+            {
+                await _profileCrud.ChangePasswordAsync(id, dto.CurrentPassword, dto.NewPassword);
+                return Ok("Password changed successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
         // DELETE /utilizadores/{id}
