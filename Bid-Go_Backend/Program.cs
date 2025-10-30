@@ -1,6 +1,10 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Login;
+using Bid_Go_Backend.Repositories.BidRepo;
+using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -15,11 +19,22 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
 using System.Text.Json;
-
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
+
+//EmailService (SMTP)
+builder.Services.AddSingleton<EmailService>(sp =>
+    new EmailService(
+        smtpHost: "smtp.sapo.pt",
+        smtpPort: 587,
+        smtpUser: "bidandgo2025@sapo.pt",
+        smtpPass: "Bidandgo2025"
+    )
+);
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -42,6 +57,10 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
+builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 var app = builder.Build();
 
@@ -71,8 +90,8 @@ app.UseExceptionHandler(config =>
         }
         else
         {
-            // Caso seja outro tipo de erro
-            var result = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado." });
+            context.Response.StatusCode = 500; 
+            var result = JsonSerializer.Serialize(new { message = feature?.Error.Message });
             await context.Response.WriteAsync(result);
         }
     });
