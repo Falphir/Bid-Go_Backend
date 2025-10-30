@@ -150,8 +150,8 @@ namespace Bid_Go_Backend.Tests.Controllers
             {
                 Name = "D",
                 Email = "d@ex.com",
-                PhoneNumber = 1,
-                NIF = 123456789,
+                PhoneNumber = 123456789,
+                NIF = 911111111,
                 DriverLicense = "L",
                 Insurance = "I"
             };
@@ -190,7 +190,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             {
                 Name = "C",
                 Email = "c@ex.com",
-                PhoneNumber = 2,
+                PhoneNumber = 123456789,
                 NIF = 987654321,
                 CompanyName = "Co",
                 Address = "addr"

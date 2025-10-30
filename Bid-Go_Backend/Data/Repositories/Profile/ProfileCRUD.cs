@@ -67,6 +67,7 @@ namespace Bid_Go_Backend.Repositories.ProfileRepo
             return true;
         }
 
+        //ChangePassword
         public async Task<bool> ChangePasswordAsync(int id, string currentPassword, string newPassword)
         {
             var user = await GetUserByIdAsync(id);

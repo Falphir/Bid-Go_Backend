@@ -112,6 +112,8 @@ namespace Bid_Go_Backend.Controllers
             return Ok("Profile updated successfully.");
         }
 
+
+        // PUT /utilizadores/{id}
         [HttpPut("{id}/ChangePassword")]
         public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDTO dto)
         {
