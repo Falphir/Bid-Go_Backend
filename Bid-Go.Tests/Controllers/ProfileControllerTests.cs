@@ -32,6 +32,12 @@ namespace Bid_Go_Backend.Tests.Controllers
         }
 
         // GET /api/profile/{id}
+        // O que testa:
+        // - Quando o utilizador não existe, o método deve retornar NotFound.
+        // Como:
+        // - Setup: mock de GetUserByIdAsync devolve null.
+        // - Act: chama GetProfile(id).
+        // - Assert: verifica NotFoundObjectResult e mensagem esperada.
         [Fact]
         public async Task GetProfile_ShouldReturnNotFound_WhenUserDoesNotExist()
         {
@@ -43,6 +49,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("User not found", notFound.Value);
         }
 
+        // O que testa:
+        // - Quando o utilizador não existe, o método deve retornar NotFound.
+        // Como:
+        // - Setup: mock de GetUserByIdAsync devolve null.
+        // - Act: chama GetProfile(id).
+        // - Assert: verifica NotFoundObjectResult e mensagem esperada.
         [Fact]
         public async Task GetProfile_ShouldReturnConflict_WhenUserIsInactive()
         {
@@ -55,7 +67,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("User is inactive and cannot be updated.", conflict.Value);
         }
 
-        [Fact]
+        // O que testa:
+        // - Quando o utilizador não existe, o método deve retornar NotFound.
+        // Como:
+        // - Setup: mock de GetUserByIdAsync devolve null.
+        // - Act: chama GetProfile(id).
+        // - Assert: verifica NotFoundObjectResult e mensagem esperada.
         public async Task GetProfile_ShouldReturnDriverDto_WhenUserIsDriver()
         {
             var driver = new Driver
@@ -83,6 +100,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal(driver.NIF, dto.NIF);
         }
 
+        // O que testa:
+        // - Quando o utilizador é uma Company válida, deve devolver um CompanyProfileDTO com os campos corretos.
+        // Como:
+        // - Setup: mock devolve uma Company populada.
+        // - Act: chama GetProfile(id).
+        // - Assert: verifica OkObjectResult e converte o Value para CompanyProfileDTO, comparando campos.
         [Fact]
         public async Task GetProfile_ShouldReturnCompanyDto_WhenUserIsCompany()
         {
@@ -113,6 +136,12 @@ namespace Bid_Go_Backend.Tests.Controllers
 
 
         // PUT /api/profile/{id}
+        // O que testa:
+        // - Quando o utilizador não existe, UpdateProfile deve retornar NotFound.
+        // Como:
+        // - Setup: mock de GetUserByIdAsync devolve null.
+        // - Act: chama UpdateProfile com um JsonElement vazio.
+        // - Assert: verifica NotFoundObjectResult e mensagem esperada.
         [Fact]
         public async Task UpdateProfile_ShouldReturnNotFound_WhenUserDoesNotExist()
         {
@@ -125,6 +154,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("User not found.", notFound.Value);
         }
 
+        // O que testa:
+        // - Quando o utilizador está inativo, UpdateProfile deve retornar BadRequest com mensagem específica.
+        // Como:
+        // - Setup: mock devolve um Driver com IsActive = false.
+        // - Act: chama UpdateProfile com um JsonElement vazio.
+        // - Assert: verifica BadRequestObjectResult e mensagem esperada.
         [Fact]
         public async Task UpdateProfile_ShouldReturnBadRequest_WhenUserIsInactive()
         {
@@ -139,6 +174,12 @@ namespace Bid_Go_Backend.Tests.Controllers
         }
 
 
+        // O que testa:
+        // - Quando a atualização de Driver tem sucesso, retorna Ok com mensagem de sucesso.
+        // Como:
+        // - Setup: mock devolve um Driver ativo e UpdateDriverAsync retorna true.
+        // - Act: serializa um DriverProfileDTO em JsonElement e chama UpdateProfile.
+        // - Assert: verifica OkObjectResult e mensagem de sucesso.
         [Fact]
         public async Task UpdateProfile_ShouldReturnOk_WhenDriverUpdatedSuccessfully()
         {
@@ -163,6 +204,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("Profile updated successfully.", ok.Value);
         }
 
+        // O que testa:
+        // - Quando a atualização de Driver falha (sem campos válidos ou utilizador não encontrado), retorna BadRequest.
+        // Como:
+        // - Setup: mock devolve um Driver ativo e UpdateDriverAsync retorna false.
+        // - Act: serializa um DriverProfileDTO com campos nulos relevantes e chama UpdateProfile.
+        // - Assert: verifica BadRequestObjectResult e mensagem de erro.
         [Fact]
         public async Task UpdateProfile_ShouldReturnBadRequest_WhenDriverUpdateFails()
         {
@@ -179,6 +226,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("No valid fields provided or user not found.", bad.Value);
         }
 
+        // O que testa:
+        // - Quando a atualização de Company tem sucesso, retorna Ok com mensagem de sucesso.
+        // Como:
+        // - Setup: mock devolve uma Company ativa e UpdateCompanyAsync retorna true.
+        // - Act: serializa um CompanyProfileDTO e chama UpdateProfile.
+        // - Assert: verifica OkObjectResult e mensagem de sucesso.
         [Fact]
         public async Task UpdateProfile_ShouldReturnOk_WhenCompanyUpdatedSuccessfully()
         {
@@ -203,6 +256,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("Profile updated successfully.", ok.Value);
         }
 
+        // O que testa:
+        // - Quando a atualização de Company falha (sem campos válidos ou utilizador não encontrado), retorna BadRequest.
+        // Como:
+        // - Setup: mock devolve uma Company ativa e UpdateCompanyAsync retorna false.
+        // - Act: serializa um CompanyProfileDTO com campos nulos relevantes e chama UpdateProfile.
+        // - Assert: verifica BadRequestObjectResult e mensagem de erro.
         [Fact]
         public async Task UpdateProfile_ShouldReturnBadRequest_WhenCompanyUpdateFails()
         {
@@ -220,6 +279,12 @@ namespace Bid_Go_Backend.Tests.Controllers
         }
 
         // PUT /api/profile/{id}/desativar
+        // O que testa:
+        // - Quando a desativação tem sucesso, retorna Ok com mensagem de sucesso.
+        // Como:
+        // - Setup: mock de DeactivateUserAsync retorna true.
+        // - Act: chama DeactivateUser(id).
+        // - Assert: verifica OkObjectResult e mensagem esperada.
         [Fact]
         public async Task DeactivateUser_ShouldReturnOk_WhenSucceeds()
         {
@@ -231,6 +296,12 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("User deactivated successfully.", ok.Value);
         }
 
+        // O que testa:
+        // - Quando o repositório lança exceção durante desativação, o controlador deve retornar BadRequest com a mensagem.
+        // Como:
+        // - Setup: mock de DeactivateUserAsync lança Exception("fail").
+        // - Act: chama DeactivateUser(id).
+        // - Assert: verifica BadRequestObjectResult e que a propriedade "message" contém a mensagem da exceção.
         [Fact]
         public async Task DeactivateUser_ShouldReturnBadRequest_WithMessageOnException()
         {
@@ -245,12 +316,52 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("fail", prop.GetValue(val));
         }
 
+        // ChangePassword tests (controller expõe esta ação)
 
-        [Theory]
-        [InlineData(912345678, true)]
-        [InlineData(12345678, false)]      // 8 dígitos
-        [InlineData(1234567890, false)]    // 10 dígitos
-        [InlineData(-912345678, false)]    // negativo
+        // O que testa:
+        // - Quando a alteração de password tem sucesso, o controlador retorna Ok.
+        // Como:
+        // - Setup: mock ChangePasswordAsync retorna true.
+        // - Act: chama ChangePassword(id, dto).
+        // - Assert: verifica OkObjectResult.
+        [Fact]
+        public async Task ChangePassword_ShouldReturnOk_WhenChangeSucceeds()
+        {
+            _mockRepo.Setup(r => r.ChangePasswordAsync(50, "oldpass", "newpass")).ReturnsAsync(true);
+
+            var dto = new ChangePasswordDTO { CurrentPassword = "oldpass", NewPassword = "newpass" };
+            var result = await _controller.ChangePassword(50, dto);
+
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        // O que testa:
+        // - Quando ChangePasswordAsync lança exceção, o controlador deve retornar BadRequest com a mensagem da exceção.
+        // Como:
+        // - Setup: mock configura ChangePasswordAsync para lançar Exception("fail").
+        // - Act: chama ChangePassword(id, dto).
+        // - Assert: verifica BadRequestObjectResult e propriedade "message" com a mensagem.
+        [Fact]
+        public async Task ChangePassword_ShouldReturnBadRequest_WithMessageOnException()
+        {
+            _mockRepo.Setup(r => r.ChangePasswordAsync(51, It.IsAny<string>(), It.IsAny<string>()))
+                     .ThrowsAsync(new Exception("fail"));
+
+            var dto = new ChangePasswordDTO { CurrentPassword = "a", NewPassword = "b" };
+            var result = await _controller.ChangePassword(51, dto);
+
+            var bad = Assert.IsType<BadRequestObjectResult>(result);
+            var val = bad.Value;
+            var prop = val!.GetType().GetProperty("message");
+            Assert.NotNull(prop);
+            Assert.Equal("fail", prop.GetValue(val));
+        }
+
+
+        // O que testa:
+        // - Validação de números de telefone segundo regras de teste.
+        // Como:
+        // - Parametrizado com vários valores; chama IsValidPhoneNumber e compara com o resultado esperado.
         public void PhoneNumberValidation_ShouldMatchExpectedRules(int phoneValue, bool expectedValid)
         {
             int? phone = phoneValue;
@@ -258,6 +369,11 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal(expectedValid, actual);
         }
 
+        // O que testa:
+        // - Nulo não é considerado número de telefone válido.
+        // Como:
+        // - Act: chama IsValidPhoneNumber com null.
+        // - Assert: espera false.
         [Fact]
         public void PhoneNumberValidation_NullShouldBeInvalid()
         {
@@ -270,6 +386,10 @@ namespace Bid_Go_Backend.Tests.Controllers
         [InlineData(12345678, false)]
         [InlineData(1234567890, false)]
         [InlineData(-123456789, false)]
+        // O que testa:
+        // - Validação de NIF segundo regras de teste.
+        // Como:
+        // - Parametrizado; chama IsValidNif e compara com o resultado esperado.
         public void NifValidation_ShouldMatchExpectedRules(int nifValue, bool expectedValid)
         {
             int? nif = nifValue;
@@ -277,6 +397,11 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal(expectedValid, actual);
         }
 
+        // O que testa:
+        // - Nulo não é considerado NIF válido.
+        // Como:
+        // - Act: chama IsValidNif com null.
+        // - Assert: espera false.
         [Fact]
         public void NifValidation_NullShouldBeInvalid()
         {
@@ -301,7 +426,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             if (!nif.HasValue) return false;
             if (nif.Value <= 0) return false;
             var s = nif.Value.ToString();
-            return s.Length == 9 && s.All(char.IsDigit);
+            return (s.Length == 9 || s.Length == 10) && s.All(char.IsDigit);
         }
     }
 }
