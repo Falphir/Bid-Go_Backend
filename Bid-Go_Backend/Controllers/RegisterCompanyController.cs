@@ -23,20 +23,21 @@ namespace Bid_Go_Backend.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Verificar se já existe
+            // check if email already exists
             var existingByEmail = await _companyRepository.GetByEmailAsync(dto.Email);
             if (existingByEmail != null)
-                return Conflict(new { message = "O email já está registado." });
+                return Conflict(new { message = "Email is already registered." });
 
+            // check if phone already exists
             var existingByPhone = await _companyRepository.GetByPhoneAsync(dto.PhoneNumber);
             if (existingByPhone != null)
-                return Conflict(new { message = "O número de telefone já está registado." });
+                return Conflict(new { message = "Phone number is already registered." });
 
+            // check if NIF already exists
             var existingByNIF = await _companyRepository.GetByNIFAsync(dto.NIF);
             if (existingByNIF != null)
-                return Conflict(new { message = "O NIF já está registado." });
+                return Conflict(new { message = "Tax ID (NIF) is already registered." });
 
-      
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             var company = new Company
@@ -54,7 +55,7 @@ namespace Bid_Go_Backend.Controllers
 
             return Ok(new
             {
-                message = "Conta criada com sucesso.",
+                message = "Company account created successfully.",
                 company = new
                 {
                     company.Id,

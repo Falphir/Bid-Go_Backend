@@ -4,36 +4,36 @@ namespace Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs
 {
     public class RegisterCompanyDTO
     {
-        [Required(ErrorMessage = "O nome é obrigatório.")]
-        [MaxLength(100, ErrorMessage = "O nome não pode exceder 100 caracteres.")]
+        [Required(ErrorMessage = "Name is required.")]
+        [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O nome da empresa é obrigatório.")]
-        [MaxLength(100, ErrorMessage = "O nome da empresa não pode exceder 100 caracteres.")]
+        [Required(ErrorMessage = "Company name is required.")]
+        [MaxLength(100, ErrorMessage = "Company name cannot exceed 100 characters.")]
         public string CompanyName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A morada é obrigatória.")]
-        [MaxLength(150, ErrorMessage = "A morada não pode exceder 150 caracteres.")]
+        [Required(ErrorMessage = "Address is required.")]
+        [MaxLength(150, ErrorMessage = "Address cannot exceed 150 characters.")]
         public string Address { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O email é obrigatório.")]
+        [Required(ErrorMessage = "Email is required.")]
         [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-            ErrorMessage = "O email deve ter um formato válido (ex: nome@dominio.com).")]
-        [MaxLength(150)]
+            ErrorMessage = "Email must have a valid format (e.g. name@domain.com).")]
+        [MaxLength(150, ErrorMessage = "Email cannot exceed 150 characters.")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A password é obrigatória.")]
+        [Required(ErrorMessage = "Password is required.")]
         [RegularExpression(
-        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
-        ErrorMessage = "A password deve ter no mínimo 8 caracteres, incluindo uma maiúscula, uma minúscula, um número e um carácter especial.")]
+            @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+            ErrorMessage = "Password must have at least 8 characters, including an uppercase letter, a lowercase letter, a number, and a special character.")]
         public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O número de telefone é obrigatório.")]
-        [RegularExpression(@"^\d{9}$", ErrorMessage = "O número de telefone deve conter exatamente 9 dígitos.")]
+        [Required(ErrorMessage = "Phone number is required.")]
+        [RegularExpression(@"^\d{9}$", ErrorMessage = "Phone number must contain exactly 9 digits.")]
         public int PhoneNumber { get; set; }
 
-        [Required(ErrorMessage = "O NIF é obrigatório.")]
-        [RegularExpression(@"^\d{10}$", ErrorMessage = "O NIF deve conter exatamente 10 dígitos.")]
+        [Required(ErrorMessage = "Tax ID (NIF) is required.")]
+        [RegularExpression(@"^\d{9,10}$", ErrorMessage = "Tax ID (NIF) must contain between 9 and 10 digits.")]
         public int NIF { get; set; }
     }
 }
