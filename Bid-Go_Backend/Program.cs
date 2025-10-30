@@ -1,8 +1,11 @@
-﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Notifications;
+using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services;
@@ -20,10 +23,24 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
+
+//EmailService (SMTP)
+builder.Services.AddSingleton<EmailService>(sp =>
+    new EmailService(
+        smtpHost: "smtp.sapo.pt",
+        smtpPort: 587,
+        smtpUser: "bidandgo2025@sapo.pt",
+        smtpPass: "Bidandgo2025"
+    )
+);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -36,6 +53,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -46,6 +64,12 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
 
 var app = builder.Build();
 
@@ -75,13 +99,14 @@ app.UseExceptionHandler(config =>
         }
         else
         {
-            // Caso seja outro tipo de erro
-            var result = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado." });
+            context.Response.StatusCode = 500; 
+            var result = JsonSerializer.Serialize(new { message = feature?.Error.Message });
             await context.Response.WriteAsync(result);
         }
     });
 });
 
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 
 app.Run();
