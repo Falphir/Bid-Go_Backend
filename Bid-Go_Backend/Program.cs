@@ -1,4 +1,7 @@
-﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
+using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Notifications;
@@ -21,6 +24,7 @@ using Stripe;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,10 +63,12 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 
 var app = builder.Build();
