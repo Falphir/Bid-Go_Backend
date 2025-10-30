@@ -4,16 +4,33 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Bid_Go_Backend.Data.Models;
 using Microsoft.Extensions.Configuration;
+﻿using Bid_Go_Backend.Data.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Caching.Memory;
+using System;
 
 namespace Bid_Go_Backend.Services
 {
     public class AuthService
     {
         private readonly IConfiguration _config;
+        private readonly IMemoryCache _cache;
 
-        public AuthService(IConfiguration config)
+        public AuthService(IConfiguration config,IMemoryCache cache)
         {
             _config = config;
+             _cache = cache;
+        }
+ 
+
+        public virtual string GeneratePasswordResetToken()
+        {
+            return Guid.NewGuid().ToString("N"); 
         }
 
         public string GenerateJwtToken(User user)
@@ -40,3 +57,5 @@ namespace Bid_Go_Backend.Services
         }
     }
 }
+
+

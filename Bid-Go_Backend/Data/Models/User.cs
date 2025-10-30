@@ -33,8 +33,9 @@ namespace Bid_Go_Backend.Data.Models
         public int PhoneNumber { get; set; }
 
         [Required]
-        [MaxLength(20)]
+        [MaxLength(10)]
         public int NIF { get; set; } 
+
     }
 }
 
