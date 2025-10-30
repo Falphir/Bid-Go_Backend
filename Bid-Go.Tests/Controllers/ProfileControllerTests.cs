@@ -73,6 +73,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         // - Setup: mock de GetUserByIdAsync devolve null.
         // - Act: chama GetProfile(id).
         // - Assert: verifica NotFoundObjectResult e mensagem esperada.
+        [Fact]
         public async Task GetProfile_ShouldReturnDriverDto_WhenUserIsDriver()
         {
             var driver = new Driver
@@ -351,10 +352,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             var result = await _controller.ChangePassword(51, dto);
 
             var bad = Assert.IsType<BadRequestObjectResult>(result);
-            var val = bad.Value;
-            var prop = val!.GetType().GetProperty("message");
-            Assert.NotNull(prop);
-            Assert.Equal("fail", prop.GetValue(val));
+            Assert.Equal("fail", bad.Value);
         }
 
 
@@ -362,6 +360,11 @@ namespace Bid_Go_Backend.Tests.Controllers
         // - Validação de números de telefone segundo regras de teste.
         // Como:
         // - Parametrizado com vários valores; chama IsValidPhoneNumber e compara com o resultado esperado.
+        [Theory]
+        [InlineData(912345678, true)]
+        [InlineData(12345678, false)]     
+        [InlineData(1234567890, false)]    
+        [InlineData(-912345678, false)]    
         public void PhoneNumberValidation_ShouldMatchExpectedRules(int phoneValue, bool expectedValid)
         {
             int? phone = phoneValue;
