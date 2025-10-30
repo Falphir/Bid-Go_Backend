@@ -1,4 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,9 +43,17 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+
+builder.Services.Configure<StripeSettings>(
+    builder.Configuration.GetSection("Stripe"));
+
+// 2) já deixar o Stripe a usar a secret
+var stripeSection = builder.Configuration.GetSection("Stripe");
+StripeConfiguration.ApiKey = stripeSection["SecretKey"];
 
 var app = builder.Build();
-
 
 
 app.UseSwagger();
@@ -58,20 +68,29 @@ app.UseExceptionHandler(config =>
 {
     config.Run(async context =>
     {
-        context.Response.StatusCode = 401;
         context.Response.ContentType = "application/json";
 
-        // Verificar se a exceção é de autorização
         var feature = context.Features.Get<IExceptionHandlerFeature>();
+
         if (feature?.Error is UnauthorizedAccessException)
         {
-            var result = JsonSerializer.Serialize(new { message = "Acesso negado. Você não tem permissão para acessar este recurso." });
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            var result = JsonSerializer.Serialize(new
+            {
+                message = "Access denied. You are not allowed to access this resource."
+            });
             await context.Response.WriteAsync(result);
         }
         else
         {
-            // Caso seja outro tipo de erro
-            var result = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado." });
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            var result = JsonSerializer.Serialize(new
+            {
+                message = "An unexpected error occurred.",
+                error = feature?.Error.Message,
+                stack = feature?.Error.StackTrace
+            });
             await context.Response.WriteAsync(result);
         }
     });

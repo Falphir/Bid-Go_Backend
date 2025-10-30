@@ -15,19 +15,32 @@ namespace Bid_Go_Backend.Data.Models
         public int PaymentId { get; set; }
 
         [Required]
-        public float GrossValue { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal GrossValue { get; set; }
 
         [Required]
-        public float NetValue { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal NetValue { get; set; }
 
         [Required]
-        public float Tax { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Tax { get; set; }
 
         [Required]
         public EPaymentStatus PaymentStatus { get; set; }
 
         [Required]
         public EPaymentMethod PaymentMethod { get; set; }
+
+        [Required]
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime? CompletedAt { get; set; }
+
+        [Required]
+        public DateTime DeadlineToPay { get; set; }
+
+        public string? FailureReason { get; set; }
 
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
@@ -42,5 +55,8 @@ namespace Bid_Go_Backend.Data.Models
         public int TransportRequestId { get; set; }
 
         public TransportRequest TransportRequest { get; set; } = null!;
+
+        public string? StripePaymentIntentId { get; set; }
+        public string? StripePaymentMethodId { get; set; }
     }
 }
