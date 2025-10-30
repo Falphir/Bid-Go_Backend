@@ -1,5 +1,6 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Repositories.BidRepo;
@@ -48,6 +49,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -57,6 +59,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
