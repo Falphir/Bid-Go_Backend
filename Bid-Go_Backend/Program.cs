@@ -1,19 +1,25 @@
+using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Chat;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,7 +50,7 @@ builder.Services.AddSingleton<IEmailService>(sp =>
     )
 );
 
-// Swagger
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -76,10 +82,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
-// Dependency Injection
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
@@ -124,28 +126,39 @@ builder.Services.AddAuthorization(options =>
 });
 
 
-builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
+builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
+builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 
 
+
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
+
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 
 var app = builder.Build();
 
 
-
 app.UseSwagger();
-app.UseSwaggerUI(c=>
+app.UseSwaggerUI(c =>
 {
-
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
-c.RoutePrefix = "";
+    c.RoutePrefix = "";
 });
 
-// Exception handler
+
 app.UseExceptionHandler(config =>
 {
     config.Run(async context =>

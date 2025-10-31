@@ -16,25 +16,14 @@
     <Compile Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
     <Compile Remove="Data\Repositories\Interfaces\NovaPasta\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
-    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
-    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
-    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
-    <EmbeddedResource Remove="Data\Repositories\Interfaces\NovaPasta\**" />
+    <EmbeddedResource Remove="Services\**" />
     <None Remove="Data\Migrations\**" />
-    <None Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
-    <None Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
-    <None Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
-    <None Remove="Data\Repositories\Interfaces\NovaPasta\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove=".env.cs" />
-    <Compile Remove="Controllers\TestController.cs" />
-    <Compile Remove="Controllers\teste.cs" />
-    <Compile Remove="Controllers\TesteController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Compile Remove="Controllers\HomeController.cs" />
+    <Compile Remove="Data\Models\DTOs\TransportRequestRespondeDTO.cs" />
     <Compile Remove="Data\Repositories\Register.cs" />
   </ItemGroup>
 
