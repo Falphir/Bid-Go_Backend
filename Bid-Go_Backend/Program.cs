@@ -12,7 +12,7 @@ using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
-using Bid_Go_Backend.Data.Repositories.Payments
+using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
