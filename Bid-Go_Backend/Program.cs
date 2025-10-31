@@ -3,19 +3,23 @@ using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Repositories.Chat;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
-using Bid_Go_Backend.Data.Repositories.Requests;
-using Bid_Go_Backend.Data.Repositories.Notifications;
+using Bid_Go_Backend.Data.Repositories.Chat;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Login;
+using Bid_Go_Backend.Data.Repositories.Notifications;
+using Bid_Go_Backend.Data.Repositories.Register;
+using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
+using Bid_Go_Backend.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -25,14 +29,14 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 using System.Text;
 using System.Text.Json;
 using Stripe;
-using Microsoft.Extensions.Options;
-using Bid_Go_Backend.Data.Repositories.Login;
-using Microsoft.Extensions.Caching.Memory;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -115,6 +119,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+
 // Authorization
 builder.Services.AddAuthorization(options =>
 {
@@ -138,7 +144,7 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
-
+builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();
 
 
 
