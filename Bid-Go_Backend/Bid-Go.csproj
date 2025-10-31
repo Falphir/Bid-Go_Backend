@@ -18,6 +18,7 @@
   <ItemGroup>
     <Compile Remove="Controllers\HomeController.cs" />
     <Compile Remove="Data\Models\DTOs\TransportRequestRespondeDTO.cs" />
+    <Compile Remove="Data\Repositories\Register.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -67,5 +68,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
