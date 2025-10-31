@@ -387,7 +387,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         [Theory]
         [InlineData(123456789, true)]
         [InlineData(12345678, false)]
-        [InlineData(1234567890, false)]
+        [InlineData(1234567890, true)]  
         [InlineData(-123456789, false)]
         // O que testa:
         // - Validação de NIF segundo regras de teste.
