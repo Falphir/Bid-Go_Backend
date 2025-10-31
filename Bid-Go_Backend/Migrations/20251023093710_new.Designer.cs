@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.Designer.cs
     [Migration("20251023093710_new")]
     partial class @new
+========
+    [Migration("20251030170809_BidGo")]
+    partial class BidGo
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -250,12 +255,15 @@ namespace Bid_Go_Backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TransportRequestId"));
 
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.Designer.cs
                     b.Property<DateTime>("BiddingEndDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("BiddingStartDate")
                         .HasColumnType("datetime(6)");
 
+========
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.Designer.cs
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
@@ -273,9 +281,12 @@ namespace Bid_Go_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.Designer.cs
                     b.Property<bool>("IsAutomaticSelectionEnabled")
                         .HasColumnType("tinyint(1)");
 
+========
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.Designer.cs
                     b.Property<decimal>("Length")
                         .HasColumnType("decimal(18,2)");
 
@@ -290,9 +301,12 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<DateTime>("PickupDate")
                         .HasColumnType("datetime(6)");
 
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.Designer.cs
                     b.Property<int?>("SelectedBidId")
                         .HasColumnType("int");
 
+========
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.Designer.cs
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -330,6 +344,12 @@ namespace Bid_Go_Backend.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.Designer.cs
+========
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.Designer.cs
                     b.Property<int>("NIF")
                         .HasMaxLength(20)
                         .HasColumnType("int");
@@ -428,7 +448,7 @@ namespace Bid_Go_Backend.Migrations
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Bid", b =>
                 {
                     b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
-                        .WithMany()
+                        .WithMany("Bids")
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -592,6 +612,11 @@ namespace Bid_Go_Backend.Migrations
                     b.Navigation("Payment");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.Driver", b =>
+                {
+                    b.Navigation("Bids");
                 });
 #pragma warning restore 612, 618
         }

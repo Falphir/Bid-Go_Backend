@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
@@ -53,6 +54,10 @@ namespace Bid_Go_Backend.Data.Models
         public string Image { get; set; } = string.Empty;
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal MaxPrice { get; set; }
+
+        [Required]
         public ERequestStatus Status { get; set; }
 
         [Required]
@@ -71,8 +76,9 @@ namespace Bid_Go_Backend.Data.Models
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
         public Company? Company { get; set; } = null;
-
-        public Chat Chat { get; set; } = null!;
+       
+        [JsonIgnore]
+        public Chats Chat { get; set; } = null!;
 
         //Relação 1:1 com Payment
         public Payment? Payment { get; set; }

@@ -7,7 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.cs
     public partial class @new : Migration
+========
+    public partial class BidGo : Migration
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,6 +33,10 @@ namespace Bid_Go_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PhoneNumber = table.Column<int>(type: "int", maxLength: 9, nullable: false),
                     NIF = table.Column<int>(type: "int", maxLength: 20, nullable: false),
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.cs
+========
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.cs
                     UserType = table.Column<string>(type: "varchar(8)", maxLength: 8, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
@@ -47,6 +55,45 @@ namespace Bid_Go_Backend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+<<<<<<<< HEAD:Bid-Go_Backend/Migrations/20251023093710_new.cs
+========
+                name: "TransportRequests",
+                columns: table => new
+                {
+                    TransportRequestId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Origin = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Destination = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Package = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Weight = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Volume = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Length = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Width = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PickupDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeliveryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Image = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransportRequests", x => x.TransportRequestId);
+                    table.ForeignKey(
+                        name: "FK_TransportRequests_Users_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+>>>>>>>> develop:Bid-Go_Backend/Migrations/20251030170809_BidGo.cs
                 name: "Bids",
                 columns: table => new
                 {
