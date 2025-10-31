@@ -2,19 +2,21 @@
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace Bid_Go_Backend.Repositories.BidRepo
 {
-    public class BidsCRUD : IBidCRUD
+    public class BidsCRUD : IBidsCRUD
     {
         private readonly BidGoDbContext _ctx;
-
-        public BidsCRUD(BidGoDbContext ctx)
+        private readonly INotificationRepository _notificationRepo;
+        public BidsCRUD(BidGoDbContext ctx, INotificationRepository notificationRepo)
         {
             _ctx = ctx;
+            _notificationRepo = notificationRepo;
         }
 
         //Create a new bid
@@ -31,8 +33,8 @@ namespace Bid_Go_Backend.Repositories.BidRepo
         {
 
             var existingBid = await _ctx.Bids.FindAsync(id);
-         
-            if(existingBid == null || existingBid.Status != EBidStatus.Pendent)
+
+            if (existingBid == null || existingBid.Status != EBidStatus.Pendent)
             {
                 return null;
             }

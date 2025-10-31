@@ -16,5 +16,8 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         [MaxLength(150)]
         public string Address { get; set; } = string.Empty;
+
+
+
     }
 }

@@ -11,8 +11,20 @@
 
   <ItemGroup>
     <Compile Remove="Data\Migrations\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta1\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta2\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta3\**" />
+    <Compile Remove="Data\Repositories\Interfaces\NovaPasta\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
+    <EmbeddedResource Remove="Services\**" />
     <None Remove="Data\Migrations\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\HomeController.cs" />
+    <Compile Remove="Data\Models\DTOs\TransportRequestRespondeDTO.cs" />
+    <Compile Remove="Data\Repositories\Register.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,5 +74,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
