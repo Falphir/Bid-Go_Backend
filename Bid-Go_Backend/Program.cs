@@ -59,10 +59,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
-
-
-
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -89,17 +85,20 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
+});
+
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI(c=>
-{
 
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
-c.RoutePrefix = "";
+    c.RoutePrefix = "";
 });
+
 
 app.UseExceptionHandler(config =>
 {
