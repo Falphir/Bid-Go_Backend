@@ -8,7 +8,7 @@ namespace Bid_Go_Backend.Data.Models.Enums
 {
     public enum EPaymentMethod
     {
-        PayPal,
-        Stripe
+        PayPal = 1,
+        Stripe = 2,
     }
 }
