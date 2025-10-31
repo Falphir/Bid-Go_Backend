@@ -3,12 +3,12 @@ using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 
-namespace Bid_Go_Backend.Data.Repositories.Requests
+namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 {
-    public class TransportRequestRepository : ITransportRequestRepository
+    public class TransportUpdateStatusRepository : ITransportUpdateStatus
     {
         private readonly BidGoDbContext _context;
-        public TransportRequestRepository(BidGoDbContext context)
+        public TransportUpdateStatusRepository(BidGoDbContext context)
         {
             _context = context;
         }

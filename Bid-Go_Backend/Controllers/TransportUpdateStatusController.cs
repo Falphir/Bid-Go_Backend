@@ -6,11 +6,11 @@ namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TransportRequestController : ControllerBase
+    public class TransportUpdateStatusController : ControllerBase
     {
-        private readonly ITransportRequestRepository _repository;
+        private readonly ITransportUpdateStatus _repository;
 
-        public TransportRequestController(ITransportRequestRepository repository)
+        public TransportUpdateStatusController(ITransportUpdateStatus repository)
         {
             _repository = repository;
         }
