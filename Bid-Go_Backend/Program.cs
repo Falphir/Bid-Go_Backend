@@ -135,7 +135,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.Configure<StripeSettings>(
     builder.Configuration.GetSection("Stripe"));
 
-// 2) já deixar o Stripe a usar a secret
+
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
 builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();

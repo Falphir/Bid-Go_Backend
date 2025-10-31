@@ -13,13 +13,13 @@ namespace Bid_Go_Backend.Tests.Controllers
 {
     public class ProfileControllerTests
     {
-        private readonly Mock<IProfileCrud> _mockRepo;
+        private readonly Mock<IProfileCRUD> _mockRepo;
         private readonly BidGoDbContext _context;
         private readonly ProfileController _controller;
 
         public ProfileControllerTests()
         {
-            _mockRepo = new Mock<IProfileCrud>();
+            _mockRepo = new Mock<IProfileCRUD>();
 
             var options = new DbContextOptionsBuilder<BidGoDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
