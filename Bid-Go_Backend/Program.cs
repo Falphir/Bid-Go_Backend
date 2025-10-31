@@ -35,7 +35,7 @@ builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
 
 //EmailService (SMTP)
-builder.Services.AddSingleton<EmailService>(sp =>
+builder.Services.AddSingleton<IEmailService>(sp =>
     new EmailService(
         smtpHost: "smtp.sapo.pt",
         smtpPort: 587,
@@ -128,7 +128,7 @@ builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 

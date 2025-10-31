@@ -13,10 +13,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using System;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 
 namespace Bid_Go_Backend.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly IConfiguration _config;
         private readonly IMemoryCache _cache;

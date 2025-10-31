@@ -1,10 +1,11 @@
-﻿using System.Net;
+﻿using Bid_Go_Backend.Data.Repositories.Interfaces;
+using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Services
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly string _smtpHost;
         private readonly int _smtpPort;

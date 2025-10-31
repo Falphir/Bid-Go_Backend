@@ -17,14 +17,14 @@ namespace Bid_Go_Backend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        private readonly AuthService _authService;
-    private readonly EmailService _emailService;
+        private readonly IAuthService _authService;
+    private readonly IEmailService _emailService;
     private readonly IMemoryCache _cache;
 
           public AuthController(
         IUserRepository userRepository,
-        AuthService authService,
-        EmailService emailService,
+        IAuthService authService,
+        IEmailService emailService,
         IMemoryCache cache)
     {
         _userRepository = userRepository;

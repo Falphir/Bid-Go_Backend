@@ -2,47 +2,52 @@
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Data.Models.DTOs.LoginDTOs;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Services;
+
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using System.Security.Claims;
 using Xunit;
-using Bid_Go_Backend.Services;
 
 namespace Bid_Go.Tests.Controllers
 {
     public class AuthControllerTests
     {
         private readonly Mock<IUserRepository> _mockRepo;
-        private readonly Mock<AuthService> _mockAuthService;
-        private readonly Mock<EmailService> _mockEmailService;
+        private readonly Mock<IAuthService> _mockAuthService;
+        private readonly Mock<IEmailService> _mockEmailService;
         private readonly IMemoryCache _memoryCache;
         private readonly BidGoDbContext _context;
         private readonly AuthController _authController;
 
         public AuthControllerTests()
         {
+            // Repositório mockado
             _mockRepo = new Mock<IUserRepository>();
 
+            // BD em memória
             var options = new DbContextOptionsBuilder<BidGoDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
             _context = new BidGoDbContext(options);
             _context.Database.EnsureCreated();
 
-            // real cache
+            // Cache real
             _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-            // create a mock of AuthService passing the required IMemoryCache to the constructor
-            _mockAuthService = new Mock<AuthService>(_memoryCache);
+            // Services mockados via interface (melhor prática)
+            _mockAuthService = new Mock<IAuthService>();
+            _mockEmailService = new Mock<IEmailService>();
 
-            // create a mock of EmailService providing constructor args
-            _mockEmailService = new Mock<EmailService>("smtp.example.com",25, "from@example.com", "pass");
-
+            // Controller que será testado
             _authController = new AuthController(
                 _mockRepo.Object,
                 _mockAuthService.Object,
@@ -54,14 +59,11 @@ namespace Bid_Go.Tests.Controllers
         [Fact]
         public async Task RecoverPassword_ShouldReturnNotFound_WhenUserDoesNotExist()
         {
-            // Arrange
             var dto = new RecoverPasswordRequestDTO { Email = "test@test.com" };
             _mockRepo.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync((User)null);
 
-            // Act
             var result = await _authController.RecoverPassword(dto);
 
-            // Assert
             var notFound = Assert.IsType<NotFoundObjectResult>(result);
             var val = notFound.Value;
             var prop = val.GetType().GetProperty("message");
@@ -72,27 +74,31 @@ namespace Bid_Go.Tests.Controllers
         [Fact]
         public async Task RecoverPassword_ShouldReturnOkAndSetCache_WhenUserExists()
         {
-            // Arrange
-            var user = new Driver { Id =1, Email = "test@test.com", Name = "test", Password = "test", PhoneNumber =123456789, NIF =123456789 };
-            _mockRepo.Setup(r => r.GetByEmailAsync(user.Email)).ReturnsAsync(user);
+            var user = new Driver
+            {
+                Id = 1,
+                Email = "test@test.com",
+                Name = "test",
+                Password = "test",
+                PhoneNumber = 123456789,
+                NIF = 123456789
+            };
 
+            _mockRepo.Setup(r => r.GetByEmailAsync(user.Email)).ReturnsAsync(user);
             _mockAuthService.Setup(s => s.GeneratePasswordResetToken()).Returns("token123");
             _mockEmailService.Setup(e => e.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             var dto = new RecoverPasswordRequestDTO { Email = user.Email };
 
-            // Act
             var result = await _authController.RecoverPassword(dto);
 
-            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var val = ok.Value;
             var prop = val.GetType().GetProperty("message");
             Assert.NotNull(prop);
             Assert.Equal("Instruções enviadas por email.", prop.GetValue(val));
 
-            // Verify cache contains token -> email
             Assert.True(_memoryCache.TryGetValue("token123", out var cachedEmail));
             Assert.Equal(user.Email, cachedEmail);
 
@@ -102,13 +108,10 @@ namespace Bid_Go.Tests.Controllers
         [Fact]
         public async Task ResetPassword_ShouldReturnBadRequest_WhenTokenInvalid()
         {
-            // Arrange
             var req = new ResetPasswordRequestDTO { Token = "invalid", NewPassword = "newpass" };
 
-            // Act
             var result = await _authController.ResetPassword(req);
 
-            // Assert
             var bad = Assert.IsType<BadRequestObjectResult>(result);
             var val = bad.Value;
             var prop = val.GetType().GetProperty("message");
@@ -119,18 +122,14 @@ namespace Bid_Go.Tests.Controllers
         [Fact]
         public async Task ResetPassword_ShouldReturnNotFound_WhenUserNotFound()
         {
-            // Arrange
             var token = "tok1";
             _memoryCache.Set(token, "test@test.com", TimeSpan.FromHours(1));
-
             _mockRepo.Setup(r => r.GetByEmailAsync("test@test.com")).ReturnsAsync((User)null);
 
             var req = new ResetPasswordRequestDTO { Token = token, NewPassword = "newpass" };
 
-            // Act
             var result = await _authController.ResetPassword(req);
 
-            // Assert
             var notFound = Assert.IsType<NotFoundObjectResult>(result);
             var val = notFound.Value;
             var prop = val.GetType().GetProperty("message");
@@ -141,8 +140,7 @@ namespace Bid_Go.Tests.Controllers
         [Fact]
         public async Task ResetPassword_ShouldReturnOkAndRemoveToken_WhenSuccessful()
         {
-            // Arrange
-            var user = new Driver { Id =2, Email = "test@test.com", Name = "test", Password = "test", PhoneNumber =123456789, NIF =123456789 };
+            var user = new Driver { Id = 2, Email = "test@test.com", Password = "test" };
             var token = "tok2";
             _memoryCache.Set(token, user.Email, TimeSpan.FromHours(1));
 
@@ -151,18 +149,115 @@ namespace Bid_Go.Tests.Controllers
 
             var req = new ResetPasswordRequestDTO { Token = token, NewPassword = "newpass" };
 
-            // Act
             var result = await _authController.ResetPassword(req);
 
-            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var val = ok.Value;
             var prop = val.GetType().GetProperty("message");
             Assert.NotNull(prop);
             Assert.Equal("Password alterada com sucesso.", prop.GetValue(val));
 
-            // Verify token removed from cache
             Assert.False(_memoryCache.TryGetValue(token, out _));
+        }
+
+        [Fact]
+        public async Task Login_ShouldReturnUnauthorized_WhenEmailInvalid()
+        {
+            var req = new LoginRequestDto { Email = "nope@test.com", Password = "whatever" };
+            _mockRepo.Setup(r => r.GetByEmailAsync(req.Email)).ReturnsAsync((User)null);
+
+            var result = await _authController.Login(req);
+
+            var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+            var val = unauthorized.Value;
+            var prop = val.GetType().GetProperty("message");
+            Assert.NotNull(prop);
+            Assert.Equal("Email inválido.", prop.GetValue(val));
+        }
+
+        [Fact]
+        public async Task Login_ShouldReturnUnauthorized_WhenPasswordIncorrect()
+        {
+            var hashed = BCrypt.Net.BCrypt.HashPassword("correctPassword");
+            var user = new Driver { Id = 3, Email = "user@test.com", Password = hashed };
+            _mockRepo.Setup(r => r.GetByEmailAsync(user.Email)).ReturnsAsync(user);
+
+            var req = new LoginRequestDto { Email = user.Email, Password = "wrong" };
+
+            var result = await _authController.Login(req);
+
+            var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+            var val = unauthorized.Value;
+            var prop = val.GetType().GetProperty("message");
+            Assert.NotNull(prop);
+            Assert.Equal("Password incorreta.", prop.GetValue(val));
+        }
+
+        [Fact]
+        public async Task Login_ShouldReturnOkWithToken_WhenCredentialsValid()
+        {
+            var plain = "mypassword";
+            var hashed = BCrypt.Net.BCrypt.HashPassword(plain);
+            var user = new Driver { Id = 4, Email = "valid@test.com", Password = hashed };
+
+            _mockRepo.Setup(r => r.GetByEmailAsync(user.Email)).ReturnsAsync(user);
+            _mockAuthService.Setup(s => s.GenerateJwtToken(It.IsAny<User>())).Returns("jwtToken123");
+
+            var req = new LoginRequestDto { Email = user.Email, Password = plain };
+
+            var result = await _authController.Login(req);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var tokenProp = ok.Value.GetType().GetProperty("Token");
+            Assert.NotNull(tokenProp);
+            Assert.Equal("jwtToken123", tokenProp.GetValue(ok.Value));
+        }
+
+        [Fact]
+        public void Me_ShouldReturnOk_WithEmailFromClaims()
+        {
+            var email = "claimed@test.com";
+            var claims = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim("sub", email),
+                new Claim("userId", "10"),
+                new Claim("userType", "Driver")
+            }, "mock"));
+
+            _authController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claims }
+            };
+
+            var result = _authController.Me();
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var val = ok.Value;
+            var prop = val.GetType().GetProperty("email");
+            Assert.NotNull(prop);
+            Assert.Equal(email, prop.GetValue(val));
+        }
+
+        [Fact]
+        public void CompanyEndpoint_ShouldReturnOk_WhenCalled()
+        {
+            var result = _authController.CompanyEndpoint();
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var val = ok.Value;
+            var prop = val.GetType().GetProperty("message");
+            Assert.NotNull(prop);
+            Assert.Equal("Apenas Companies conseguem ver isto!", prop.GetValue(val));
+        }
+
+        [Fact]
+        public void DriverEndpoint_ShouldReturnOk_WhenCalled()
+        {
+            var result = _authController.DriverEndpoint();
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var val = ok.Value;
+            var prop = val.GetType().GetProperty("message");
+            Assert.NotNull(prop);
+            Assert.Equal("Apenas Drivers conseguem ver isto!", prop.GetValue(val));
         }
     }
 }
