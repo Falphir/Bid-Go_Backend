@@ -1,16 +1,28 @@
-﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
+using Bid_Go_Backend.Data.Repositories;
+using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
+using Bid_Go_Backend.Data.Repositories.Payments
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,8 +32,6 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Caching.Memory;
-using Bid_Go_Backend.Data.Repositories.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +49,7 @@ builder.Services.AddSingleton<EmailService>(sp =>
     )
 );
 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -50,6 +61,10 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+
+
+
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -58,6 +73,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 
+builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
@@ -68,13 +84,24 @@ builder.Services.Configure<StripeSettings>(
 // 2) já deixar o Stripe a usar a secret
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 
+
+
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c=>
