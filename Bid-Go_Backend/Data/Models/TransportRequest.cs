@@ -54,6 +54,10 @@ namespace Bid_Go_Backend.Data.Models
         public string Image { get; set; } = string.Empty;
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal MaxPrice { get; set; }
+
+        [Required]
         public ERequestStatus Status { get; set; }
 
         [ForeignKey(nameof(Company))]
