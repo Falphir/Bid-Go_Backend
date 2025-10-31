@@ -25,7 +25,7 @@ namespace Bid_Go_Backend.Controllers
 
         // POST /api/bids
         [HttpPost]
-        public async Task<IActionResult> AddBid([FromBody] BidDTO bidDto)
+        public async Task<IActionResult> AddBid([FromBody] AddBidDTO bidDto)
         {
             var transportRequest = await _ctx.TransportRequests
                 .AsNoTracking()

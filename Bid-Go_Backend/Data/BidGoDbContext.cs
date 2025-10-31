@@ -154,6 +154,20 @@ namespace Bid_Go_Backend.Data
              .HasForeignKey(r => r.TransportRequestId)
              .IsRequired()
              .OnDelete(DeleteBehavior.Cascade);
+
+            // 1. TransportRequest -> Bids (One-to-Many)
+            modelBuilder.Entity<Bid>()
+                .HasOne(b => b.TransportRequest)
+                .WithMany(tr => tr.Bids)
+                .HasForeignKey(b => b.TransportRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 2. TransportRequest -> SelectedBid (One-to-One)
+            modelBuilder.Entity<TransportRequest>()
+                .HasOne(tr => tr.SelectedBid)
+                .WithOne()
+                .HasForeignKey<TransportRequest>(tr => tr.SelectedBidId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Bid_Go_Backend</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +25,10 @@
     <Compile Remove="Controllers\HomeController.cs" />
     <Compile Remove="Data\Models\DTOs\TransportRequestRespondeDTO.cs" />
     <Compile Remove="Data\Repositories\Register.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\Models\DTOs\TransportRequestDTO.cs" />
   </ItemGroup>
 
   <ItemGroup>

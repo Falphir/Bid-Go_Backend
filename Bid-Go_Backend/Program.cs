@@ -1,3 +1,9 @@
+using Bid_Go_Backend.Data.Repositories.Bids;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Chat;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
@@ -14,7 +20,6 @@ using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
 using Bid_Go_Backend.Controllers;
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -128,7 +133,7 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim("userType", "Company"));
 });
 
-
+builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
 builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
