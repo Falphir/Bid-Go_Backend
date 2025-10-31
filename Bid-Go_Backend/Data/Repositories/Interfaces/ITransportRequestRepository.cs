@@ -12,7 +12,5 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
         Task<TransportRequest> GetByIdAsync(int id);
         Task<List<TransportRequest>> GetAllByCompanyAsync(int companyId);
 
-
-        Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus status);
     }
 }
