@@ -1,4 +1,5 @@
-﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
@@ -12,12 +13,14 @@ using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,7 +30,6 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Caching.Memory;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +47,7 @@ builder.Services.AddSingleton<EmailService>(sp =>
         smtpPass: "Bidandgo2025"
     )
 );
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -69,6 +72,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 
+builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();

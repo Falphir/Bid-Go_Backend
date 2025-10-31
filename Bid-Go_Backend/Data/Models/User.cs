@@ -36,6 +36,8 @@ namespace Bid_Go_Backend.Data.Models
         [MaxLength(10)]
         public int NIF { get; set; } 
 
+        [Required]
+        public bool IsActive { get; set; } = true;
     }
 }
 

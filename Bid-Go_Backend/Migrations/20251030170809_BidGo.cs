@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class teste : Migration
+    public partial class BidGo : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,6 +29,7 @@ namespace Bid_Go_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PhoneNumber = table.Column<int>(type: "int", maxLength: 9, nullable: false),
                     NIF = table.Column<int>(type: "int", maxLength: 20, nullable: false),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     UserType = table.Column<string>(type: "varchar(8)", maxLength: 8, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
