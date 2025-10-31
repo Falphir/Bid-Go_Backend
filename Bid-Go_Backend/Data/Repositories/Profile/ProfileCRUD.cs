@@ -10,7 +10,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Bid_Go_Backend.Repositories.ProfileRepo
 {
-    public class ProfileCRUD : IProfileCrud
+    public class ProfileCRUD : IProfileCRUD
     {
         private readonly BidGoDbContext _ctx;
 

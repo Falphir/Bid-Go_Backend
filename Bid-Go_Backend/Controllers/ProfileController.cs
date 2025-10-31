@@ -18,9 +18,9 @@ namespace Bid_Go_Backend.Controllers
     public class ProfileController : ControllerBase
     {
 
-        private readonly IProfileCrud _profileCrud;
+        private readonly IProfileCRUD _profileCrud;
         private readonly BidGoDbContext _ctx;
-        public ProfileController(IProfileCrud profileCrud, BidGoDbContext ctx)
+        public ProfileController(IProfileCRUD profileCrud, BidGoDbContext ctx)
         {
             _profileCrud = profileCrud;
             _ctx = ctx;
