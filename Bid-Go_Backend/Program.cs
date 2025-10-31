@@ -1,3 +1,6 @@
+﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
@@ -54,6 +57,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
+
+
+
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -68,12 +74,18 @@ builder.Services.AddScoped<ITransportRequestRepository, TransportRequestReposito
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 
 
+
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
-
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c=>
