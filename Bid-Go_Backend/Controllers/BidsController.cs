@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -14,9 +15,9 @@ namespace Bid_Go_Backend.Controllers
     public class BidsController : ControllerBase
     {
 
-        private readonly IBidCRUD _bidCrud;
+        private readonly IBidsCRUD _bidCrud;
         private readonly BidGoDbContext _ctx;
-        public BidsController(IBidCRUD bidCrud, BidGoDbContext ctx)
+        public BidsController(IBidsCRUD bidCrud, BidGoDbContext ctx)
         {
             _bidCrud = bidCrud;
             _ctx = ctx;

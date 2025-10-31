@@ -3,7 +3,6 @@ using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
@@ -73,6 +72,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 
 
+builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -84,6 +84,7 @@ builder.Services.Configure<StripeSettings>(
 // 2) já deixar o Stripe a usar a secret
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
+builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();

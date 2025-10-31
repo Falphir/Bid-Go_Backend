@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Repositories.BidRepo
 {
-    public class BidsCRUD : IBidCRUD
+    public class BidsCRUD : IBidsCRUD
     {
         private readonly BidGoDbContext _ctx;
         private readonly INotificationRepository _notificationRepo;
@@ -33,8 +33,8 @@ namespace Bid_Go_Backend.Repositories.BidRepo
         {
 
             var existingBid = await _ctx.Bids.FindAsync(id);
-         
-            if(existingBid == null || existingBid.Status != EBidStatus.Pendent)
+
+            if (existingBid == null || existingBid.Status != EBidStatus.Pendent)
             {
                 return null;
             }
