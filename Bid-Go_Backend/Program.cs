@@ -1,6 +1,11 @@
-﻿using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
+using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
@@ -22,9 +27,11 @@ using Stripe;
 using System.Text;
 using System.Text.Json;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
 
 //EmailService (SMTP)
@@ -49,6 +56,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -59,8 +67,12 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 
 var app = builder.Build();
@@ -98,6 +110,7 @@ app.UseExceptionHandler(config =>
     });
 });
 
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 
 app.Run();
