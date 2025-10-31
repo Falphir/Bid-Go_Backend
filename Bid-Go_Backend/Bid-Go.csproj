@@ -12,7 +12,15 @@
   <ItemGroup>
     <Compile Remove="Data\Migrations\**" />
     <EmbeddedResource Remove="Data\Migrations\**" />
+    <EmbeddedResource Remove="Services\**" />
     <None Remove="Data\Migrations\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\HomeController.cs" />
+    <Compile Remove="Data\Models\DTOs\TransportRequestRespondeDTO.cs" />
+    <Compile Remove="Data\Repositories\Register.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,13 +62,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

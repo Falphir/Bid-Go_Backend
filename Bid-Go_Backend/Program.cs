@@ -1,11 +1,26 @@
-﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
+using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Notifications;
+using Bid_Go_Backend.Data.Repositories.Login;
+using Bid_Go_Backend.Repositories.BidRepo;
+using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.ProfileRepo;
+using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,6 +35,19 @@ using System.Text.Json;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
+
+//EmailService (SMTP)
+builder.Services.AddSingleton<EmailService>(sp =>
+    new EmailService(
+        smtpHost: "smtp.sapo.pt",
+        smtpPort: 587,
+        smtpUser: "bidandgo2025@sapo.pt",
+        smtpPass: "Bidandgo2025"
+    )
+);
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -37,6 +65,21 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("default");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
+
+
+
+builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
+builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
+
+
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -73,13 +116,14 @@ app.UseExceptionHandler(config =>
         }
         else
         {
-            // Caso seja outro tipo de erro
-            var result = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado." });
+            context.Response.StatusCode = 500; 
+            var result = JsonSerializer.Serialize(new { message = feature?.Error.Message });
             await context.Response.WriteAsync(result);
         }
     });
 });
 
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 
 app.Run();
