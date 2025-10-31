@@ -1,12 +1,13 @@
 using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Chat;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
@@ -73,6 +74,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
