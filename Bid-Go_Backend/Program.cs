@@ -4,8 +4,6 @@ using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
-using Bid_Go_Backend.Data;
-using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Requests;
@@ -74,7 +72,7 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 
 builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
-builder.Services.AddScoped<IBidCRUD, BidsCRUD>();
+builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 
