@@ -1,0 +1,15 @@
+﻿using Bid_Go_Backend.Data.Models.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Bid_Go_Backend.Data.Repositories.Interfaces
+{
+    public interface IReviewRequestServiceRepository
+    {
+        Task<bool> SubmitReviewAsync(ReviewRequestServiceDTO reviewDTO);
+        Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId);
+    }
+}
