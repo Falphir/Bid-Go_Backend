@@ -24,7 +24,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>w 
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bid-Go_Backend\Bid-Go.csproj" />
