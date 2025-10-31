@@ -12,7 +12,7 @@ namespace Bid_Go_Backend.Data.Models.Enums
         Canceled,
         Completed,
         Pending,
-        Instransit,
+        InTransit,
         Draft,
         WaitingPickup
     }
