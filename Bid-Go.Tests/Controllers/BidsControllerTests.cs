@@ -36,7 +36,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         public async Task AddBid_ShouldReturnNotFound_WhenTransportRequestDoesNotExist()
         {
             // Arrange
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = 1,
                 Value = 100,
@@ -67,7 +67,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             _context.TransportRequests.Add(tr);
             _context.SaveChanges();
 
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
                 Value = 100,
@@ -97,7 +97,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             _context.TransportRequests.Add(tr);
             _context.SaveChanges();
 
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
                 Value = 0,
@@ -125,7 +125,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             _context.TransportRequests.Add(tr);
             _context.SaveChanges();
 
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
                 Value = 150,
@@ -188,7 +188,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             _context.TransportRequests.Add(tr);
             _context.SaveChanges();
 
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
                 Value = 100,
@@ -218,7 +218,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             _context.TransportRequests.Add(tr);
             _context.SaveChanges();
 
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
                 Value = 120,
@@ -256,7 +256,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             });
             _context.SaveChanges();
 
-            var bidDto = new BidDTO
+            var bidDto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
                 Value = 200,

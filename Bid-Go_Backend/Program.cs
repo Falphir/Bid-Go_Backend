@@ -1,19 +1,22 @@
+using Bid_Go_Backend.Data.Repositories.Bids;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data.Repositories.Chat;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
-using Bid_Go_Backend.Data.Repositories.Requests;
-using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Data.Repositories.Payments;
+using Bid_Go_Backend.Data.Repositories.Notifications;
+using Bid_Go_Backend.Data.Repositories.Register;
+using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Repositories.BidRepo;
-using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
+using Bid_Go_Backend.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -26,18 +29,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Stripe;
+
 using System.Text;
 using System.Text.Json;
+using Stripe;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adicionar controllers
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
 
 //EmailService (SMTP)
-builder.Services.AddSingleton<EmailService>(sp =>
+builder.Services.AddSingleton<IEmailService>(sp =>
     new EmailService(
         smtpHost: "smtp.sapo.pt",
         smtpPort: 587,
@@ -50,17 +56,34 @@ builder.Services.AddSingleton<EmailService>(sp =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "BidGo",
         Version = "v1"
     });
+
+    // Configuração para usar JWT no Swagger UI
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insira 'Bearer {token}'"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] {}
+        }
+    });
 });
-
-
-
-
 
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
@@ -68,8 +91,45 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
+// JWT Authentication
+var key = builder.Configuration["Jwt:Key"];
+var issuer = builder.Configuration["Jwt:Issuer"];
+var audience = builder.Configuration["Jwt:Audience"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+    };
+});
 
 
+
+// Authorization
+builder.Services.AddAuthorization(options =>
+{
+    // Política para Drivers
+    options.AddPolicy("DriverOnly", policy =>
+        policy.RequireClaim("userType", "Driver"));
+
+    // Política para Companies
+    options.AddPolicy("CompanyOnly", policy =>
+        policy.RequireClaim("userType", "Company"));
+});
+
+builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
 builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
 builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
@@ -87,10 +147,10 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
-
+builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();
 
 
 
@@ -98,33 +158,32 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
+});
+
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI(c=>
-{
 
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "BidGo API v1");
-c.RoutePrefix = "";
+    c.RoutePrefix = "";
 });
+
 
 app.UseExceptionHandler(config =>
 {
     config.Run(async context =>
     {
         context.Response.ContentType = "application/json";
-
         var feature = context.Features.Get<IExceptionHandlerFeature>();
 
         if (feature?.Error is UnauthorizedAccessException)
         {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            var result = JsonSerializer.Serialize(new
-            {
-                message = "Access denied. You are not allowed to access this resource."
-            });
+            context.Response.StatusCode = 401;
+            var result = JsonSerializer.Serialize(new { message = "Acesso negado. Você não tem permissão para acessar este recurso." });
             await context.Response.WriteAsync(result);
         }
         else
@@ -142,6 +201,11 @@ app.UseExceptionHandler(config =>
     });
 });
 
+// Autenticação e autorização
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map controllers
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 

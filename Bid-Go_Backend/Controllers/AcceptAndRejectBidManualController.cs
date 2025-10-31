@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/bids")] // Rota raiz
+    [Route("api/bids/manual")] // Rota raiz
     public class AcceptAndRejectBidManualController: ControllerBase
     {
 
