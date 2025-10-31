@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models
@@ -59,18 +60,30 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         public ERequestStatus Status { get; set; }
 
+        [Required]
+        public DateTime BiddingStartDate { get; set; }
+
+        [Required]
+        public DateTime BiddingEndDate { get; set; }
+
+        [Required]
+        public bool IsAutomaticSelectionEnabled { get; set; } = false;
+
+        [ForeignKey(nameof(SelectedBid))]
+        public int? SelectedBidId { get; set; }
+        public Bid? SelectedBid { get; set; }
+
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
         public Company? Company { get; set; } = null;
-
-        public Chat Chat { get; set; } = null!;
+       
+        [JsonIgnore]
+        public Chats Chat { get; set; } = null!;
 
         //Relação 1:1 com Payment
         public Payment? Payment { get; set; }
 
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
-
-
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }

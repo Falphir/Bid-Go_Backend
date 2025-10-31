@@ -1,10 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Bid_Go_Backend.Data.Models.Enums;
 
 namespace Bid_Go_Backend.Data.Repositories.Interfaces
 {
@@ -17,5 +13,6 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
         Task<List<TransportRequest>> GetAllByCompanyAsync(int companyId);
 
 
+        Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus status);
     }
 }

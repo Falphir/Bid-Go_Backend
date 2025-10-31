@@ -1,38 +1,93 @@
-﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
+using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
+using Bid_Go_Backend.Data.Repositories;
+using Bid_Go_Backend.Data.Repositories.Chat;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Data.Repositories.Login;
+using Bid_Go_Backend.Data.Repositories.Notifications;
+using Bid_Go_Backend.Data.Repositories.Register;
+using Bid_Go_Backend.Data.Repositories.Requests;
+using Bid_Go_Backend.Data.Repositories.Transport_Request;
+using Bid_Go_Backend.Repositories.BidRepo;
+using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.ProfileRepo;
+using Bid_Go_Backend.Services;
+using Bid_Go_Backend.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Stripe;
+
 using System.Text;
 using System.Text.Json;
+using Stripe;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adicionar controllers
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
+
+//EmailService (SMTP)
+builder.Services.AddSingleton<IEmailService>(sp =>
+    new EmailService(
+        smtpHost: "smtp.sapo.pt",
+        smtpPort: 587,
+        smtpUser: "bidandgo2025@sapo.pt",
+        smtpPass: "Bidandgo2025"
+    )
+);
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "BidGo",
         Version = "v1"
     });
-});
 
-builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
+    // Configuração para usar JWT no Swagger UI
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insira 'Bearer {token}'"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] {}
+        }
+    });
+});
 
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
@@ -40,13 +95,66 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
+// JWT Authentication
+var key = builder.Configuration["Jwt:Key"];
+var issuer = builder.Configuration["Jwt:Issuer"];
+var audience = builder.Configuration["Jwt:Audience"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+    };
+});
+
+
+
+// Authorization
+builder.Services.AddAuthorization(options =>
+{
+    // Política para Drivers
+    options.AddPolicy("DriverOnly", policy =>
+        policy.RequireClaim("userType", "Driver"));
+
+    // Política para Companies
+    options.AddPolicy("CompanyOnly", policy =>
+        policy.RequireClaim("userType", "Company"));
+});
+
+builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
+builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
+builder.Services.AddScoped<IProfileCrud, ProfileCRUD>();
+builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
+builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
+builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();
+
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
+});
 
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 
 var app = builder.Build();
 
@@ -63,25 +171,30 @@ app.UseExceptionHandler(config =>
 {
     config.Run(async context =>
     {
-        context.Response.StatusCode = 401;
         context.Response.ContentType = "application/json";
-
-        // Verificar se a exceção é de autorização
         var feature = context.Features.Get<IExceptionHandlerFeature>();
+
         if (feature?.Error is UnauthorizedAccessException)
         {
+            context.Response.StatusCode = 401;
             var result = JsonSerializer.Serialize(new { message = "Acesso negado. Você não tem permissão para acessar este recurso." });
             await context.Response.WriteAsync(result);
         }
         else
         {
-            // Caso seja outro tipo de erro
-            var result = JsonSerializer.Serialize(new { message = "Ocorreu um erro inesperado." });
+            context.Response.StatusCode = 500; 
+            var result = JsonSerializer.Serialize(new { message = feature?.Error.Message });
             await context.Response.WriteAsync(result);
         }
     });
 });
 
+// Autenticação e autorização
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map controllers
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 
 app.Run();
