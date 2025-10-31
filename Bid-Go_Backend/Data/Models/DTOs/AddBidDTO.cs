@@ -1,5 +1,4 @@
-﻿using Bid_Go_Backend.Data.Models.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Models.DTOs
 {
-    public class BidDTO
+    public class AddBidDTO
     {
-        public int BidId { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
@@ -20,10 +18,9 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         [Required]
         public DateTime DeliveryDeadline { get; set; }
 
-        public int DriverId { get; set; }  
+        public int DriverId { get; set; }
 
-        public int TransportRequestId { get; set; } 
+        public int TransportRequestId { get; set; }
 
-        public DriverDTO Driver { get; set; }
     }
 }
