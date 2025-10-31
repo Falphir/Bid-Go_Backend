@@ -82,7 +82,7 @@ namespace Bid_Go_Backend.Data
             // Relações e chaves estrangeiras
             modelBuilder.Entity<Bid>()
                 .HasOne(b => b.Driver)
-                .WithMany()
+                .WithMany(d => d.Bids)
                 .HasForeignKey(b => b.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
 

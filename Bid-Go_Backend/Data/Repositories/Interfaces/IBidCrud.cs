@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,6 @@ namespace Bid_Go_Backend.Repositories.Interface
         Task<List<Bid>> GetBidByTransportRequestAsync(int transportRequestId);
         Task<IEnumerable<Bid>> GetBidByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status);
         Task<bool> CancelBidAsync(int id);
+        Task<List<Bid>> GetActiveBidsByTransportRequestAsync(int transportRequestId, string? orderBy = "value", bool descending = false);
     }
 }

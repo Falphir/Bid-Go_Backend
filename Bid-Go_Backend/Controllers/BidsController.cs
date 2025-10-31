@@ -30,7 +30,6 @@ namespace Bid_Go_Backend.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == bidDto.TransportRequestId);
 
-
             if (transportRequest == null)
                 return NotFound("Transport request not found.");
 
@@ -54,12 +53,10 @@ namespace Bid_Go_Backend.Controllers
                 .Where(b => b.DriverId == bidDto.DriverId && b.TransportRequestId == bidDto.TransportRequestId)
                 .ToListAsync();
                     
-            bool hasActiveBid = existingBid.Any(b => b.Status != EBidStatus.Canceled);
-
+            bool hasActiveBid = existingBid.Any(b => b.Status != EBidStatus.Canceled && b.Status != EBidStatus.Rejected);
 
             if(hasActiveBid)
                 return BadRequest("Driver already has an active bid for this transport request.");
-
 
             var bid = new Bid
             {
@@ -70,12 +67,10 @@ namespace Bid_Go_Backend.Controllers
 
             };
 
-
             var createdBid = await _bidCrud.CreateBidAsync(bid);
             return CreatedAtAction(nameof(AddBid), new { id = createdBid.BidId }, createdBid);
 
         }
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBid(int id, [FromBody] BidUpdateDTO updateDTO)
@@ -109,7 +104,6 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
-
         // GET /api/bids?transportRequestId=X
         [HttpGet("by-request/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
@@ -134,7 +128,6 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
-
         // DELETE /licitacoes/{id}
         [HttpPatch("{id}/cancel")]
         public async Task<IActionResult> CancelBid(int id)
@@ -144,5 +137,31 @@ namespace Bid_Go_Backend.Controllers
                 return NotFound("Only pending bids can be canceled");
             return Ok("Bid canceled successfully.");
         }
+
+       
+
+        // GET /api/bids/active?transportRequestId=1&orderBy=value
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActiveBids(
+        [FromQuery] int transportRequestId,
+        [FromQuery] string orderBy = "value",
+        [FromQuery] bool descending = false)
+        {
+            var activeBids = await _bidCrud.GetActiveBidsByTransportRequestAsync(transportRequestId, orderBy, descending);
+
+            if (activeBids == null || !activeBids.Any())
+                return Ok(new { message = "No active bids found for this request.", bids = new List<object>() });
+
+            var result = activeBids.Select(b => new
+            {
+                b.BidId,
+                b.Value,
+                b.DeliveryDeadline,
+                Driver = new { b.DriverId, b.Driver.Name, b.Driver.Email }
+            });
+
+            return Ok(result);
+        }
     }
 }
+    

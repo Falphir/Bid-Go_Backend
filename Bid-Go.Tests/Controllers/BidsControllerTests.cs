@@ -173,7 +173,7 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("Only pending bids can be canceled", notFound.Value);
         }
 
-    [Fact]
+        [Fact]
         public async Task AddBid_ShouldReturnBadRequest_WhenDeliveryDeadlineBeforePickupDate()
         {
             var tr = new TransportRequest
@@ -380,6 +380,87 @@ namespace Bid_Go_Backend.Tests.Controllers
             Assert.Equal("No bids found for the given transport request ID and status.", notFound.Value);
 
         }
-    }
 
+        [Fact]
+        public async Task GetActiveBids_ShouldReturnOkWithProjectedResult_WhenActiveBidsExist()
+        {
+            // Arrange
+            var driver = new Driver { Name = "DriverName", Email = "d@example.com" };
+            var bids = new List<Bid>
+            {
+                new Bid
+                {
+                    BidId = 1,
+                    Value = 99,
+                    DeliveryDeadline = DateTime.UtcNow.AddDays(1),
+                    DriverId = 10,
+                    Driver = driver
+                }
+            };
+
+            _mockRepo.Setup(r => r.GetActiveBidsByTransportRequestAsync(5, It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(bids);
+
+            // Act
+            var result = await _controller.GetActiveBids(5, "value", false);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var enumerable = Assert.IsAssignableFrom<IEnumerable<object>>(ok.Value);
+            var list = enumerable.ToList();
+            Assert.Single(list);
+
+            var item = list[0];
+            var itemType = item.GetType();
+
+            var bidIdProp = itemType.GetProperty("BidId");
+            Assert.NotNull(bidIdProp);
+            Assert.Equal(1, (int)bidIdProp.GetValue(item));
+
+            var valueProp = itemType.GetProperty("Value");
+            Assert.NotNull(valueProp);
+            Assert.Equal(99, Convert.ToDecimal(valueProp.GetValue(item)));
+
+            var driverProp = itemType.GetProperty("Driver");
+            Assert.NotNull(driverProp);
+            var driverVal = driverProp.GetValue(item);
+            var driverType = driverVal.GetType();
+
+            var driverIdProp = driverType.GetProperty("DriverId");
+            var driverNameProp = driverType.GetProperty("Name");
+            var driverEmailProp = driverType.GetProperty("Email");
+
+            Assert.NotNull(driverNameProp);
+            Assert.Equal("DriverName", driverNameProp.GetValue(driverVal));
+            Assert.NotNull(driverEmailProp);
+            Assert.Equal("d@example.com", driverEmailProp.GetValue(driverVal));
+        }
+
+        [Fact]
+        public async Task GetActiveBids_ShouldReturnOkWithMessage_WhenNoActiveBidsExist()
+        {
+            // Arrange
+            _mockRepo.Setup(r => r.GetActiveBidsByTransportRequestAsync(5, It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(new List<Bid>());
+
+            // Act
+            var result = await _controller.GetActiveBids(5, "value", false);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var value = ok.Value;
+            var valueType = value.GetType();
+
+            var messageProp = valueType.GetProperty("message");
+            Assert.NotNull(messageProp);
+            Assert.Equal("No active bids found for this request.", messageProp.GetValue(value));
+
+            var bidsProp = valueType.GetProperty("bids");
+            Assert.NotNull(bidsProp);
+            var bidsVal = bidsProp.GetValue(value) as IEnumerable<object>;
+            Assert.NotNull(bidsVal);
+            Assert.Empty(bidsVal);
+        }
+
+    }
 }
