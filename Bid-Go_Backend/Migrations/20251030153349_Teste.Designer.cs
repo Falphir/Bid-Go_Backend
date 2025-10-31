@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251027142816_teste")]
-    partial class teste
+    [Migration("20251030153349_Teste")]
+    partial class Teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,14 +166,26 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DeadlineToPay")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("DriverId")
                         .HasColumnType("int");
 
-                    b.Property<float>("GrossValue")
-                        .HasColumnType("float");
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("longtext");
 
-                    b.Property<float>("NetValue")
-                        .HasColumnType("float");
+                    b.Property<decimal>("GrossValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NetValue")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
@@ -181,8 +193,14 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
-                    b.Property<float>("Tax")
-                        .HasColumnType("float");
+                    b.Property<string>("StripePaymentIntentId")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StripePaymentMethodId")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TransportRequestId")
                         .HasColumnType("int");
@@ -413,7 +431,7 @@ namespace Bid_Go_Backend.Migrations
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Bid", b =>
                 {
                     b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
-                        .WithMany()
+                        .WithMany("Bids")
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -570,6 +588,11 @@ namespace Bid_Go_Backend.Migrations
                     b.Navigation("Payment");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.Driver", b =>
+                {
+                    b.Navigation("Bids");
                 });
 #pragma warning restore 612, 618
         }

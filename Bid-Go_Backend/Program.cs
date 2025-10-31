@@ -1,6 +1,5 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Login;
@@ -22,6 +21,7 @@ using Stripe;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
+using Bid_Go_Backend.Data.Repositories.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 

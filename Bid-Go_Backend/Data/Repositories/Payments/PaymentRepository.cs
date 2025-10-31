@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using System;
@@ -9,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bid_Go_Backend.Data.Repositories
+namespace Bid_Go_Backend.Data.Repositories.Payments
 {
     public class PaymentRepository : IPaymentRepository
     {
