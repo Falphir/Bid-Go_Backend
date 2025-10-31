@@ -2,19 +2,17 @@
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Review;
 using Bid_Go_Backend.Controllers;
-using Bid_Go_Backend.Data;
+
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Chat;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
 using Bid_Go_Backend.Data.Repositories.Requests;
-using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
@@ -36,6 +34,8 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using System.Text;
 using System.Text.Json;
+using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
+using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -119,7 +119,6 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-
 // Authorization
 builder.Services.AddAuthorization(options =>
 {
@@ -154,7 +153,8 @@ builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticS
 builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 builder.Services.AddScoped<IProfileCRUD, ProfileCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
+builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -162,10 +162,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
-});
-
-builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 
 var app = builder.Build();
 
