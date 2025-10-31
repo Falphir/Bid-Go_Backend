@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
 
 
 namespace Bid_Go_Backend.Repositories.BidRepo
@@ -64,11 +65,11 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             if (existingBid.TransportRequest == null)
                 throw new Exception("Associated transport request not found");
 
-        
+
             if (existingBid.TransportRequest.Status != ERequestStatus.Active)
                 throw new Exception("The transport request is not active.");
 
-           
+
             bool alreadyAccepted = await _ctx.Bids
                 .AnyAsync(b => b.TransportRequestId == existingBid.TransportRequestId
                                && b.Status == EBidStatus.Accepted);
@@ -76,10 +77,10 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             if (alreadyAccepted)
                 throw new Exception("There is already an accepted bid for this request");
 
-        
+
             existingBid.Status = EBidStatus.Accepted;
 
-          
+
             var otherBids = await _ctx.Bids
             .Where(b => b.TransportRequestId == existingBid.TransportRequestId
                      && b.BidId != id
@@ -89,7 +90,7 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             foreach (var bid in otherBids)
                 bid.Status = EBidStatus.Rejected;
 
-       
+
             existingBid.TransportRequest.Status = ERequestStatus.Pending;
 
             await _ctx.SaveChangesAsync();
