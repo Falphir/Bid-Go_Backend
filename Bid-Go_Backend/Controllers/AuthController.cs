@@ -1,22 +1,30 @@
+﻿using Bid_Go_Backend.Data.Models.DTOs.LoginDTOs;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.DTOs;
+using Bid_Go_Backend.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace Bid_Go_Backend.Controllers
 {
-    private readonly IUserRepository _userRepository;
-    private readonly AuthService _authService;
-    private readonly EmailService _emailService;
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IAuthService _authService;
+    private readonly IEmailService _emailService;
     private readonly IMemoryCache _cache;
 
-    public AuthController(
+          public AuthController(
         IUserRepository userRepository,
-        AuthService authService,
-        EmailService emailService,
+        IAuthService authService,
+        IEmailService emailService,
         IMemoryCache cache)
     {
         _userRepository = userRepository;
@@ -24,8 +32,9 @@ public class AuthController : ControllerBase
         _emailService = emailService;
         _cache = cache;
     }
+    
 
-    [HttpPost("recover-password")]
+[HttpPost("recover-password")]
     public async Task<IActionResult> RecoverPassword([FromBody] RecoverPasswordRequestDTO request)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email);
@@ -66,5 +75,67 @@ public class AuthController : ControllerBase
         _cache.Remove(request.Token);
 
         return Ok(new { message = "Password alterada com sucesso." });
+    }
+
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        {
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user == null)
+                return Unauthorized(new { message = "Email inválido." });
+
+
+            Console.WriteLine($"Email do request: '{request.Email}'");
+            Console.WriteLine($"Password do request: '{request.Password}'");
+            Console.WriteLine($"Email do DB: '{user.Email}'");
+            Console.WriteLine($"Password do DB: '{user.Password}'");
+
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+                return Unauthorized(new { message = "Password incorreta." });
+
+
+            var token = _authService.GenerateJwtToken(user);
+        
+
+            return Ok(new LoginResponseDto
+            {
+
+                Token = token,
+                Expiration = DateTime.UtcNow.AddMinutes(60)
+            });
+        }
+        // Endpoint protegido com JWT
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult Me()
+        {
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            var userType = User.Claims.FirstOrDefault(c => c.Type == "userType")?.Value;
+
+            return Ok(new
+            {
+                message = "Endpoint protegido",
+                email = userEmail,
+            });
+        }
+
+        // Apenas Companys podem aceder
+        [HttpGet("company-endpoint")]
+        [Authorize(Policy = "CompanyOnly")]
+        public IActionResult CompanyEndpoint()
+        {
+            return Ok(new { message = "Apenas Companies conseguem ver isto!" });
+        }
+
+        // Apenas Drivers podem aceder
+        [HttpGet("driver-endpoint")]
+        [Authorize(Policy = "DriverOnly")]
+        public IActionResult DriverEndpoint()
+        {
+            return Ok(new { message = "Apenas Drivers conseguem ver isto!" });
+        }
+
     }
 }
