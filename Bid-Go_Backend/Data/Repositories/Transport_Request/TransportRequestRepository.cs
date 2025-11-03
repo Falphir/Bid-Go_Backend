@@ -27,6 +27,13 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             return await _context.TransportRequests.FindAsync(id);
         }
 
+        public async Task<TransportRequest?> GetByIdBidsAsync(int id)
+        {
+            return await _context.TransportRequests
+                  .Include(r => r.Bids)
+                  .FirstOrDefaultAsync(r => r.TransportRequestId == id);
+        }
+
         public async Task<List<TransportRequest>> GetAllByCompanyAsync(int companyId)
         {
             return await _context.TransportRequests

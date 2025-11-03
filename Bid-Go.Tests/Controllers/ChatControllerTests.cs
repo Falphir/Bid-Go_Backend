@@ -18,12 +18,13 @@ namespace Bid_Go_Tests.Controllers
     public class ChatControllerTests
     {
         private readonly Mock<IChatRepository> _mockRepo;
+        private readonly Mock<ITransportRequestRepository> _mockRequestRepo;
         private readonly ChatController _controller;
 
         public ChatControllerTests()
         {
             _mockRepo = new Mock<IChatRepository>();
-            _controller = new ChatController(_mockRepo.Object);
+            _controller = new ChatController(_mockRepo.Object, _mockRequestRepo.Object);
         }
 
 

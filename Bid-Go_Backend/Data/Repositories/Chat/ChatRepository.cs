@@ -24,6 +24,14 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
         }
 
 
+        public async Task<Chats> GetChatByIdAsync(int chatId)
+        {
+            return await _context.Chats
+                .Include(c => c.TransportRequest)
+                .FirstOrDefaultAsync(c => c.ChatId == chatId);
+        }
+
+
         public async Task<IEnumerable<Message>> GetMessagesAsync(int chatId)
         {
             return await _context.Messages
