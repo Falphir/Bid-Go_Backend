@@ -21,6 +21,6 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public decimal Height { get; set; }
         public string Image { get; set; }
         public decimal MaxPrice { get; set; }
-        public ERequestStatus Status { get; internal set; }
+        public ERequestStatus Status { get; set; }
     }
 }

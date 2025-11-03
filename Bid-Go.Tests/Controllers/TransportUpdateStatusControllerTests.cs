@@ -67,20 +67,31 @@ namespace Bid_Go.Tests.Controllers
             var companyId = 1;
             var requestId = 1;
 
-            var request = new TransportRequest
-            {
-                TransportRequestId = requestId,
-                CompanyId = companyId
-            };
-
             var requestStatus = new RequestStatusDTO
             {
                 Status = ERequestStatus.Completed
             };
 
+            var responseDto = new TransportRequestResponseDTO
+            {
+                Origin = "Lisboa",
+                Destination = "Coimbra",
+                Package = "Envelope",
+                PickupDate = DateTime.Now,
+                DeliveryDate = DateTime.Now.AddDays(1),
+                Weight = 2,
+                Volume = 1,
+                Length = 0.5m,
+                Width = 0.5m,
+                Height = 0.5m,
+                Image = "image.jpg",
+                MaxPrice = 50,
+                Status = ERequestStatus.Completed
+            };
+
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestId, companyId, requestStatus.Status))
-                .ReturnsAsync(request);
+                .ReturnsAsync(responseDto); // 👈 devolve o DTO correto
 
             // Act
             var result = await _controller.UpdateRequestStatus(requestId, companyId, requestStatus);
@@ -89,6 +100,7 @@ namespace Bid_Go.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
         }
+
 
         [Fact]
         public async Task UpdateRequestStatus_ShouldReturnBadRequest_WhenRepoThrowsInvalidOperation()
@@ -137,7 +149,7 @@ namespace Bid_Go.Tests.Controllers
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, ERequestStatus.Canceled))
-                .ReturnsAsync((TransportRequest?)null);
+                .ReturnsAsync((TransportRequestResponseDTO?)null);
 
             // Act
             var result = await _controller.CancelRequestStatus(requestID, companyID);
@@ -153,16 +165,26 @@ namespace Bid_Go.Tests.Controllers
             int requestID = 10;
             int companyID = 1;
 
-            var request = new TransportRequest
+            var responseDto = new TransportRequestResponseDTO
             {
-                TransportRequestId = requestID,
-                CompanyId = companyID,
+                Origin = "Lisboa",
+                Destination = "Porto",
+                Package = "Caixa",
+                PickupDate = DateTime.Now,
+                DeliveryDate = DateTime.Now.AddDays(1),
+                Weight = 10,
+                Volume = 5,
+                Length = 2,
+                Width = 1,
+                Height = 1,
+                Image = "image.jpg",
+                MaxPrice = 100,
                 Status = ERequestStatus.Canceled
             };
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, ERequestStatus.Canceled))
-                .ReturnsAsync(request);
+                .ReturnsAsync(responseDto); // 👈 devolve um DTO válido
 
             // Act
             var result = await _controller.CancelRequestStatus(requestID, companyID);
@@ -171,6 +193,7 @@ namespace Bid_Go.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
         }
+
 
         [Fact]
         public async Task CancelRequestStatus_ShouldReturnBadRequest_WhenRepoThrowsInvalidOperation()

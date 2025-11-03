@@ -29,7 +29,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             var user = await _context.Users.FindAsync(companyID);
             if (user == null)
             {
-                throw new InvalidOperationException("Utilizador não encontrado.");
+                throw new InvalidOperationException("User not found.");
             }
 
             bool isValidTransition = false;
@@ -57,16 +57,15 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             }
             else
             {
-                throw new InvalidOperationException("Tipo de utilizador não suportado.");
+                throw new InvalidOperationException("User type not supported.");
             }
 
             if (!isValidTransition)
             {
                 throw new InvalidOperationException(
-                    $"Não é possível mudar o estado de '{request.Status}' para '{newStatus}' para o tipo '{userRole}'.");
+                    $"It is not possible to change the state of '{request.Status}' to '{newStatus}' for the type '{userRole}'.");
             }
 
-            // Atualiza o estado
             request.Status = newStatus;
             _context.TransportRequests.Update(request);
 
@@ -80,7 +79,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
                 {
                     await _notificationRepo.CreateAsync(
                         bid.DriverId,
-                        "O pedido associado à sua licitação foi cancelado pela empresa.",
+                        "The order associated with your bid was cancelled by the company.",
                         ENotificationType.Canceled,
                         bid.BidId,
                         bid.TransportRequestId
@@ -88,7 +87,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 
                     await _notificationRepo.SendAsync(
                         bid.DriverId,
-                        "O pedido associado à sua licitação foi cancelado pela empresa.",
+                        "The order associated with your bid was cancelled by the company.",
                         ENotificationType.Canceled
                     );
 
@@ -101,7 +100,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 
             await _context.SaveChangesAsync();
 
-            // Retorna DTO limpo
+          
             return new TransportRequestResponseDTO
             {
                 Origin = request.Origin,
