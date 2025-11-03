@@ -15,10 +15,11 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
     public class PaymentRepository : IPaymentRepository
     {
         private readonly BidGoDbContext _ctx;
-
-        public PaymentRepository(BidGoDbContext ctx)
+        private readonly INotificationRepository _notificationRepo;
+        public PaymentRepository(BidGoDbContext ctx, INotificationRepository notificationRepo)
         {
             _ctx = ctx;
+            _notificationRepo = notificationRepo;
         }
 
         public async Task<PaymentResultDTO> ProcessPaymentAsync(CreatePaymentRequestDTO request)
@@ -78,7 +79,21 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                     payment.PaymentStatus = EPaymentStatus.Confirmed;
                     payment.CompletedAt = DateTime.UtcNow;
                     payment.FailureReason = null;
+
+                    await _notificationRepo.CreateAsync(
+                                  payment.CompanyId,
+                                  $"Payment for transport request #{payment.TransportRequestId} confirmed successfully.",
+                                  ENotificationType.Confirmed_Payment,
+                                  null,
+                                  payment.TransportRequestId
+                              );
+                    await _notificationRepo.SendAsync(
+                        payment.CompanyId,
+                        $"Payment for transport request #{payment.TransportRequestId} confirmed successfully.",
+                        ENotificationType.Confirmed_Payment
+                    );
                 }
+            
                 else
                 {
                     payment.PaymentStatus = EPaymentStatus.Failed;
@@ -168,6 +183,22 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                     payment.PaymentStatus = EPaymentStatus.Confirmed;
                     payment.CompletedAt = DateTime.UtcNow;
                     payment.FailureReason = null;
+
+                    await _ctx.SaveChangesAsync();
+
+                    await _notificationRepo.CreateAsync(
+                        payment.CompanyId,
+                        "Your payment was successfully completed after retry.",
+                        ENotificationType.Confirmed_Payment,
+                        null,
+                        payment.TransportRequestId
+                    );
+
+                    await _notificationRepo.SendAsync(
+                        payment.CompanyId,
+                        "Your payment was successfully completed after retry.",
+                        ENotificationType.Confirmed_Payment
+                    );
                 }
                 else
                 {
@@ -181,9 +212,9 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                 payment.PaymentStatus = EPaymentStatus.Failed;
                 payment.CompletedAt = null;
                 payment.FailureReason = ex.Message;
+                await _ctx.SaveChangesAsync();
             }
 
-            await _ctx.SaveChangesAsync();
 
             return new PaymentResultDTO
             {

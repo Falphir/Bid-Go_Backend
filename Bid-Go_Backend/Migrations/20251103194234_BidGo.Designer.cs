@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251103161451_BidGo")]
+    [Migration("20251103194234_BidGo")]
     partial class BidGo
     {
         /// <inheritdoc />
