@@ -27,7 +27,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             return await _context.TransportRequests.FindAsync(id);
         }
 
-        public async Task<TransportRequest?> GetByIdBidsAsync(int id)
+        public async Task<TransportRequest?> GetRequestWithBidsByIdAsync(int id)
         {
             return await _context.TransportRequests
                   .Include(r => r.Bids)

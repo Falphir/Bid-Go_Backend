@@ -4,7 +4,6 @@ using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stripe;
 using System.Security.Claims;
 
 namespace Bid_Go_Backend.Controllers
@@ -25,36 +24,23 @@ namespace Bid_Go_Backend.Controllers
 
         private async Task<bool> UserHasAccessToChatAsync(int chatId)
         {
-            // Obter o chat completo (com o pedido de transporte)
             var chat = await _chatRepository.GetChatByIdAsync(chatId);
-            if (chat == null)
+            if (chat == null) return false;
+
+            var request = await _requestRepository.GetRequestWithBidsByIdAsync(chat.TransportRequestId);
+            if (request == null) return false;
+
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            var roleClaim = User.FindFirst("userType")?.Value;
+
+            if (!int.TryParse(userIdClaim, out int userId) || string.IsNullOrEmpty(roleClaim))
                 return false;
 
-            // Obter o pedido de transporte associado
-            var request = await _requestRepository.GetByIdAsync(chat.TransportRequestId);
-            if (request == null)
-                return false;
-
-            // Extrair ID e role do utilizador autenticado
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(roleClaim))
-                return false;
-
-            int userId = int.Parse(userIdClaim);
-
-            // Encontrar a Bid aceite 
             var acceptedBid = request.Bids?.FirstOrDefault(b => b.Status == EBidStatus.Accepted);
-            if (acceptedBid == null)
-                return false;
+            if (acceptedBid == null) return false;
 
-            // Verificar se o utilizador autenticado é o motorista da bid aceite ou a empresa do pedido
-            bool isAuthorized =
-                (roleClaim == "Driver" && acceptedBid.DriverId == userId) ||
-                (roleClaim == "Company" && request.CompanyId == userId);
-
-            return isAuthorized;
+            return (roleClaim == "Driver" && acceptedBid.DriverId == userId) ||
+                   (roleClaim == "Company" && request.CompanyId == userId);
         }
 
 
@@ -69,8 +55,6 @@ namespace Bid_Go_Backend.Controllers
 
                 if (!await UserHasAccessToChatAsync(chat.ChatId))
                     return StatusCode(403, new { message = "Acesso negado. Não pertence a este pedido de transporte." });
-
-
 
                 var chatDto = new ChatDTO
                 {
@@ -102,14 +86,36 @@ namespace Bid_Go_Backend.Controllers
                 if (!await UserHasAccessToChatAsync(chatId))
                     return StatusCode(403, new { message = "Acesso negado. Não pertence a este pedido de transporte." });
 
+                var chat = await _chatRepository.GetChatByIdAsync(chatId);
+                var request = await _requestRepository.GetByIdAsync(chat.TransportRequestId);
 
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                var role = User.FindFirst(ClaimTypes.Role)!.Value;
+
+                int driverId = 0;
+                int companyId = 0;
+
+                if (role == "Driver")
+                {
+                    driverId = userId;
+                    companyId = request.CompanyId;
+                }
+                else if (role == "Company")
+                {
+                    companyId = userId;
+                    var acceptedBid = request.Bids?.FirstOrDefault(b => b.Status == EBidStatus.Accepted);
+                    if (acceptedBid == null)
+                        return BadRequest(new { message = "Nenhuma bid aceite encontrada." });
+
+                    driverId = acceptedBid.DriverId;
+                }
 
                 var message = new Message
                 {
                     ChatId = chatId,
                     Context = dto.Context,
-                    DriverId = dto.DriverId ?? 0,
-                    CompanyId = dto.CompanyId ?? 0
+                    DriverId = driverId,
+                    CompanyId = companyId
                 };
 
                 var result = await _chatRepository.SendMessageAsync(message);
@@ -138,11 +144,12 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+
         [HttpGet("{chatId}/messages")]
         public async Task<IActionResult> GetMessages(int chatId)
         {
             if (!await UserHasAccessToChatAsync(chatId))
-                return Forbid();
+                return StatusCode(403, new { message = "Acesso negado. Não pertence a este pedido de transporte." });
 
             var messages = await _chatRepository.GetMessagesAsync(chatId);
             return Ok(messages);

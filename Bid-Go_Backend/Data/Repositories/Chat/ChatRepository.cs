@@ -19,8 +19,7 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
             return await _context.Chats
                 .Include(c => c.Messages)
                 .Include(c => c.TransportRequest)
-                .FirstOrDefaultAsync(c => c.TransportRequestId == requestId)
-                ?? throw new KeyNotFoundException("Chat não encontrado.");
+                .FirstOrDefaultAsync(c => c.TransportRequestId == requestId);
         }
 
 
