@@ -89,8 +89,10 @@ namespace Bid_Go_Backend.Controllers
                 var chat = await _chatRepository.GetChatByIdAsync(chatId);
                 var request = await _requestRepository.GetByIdAsync(chat.TransportRequestId);
 
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-                var role = User.FindFirst(ClaimTypes.Role)!.Value;
+                var userId = int.Parse(User.FindFirst("userId")!.Value);
+                var role = User.FindFirst("userType")!.Value;
+
+    
 
                 int driverId = 0;
                 int companyId = 0;
