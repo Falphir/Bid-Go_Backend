@@ -29,6 +29,9 @@
 
   <ItemGroup>
     <Compile Remove="Data\Models\DTOs\TransportRequestDTO.cs" />
+    <Compile Remove="Migrations\20251103162837_lds.cs" />
+    <Compile Remove="Migrations\20251103162837_lds.Designer.cs" />
+    <Compile Remove="Migrations\BidGoDbContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>

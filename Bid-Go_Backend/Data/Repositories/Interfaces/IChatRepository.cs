@@ -10,6 +10,7 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
     public interface IChatRepository
     {
         Task<Chats> GetChatByRequestIdAsync(int requestId);
+        Task<Chats> GetChatByIdAsync(int requestId); 
         Task<IEnumerable<Message>> GetMessagesAsync(int chatId);
         Task<Message> SendMessageAsync(Message message);
         Task<Chats> CreateChatFromAcceptedBidAsync(int transportRequestId);
