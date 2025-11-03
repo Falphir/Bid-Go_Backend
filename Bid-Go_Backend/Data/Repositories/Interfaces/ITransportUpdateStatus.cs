@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,6 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
     public interface ITransportUpdateStatus
     {
 
-        Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus status);
+        Task<TransportRequestResponseDTO?> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus);
     }
 }

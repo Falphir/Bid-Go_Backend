@@ -114,7 +114,7 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             {
                 await _notificationRepo.CreateAsync(
                     bid.DriverId,
-                    "A sua licitação foi recusada.",
+                    "Your bid was rejected.",
                     ENotificationType.Rejected,
                     bid.BidId,
                     bid.TransportRequestId
@@ -122,7 +122,7 @@ namespace Bid_Go_Backend.Repositories.BidRepo
 
                 await _notificationRepo.SendAsync(
                     bid.DriverId,
-                    "A sua licitação foi recusada.",
+                    "Your bid was rejected.",
                     ENotificationType.Rejected
                 );
             }
@@ -159,7 +159,7 @@ namespace Bid_Go_Backend.Repositories.BidRepo
 
             await _notificationRepo.CreateAsync(
                 existingBid.DriverId,
-                "A sua licitação foi recusada.",
+                "Your bid was rejected.",
                 ENotificationType.Rejected,
                 existingBid.BidId,
                 existingBid.TransportRequestId
@@ -167,7 +167,7 @@ namespace Bid_Go_Backend.Repositories.BidRepo
 
             await _notificationRepo.SendAsync(
                 existingBid.DriverId,
-                "A sua licitação foi recusada.",
+                "Your bid was rejected.",
                 ENotificationType.Rejected
             );
         }

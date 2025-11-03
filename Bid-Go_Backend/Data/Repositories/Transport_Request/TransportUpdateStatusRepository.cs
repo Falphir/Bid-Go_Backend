@@ -2,20 +2,25 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 {
     public class TransportUpdateStatusRepository : ITransportUpdateStatus
     {
         private readonly BidGoDbContext _context;
-        public TransportUpdateStatusRepository(BidGoDbContext context)
+        private readonly INotificationRepository _notificationRepo;
+        public TransportUpdateStatusRepository(BidGoDbContext context, INotificationRepository notificationRepo)
         {
             _context = context;
+            _notificationRepo = notificationRepo;
         }
 
-        public async Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus)
+        public async Task<TransportRequestResponseDTO> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus)
         {
-            var request = await _context.TransportRequests.FindAsync(id);
+            var request = await _context.TransportRequests
+                 .Include(r => r.Bids)
+                 .FirstOrDefaultAsync(r => r.TransportRequestId == id);
             if (request == null)
             {
                 throw new Exception("Transport request not found.");
@@ -64,10 +69,55 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             // Atualiza o estado
             request.Status = newStatus;
             _context.TransportRequests.Update(request);
+
+            if (userRole == "Company" && newStatus == ERequestStatus.Canceled)
+            {
+                var pendingBids = request.Bids
+                    .Where(b => b.Status == EBidStatus.Pendent)
+                    .ToList();
+
+                foreach (var bid in pendingBids)
+                {
+                    await _notificationRepo.CreateAsync(
+                        bid.DriverId,
+                        "O pedido associado à sua licitação foi cancelado pela empresa.",
+                        ENotificationType.Canceled,
+                        bid.BidId,
+                        bid.TransportRequestId
+                    );
+
+                    await _notificationRepo.SendAsync(
+                        bid.DriverId,
+                        "O pedido associado à sua licitação foi cancelado pela empresa.",
+                        ENotificationType.Canceled
+                    );
+
+                    bid.Status = EBidStatus.Canceled;
+                }
+
+                if (pendingBids.Any())
+                    _context.Bids.UpdateRange(pendingBids);
+            }
+
             await _context.SaveChangesAsync();
 
-            return request;
+            // Retorna DTO limpo
+            return new TransportRequestResponseDTO
+            {
+                Origin = request.Origin,
+                Destination = request.Destination,
+                Package = request.Package,
+                PickupDate = request.PickupDate,
+                DeliveryDate = request.DeliveryDate,
+                Weight = request.Weight,
+                Volume = request.Volume,
+                Length = request.Length,
+                Width = request.Width,
+                Height = request.Height,
+                Image = request.Image,
+                MaxPrice = request.MaxPrice,
+                Status = request.Status
+            };
         }
-
     }
 }
