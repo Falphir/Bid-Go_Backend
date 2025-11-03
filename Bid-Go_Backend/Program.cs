@@ -155,6 +155,7 @@ builder.Services.AddScoped<IProfileCRUD, ProfileCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
+builder.Services.AddScoped<ITransportUpdateStatus, TransportUpdateStatusRepository>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

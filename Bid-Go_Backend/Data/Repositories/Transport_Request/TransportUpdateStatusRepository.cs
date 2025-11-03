@@ -2,20 +2,25 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 {
     public class TransportUpdateStatusRepository : ITransportUpdateStatus
     {
         private readonly BidGoDbContext _context;
-        public TransportUpdateStatusRepository(BidGoDbContext context)
+        private readonly INotificationRepository _notificationRepo;
+        public TransportUpdateStatusRepository(BidGoDbContext context, INotificationRepository notificationRepo)
         {
             _context = context;
+            _notificationRepo = notificationRepo;
         }
 
-        public async Task<TransportRequest> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus)
+        public async Task<TransportRequestResponseDTO> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus)
         {
-            var request = await _context.TransportRequests.FindAsync(id);
+            var request = await _context.TransportRequests
+                 .Include(r => r.Bids)
+                 .FirstOrDefaultAsync(r => r.TransportRequestId == id);
             if (request == null)
             {
                 throw new Exception("Transport request not found.");
@@ -24,7 +29,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             var user = await _context.Users.FindAsync(companyID);
             if (user == null)
             {
-                throw new InvalidOperationException("Utilizador não encontrado.");
+                throw new InvalidOperationException("User not found.");
             }
 
             bool isValidTransition = false;
@@ -52,22 +57,66 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
             }
             else
             {
-                throw new InvalidOperationException("Tipo de utilizador não suportado.");
+                throw new InvalidOperationException("User type not supported.");
             }
 
             if (!isValidTransition)
             {
                 throw new InvalidOperationException(
-                    $"Não é possível mudar o estado de '{request.Status}' para '{newStatus}' para o tipo '{userRole}'.");
+                    $"It is not possible to change the state of '{request.Status}' to '{newStatus}' for the type '{userRole}'.");
             }
 
-            // Atualiza o estado
             request.Status = newStatus;
             _context.TransportRequests.Update(request);
+
+            if (userRole == "Company" && newStatus == ERequestStatus.Canceled)
+            {
+                var pendingBids = request.Bids
+                    .Where(b => b.Status == EBidStatus.Pendent)
+                    .ToList();
+
+                foreach (var bid in pendingBids)
+                {
+                    await _notificationRepo.CreateAsync(
+                        bid.DriverId,
+                        "The order associated with your bid was cancelled by the company.",
+                        ENotificationType.Canceled,
+                        bid.BidId,
+                        bid.TransportRequestId
+                    );
+
+                    await _notificationRepo.SendAsync(
+                        bid.DriverId,
+                        "The order associated with your bid was cancelled by the company.",
+                        ENotificationType.Canceled
+                    );
+
+                    bid.Status = EBidStatus.Canceled;
+                }
+
+                if (pendingBids.Any())
+                    _context.Bids.UpdateRange(pendingBids);
+            }
+
             await _context.SaveChangesAsync();
 
-            return request;
+          
+            return new TransportRequestResponseDTO
+            {
+                Origin = request.Origin,
+                Destination = request.Destination,
+                Package = request.Package,
+                PickupDate = request.PickupDate,
+                DeliveryDate = request.DeliveryDate,
+                Weight = request.Weight,
+                Volume = request.Volume,
+                Length = request.Length,
+                Width = request.Width,
+                Height = request.Height,
+                Image = request.Image,
+                MaxPrice = request.MaxPrice,
+                Status = request.Status
+            };
         }
-
     }
 }
