@@ -11,10 +11,12 @@ namespace Bid_Go_Backend.Repositories.BidRepo
     public class AcceptAndRejectBidManual : IAcceptAndRejectBidManual
     {
         private readonly BidGoDbContext _ctx;
+        private readonly INotificationRepository _notificationRepo;
 
-        public AcceptAndRejectBidManual(BidGoDbContext ctx)
+        public AcceptAndRejectBidManual(BidGoDbContext ctx, INotificationRepository notificationRepo)
         {
             _ctx = ctx;
+            _notificationRepo = notificationRepo;
         }
 
         //Get bid by id
@@ -94,7 +96,38 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             existingBid.TransportRequest.Status = ERequestStatus.Pending;
 
             await _ctx.SaveChangesAsync();
+
+            await _notificationRepo.CreateAsync(
+                existingBid.DriverId,
+                "You bid was accepted.",
+                ENotificationType.Accepted,
+                existingBid.BidId,
+                existingBid.TransportRequestId);
+
+
+            await _notificationRepo.SendAsync(
+                existingBid.DriverId,
+                "Your bid was accepted",
+                ENotificationType.Accepted);
+
+            foreach (var bid in otherBids)
+            {
+                await _notificationRepo.CreateAsync(
+                    bid.DriverId,
+                    "A sua licitação foi recusada.",
+                    ENotificationType.Rejected,
+                    bid.BidId,
+                    bid.TransportRequestId
+                );
+
+                await _notificationRepo.SendAsync(
+                    bid.DriverId,
+                    "A sua licitação foi recusada.",
+                    ENotificationType.Rejected
+                );
+            }
         }
+        
 
 
         public async Task RejectBidAsync(int id)
@@ -122,7 +155,22 @@ namespace Bid_Go_Backend.Repositories.BidRepo
             existingBid.Status = EBidStatus.Rejected;
 
             await _ctx.SaveChangesAsync();
+
+
+            await _notificationRepo.CreateAsync(
+                existingBid.DriverId,
+                "A sua licitação foi recusada.",
+                ENotificationType.Rejected,
+                existingBid.BidId,
+                existingBid.TransportRequestId
+);
+
+            await _notificationRepo.SendAsync(
+                existingBid.DriverId,
+                "A sua licitação foi recusada.",
+                ENotificationType.Rejected
+            );
         }
+    }
 
     }
-}
