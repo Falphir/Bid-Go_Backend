@@ -40,7 +40,6 @@ using Bid_Go_Backend.Services.Bids;
 using Bid_Go_Backend.Services.Profile;
 using Bid_Go_Backend.Repositories;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Adicionar controllers
