@@ -13,12 +13,13 @@ namespace Bid_Go_Backend.Repositories.BidRepo
         private readonly BidGoDbContext _ctx;
         public AcceptAndRejectBidManualRepository(BidGoDbContext ctx) => _ctx = ctx;
 
-        public Task<Bid?> GetByIdAsync(int id) =>
-            _ctx.Bids.Include(b => b.TransportRequest).FirstOrDefaultAsync(b => b.BidId == id);
+        public async Task<Bid?> GetByIdAsync(int id) =>
+             await _ctx.Bids
+            .Include(b => b.TransportRequest).FirstOrDefaultAsync(b => b.BidId == id);
+        
 
         public Task<List<Bid>> GetByTransportRequestAsync(int transportRequestId) =>
             _ctx.Bids
-                .AsNoTracking()
                 .Where(b => b.TransportRequestId == transportRequestId
                          && b.Status != EBidStatus.Canceled
                          && b.Status != EBidStatus.Expired)
