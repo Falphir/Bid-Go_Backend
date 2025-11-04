@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 
 namespace Bid_Go_Backend.Data.Repositories.Interfaces
 {
@@ -11,7 +12,7 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
     {
         Task<Chats> GetChatByRequestIdAsync(int requestId);
         Task<Chats> GetChatByIdAsync(int requestId); 
-        Task<IEnumerable<Message>> GetMessagesAsync(int chatId);
+        Task<IEnumerable<ChatMessageDTO>> GetMessagesAsync(int chatId);
         Task<Message> SendMessageAsync(Message message);
         Task<Chats> CreateChatFromAcceptedBidAsync(int transportRequestId);
     }

@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -32,13 +33,23 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
         }
 
 
-        public async Task<IEnumerable<Message>> GetMessagesAsync(int chatId)
+        public async Task<IEnumerable<ChatMessageDTO>> GetMessagesAsync(int chatId)
         {
             return await _context.Messages
                 .Where(m => m.ChatId == chatId)
+                .Select(m => new ChatMessageDTO
+                {
+                    Id = m.Id,
+                    Context = m.Context,
+                    TimeStamp = m.TimeStamp,
+                    ChatId = m.ChatId,
+                    DriverId = m.DriverId,
+                    CompanyId = m.CompanyId
+                })
                 .OrderBy(m => m.TimeStamp)
                 .ToListAsync();
         }
+
 
         public async Task<Message> SendMessageAsync(Message message)
         {
