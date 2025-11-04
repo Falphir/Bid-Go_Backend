@@ -1,23 +1,20 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ReviewRequestServiceController : ControllerBase
+    public class ReviewRequestController : ControllerBase
     {
-        private readonly IReviewRequestServiceRepository repository;
+        private readonly IReviewRequestService _service;
 
-        public ReviewRequestServiceController(IReviewRequestServiceRepository repository)
+        public ReviewRequestController(IReviewRequestService service)
         {
-            this.repository = repository;
+            _service = service;
         }
 
         [HttpPost("submit-review")]
@@ -25,7 +22,7 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                bool result = await repository.SubmitReviewAsync(reviewDTO);
+                bool result = await _service.SubmitReviewAsync(reviewDTO);
                 if (result)
                 {
                     return Ok(new { message = "Review submetida com Sucesso." });
@@ -54,7 +51,7 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                var reviews = await repository.GetReviewByServiceIdAsync(request_id);
+                var reviews = await _service.GetReviewByServiceIdAsync(request_id);
                 return Ok(reviews);
             }
             catch (InvalidOperationException ex)

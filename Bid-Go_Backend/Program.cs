@@ -34,7 +34,10 @@ using Bid_Go_Backend.Services.Chat;
 using Bid_Go_Backend.Services.Auth;
 using Bid_Go_Backend.Services.Email;
 using ITransportRequestsPageService = Bid_Go_Backend.Services.ITransportRequestsPageService;
-
+using Bid_Go_Backend.Services.Interfaces;
+using Bid_Go_Backend.Services.History;
+using Bid_Go_Backend.Services.Transport_Request;
+using Bid_Go_Backend.Services.Review;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -149,8 +152,11 @@ builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticS
 builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
 builder.Services.AddScoped<IProfileCRUD, ProfileCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
-builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
+builder.Services.AddScoped<IReviewRequestService, ReviewRequestService>();
+builder.Services.AddScoped<IReviewRequestRepository, ReviewRequestRepository>();
+builder.Services.AddScoped<ITransportUpdateStatusService, TransportUpdateStatusService>();
 builder.Services.AddScoped<ITransportUpdateStatus, TransportUpdateStatusRepository>();
 
 builder.Services.AddControllers()
