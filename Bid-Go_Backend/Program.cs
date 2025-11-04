@@ -1,18 +1,14 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Review;
-using Bid_Go_Backend.Controllers;
-
 using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Chat;
-using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
-using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
@@ -23,8 +19,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,7 +30,7 @@ using System.Text;
 using System.Text.Json;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
-using Bid_Go_Backend.Services.Interfaces;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,15 +40,6 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
 
-//EmailService (SMTP)
-builder.Services.AddSingleton<IEmailService>(sp =>
-    new EmailService(
-        smtpHost: "smtp.sapo.pt",
-        smtpPort: 587,
-        smtpUser: "bidandgo2025@sapo.pt",
-        smtpPass: "Bidandgo2025"
-    )
-);
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -149,7 +134,15 @@ builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();

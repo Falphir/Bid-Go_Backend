@@ -21,7 +21,7 @@ namespace Bid_Go.Tests.Controllers
     public class AuthControllerTests
     {
         private readonly Mock<IUserRepository> _mockRepo;
-        private readonly Mock<IAuthService> _mockAuthService;
+        private readonly Mock<IAuthRepository> _mockAuthService;
         private readonly Mock<IEmailService> _mockEmailService;
         private readonly IMemoryCache _memoryCache;
         private readonly BidGoDbContext _context;
@@ -44,7 +44,7 @@ namespace Bid_Go.Tests.Controllers
             _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
             // Services mockados via interface (melhor prática)
-            _mockAuthService = new Mock<IAuthService>();
+            _mockAuthService = new Mock<IAuthRepository>();
             _mockEmailService = new Mock<IEmailService>();
 
             // Controller que será testado
