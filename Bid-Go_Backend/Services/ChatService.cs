@@ -56,15 +56,16 @@ namespace Bid_Go_Backend.Services
 
             return (200, messages);
         }
+
         public async Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageDTO dto, ClaimsPrincipal user)
         {
             try
             {
-                // Verifica acesso
+   
                 if (!await UserHasAccessToChat(user, chatId))
                     return (403, new { message = "Acesso negado." });
 
-                // Busca o chat e pedido associado
+        
                 var chat = await _chatRepository.GetChatByIdAsync(chatId);
                 if (chat == null)
                     return (404, new { message = "Chat não encontrado." });
@@ -73,7 +74,7 @@ namespace Bid_Go_Backend.Services
                 if (request == null)
                     return (404, new { message = "Pedido de transporte não encontrado." });
 
-                // Regras de negócio — bloqueios conforme status do pedido
+     
                 if (request.Status == ERequestStatus.Canceled)
                 {
                    
@@ -86,11 +87,11 @@ namespace Bid_Go_Backend.Services
                     return (400, new { message = "Não é possível enviar mensagens neste chat, pois o pedido foi concluído." });
                 }
 
-                // Regras de negócio — bloqueio se chat já estiver arquivado/cancelado
+ 
                 if (chat.Status == EChatStatus.Archived || chat.Status == EChatStatus.Canceled)
                     return (400, new { message = "Não é possível enviar mensagens neste chat." });
 
-                // Determina quem está enviando
+     
                 var userId = int.Parse(user.FindFirst("userId")!.Value);
                 var role = user.FindFirst("userType")!.Value;
 
@@ -111,7 +112,7 @@ namespace Bid_Go_Backend.Services
                     driverId = acceptedBid.DriverId;
                 }
 
-                // Criação da mensagem
+    
                 var message = new Message
                 {
                     ChatId = chatId,
@@ -121,10 +122,9 @@ namespace Bid_Go_Backend.Services
                     TimeStamp = DateTime.UtcNow
                 };
 
-                // Persistência (repository)
+        
                 var result = await _chatRepository.AddMessageAsync(message);
 
-                // Retorno formatado
                 var messageDto = new MessageDTO
                 {
                     Context = result.Context,
@@ -149,8 +149,47 @@ namespace Bid_Go_Backend.Services
         {
             try
             {
-                var chat = await _chatRepository.CreateChatFromAcceptedBidAsync(transportRequestId);
-                return (200, chat);
+      
+                var existingChat = await _chatRepository.GetChatByTransportRequestIdAsync(transportRequestId);
+                if (existingChat != null)
+                {
+                    var existingChatDto = new ViewChatDTO
+                    {
+                        ChatId = existingChat.ChatId,
+                        TransportRequestId = existingChat.TransportRequestId,
+                    };
+
+                    return (200, existingChatDto);
+                }
+
+             
+                var acceptedBid = await _chatRepository.GetAcceptedBidByRequestIdAsync(transportRequestId);
+                if (acceptedBid == null)
+                    return (400, new { message = "Nenhuma bid aceite encontrada para este pedido." });
+
+         
+                var transportRequest = await _chatRepository.GetTransportRequestByIdAsync(transportRequestId);
+                if (transportRequest == null)
+                    return (404, new { message = "Pedido de transporte não encontrado." });
+
+        
+                var newChat = new Chats
+                {
+                    Status = EChatStatus.Active,
+                    TransportRequestId = transportRequestId
+                };
+
+         
+                var createdChat = await _chatRepository.AddChatAsync(newChat);
+
+    
+                var chatDto = new ViewChatDTO
+                {
+                    ChatId = createdChat.ChatId,
+                    TransportRequestId = createdChat.TransportRequestId,
+                };
+
+                return (200, chatDto);
             }
             catch (Exception ex)
             {

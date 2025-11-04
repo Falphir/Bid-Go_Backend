@@ -9,11 +9,10 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
     public class ChatRepository : IChatRepository
     {
         private readonly BidGoDbContext _context;
-        private readonly INotificationRepository _notificationRepo;
         public ChatRepository(BidGoDbContext context, INotificationRepository notificationRepo)
         {
             _context = context;
-            _notificationRepo = notificationRepo;
+
         }
 
         public async Task<Chats> GetChatByRequestIdAsync(int requestId)
@@ -62,42 +61,30 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
             await _context.SaveChangesAsync();
         }
 
-        
 
-        //Cria o chat a partir da bid aceite
-        public async Task<Chats> CreateChatFromAcceptedBidAsync(int transportRequestId)
+
+        public async Task<Chats?> GetChatByTransportRequestIdAsync(int transportRequestId)
         {
-            // Verifica se já existe chat para este pedido
-            var existingChat = await _context.Chats
+            return await _context.Chats
                 .FirstOrDefaultAsync(c => c.TransportRequestId == transportRequestId);
+        }
 
-            if (existingChat != null)
-                return existingChat;
-
-            // Procura a bid aceite
-            var acceptedBid = await _context.Bids
+        public async Task<Bid?> GetAcceptedBidByRequestIdAsync(int transportRequestId)
+        {
+            return await _context.Bids
                 .FirstOrDefaultAsync(b => b.TransportRequestId == transportRequestId && b.Status == EBidStatus.Accepted);
+        }
 
-            if (acceptedBid == null)
-                throw new InvalidOperationException("Nenhuma bid aceite encontrada para este pedido.");
-
-            // Verifica se o TransportRequest existe
-            var transportRequest = await _context.TransportRequests
+        public async Task<TransportRequest?> GetTransportRequestByIdAsync(int transportRequestId)
+        {
+            return await _context.TransportRequests
                 .FirstOrDefaultAsync(t => t.TransportRequestId == transportRequestId);
+        }
 
-            if (transportRequest == null)
-                throw new KeyNotFoundException("Pedido de transporte não encontrado.");
-
-            // Cria o chat
-            var chat = new Chats
-            {
-                Status = EChatStatus.Active,
-                TransportRequestId = transportRequestId
-            };
-
+        public async Task<Chats> AddChatAsync(Chats chat)
+        {
             _context.Chats.Add(chat);
             await _context.SaveChangesAsync();
-
             return chat;
         }
 

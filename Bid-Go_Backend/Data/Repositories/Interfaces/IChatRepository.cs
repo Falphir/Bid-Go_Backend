@@ -14,10 +14,14 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
         Task<Chats> GetChatByRequestIdAsync(int requestId);
         Task<Chats> GetChatByIdAsync(int requestId); 
         Task<IEnumerable<ChatMessageDTO>> GetMessagesAsync(int chatId);
-        Task<Chats> CreateChatFromAcceptedBidAsync(int transportRequestId);
-
         Task<Message> AddMessageAsync(Message message);
-
         Task UpdateChatStatusAsync(Chats chat, EChatStatus status);
+        Task<Chats?> GetChatByTransportRequestIdAsync(int transportRequestId);
+        Task<Bid?> GetAcceptedBidByRequestIdAsync(int transportRequestId);
+        Task<TransportRequest?> GetTransportRequestByIdAsync(int transportRequestId);
+        Task<Chats> AddChatAsync(Chats chat);
+
+
     }
+
 }
