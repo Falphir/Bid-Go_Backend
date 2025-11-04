@@ -130,30 +130,20 @@ builder.Services.Configure<StripeSettings>(
 
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
+
+
 builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
-
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
-builder.Services.AddScoped<IChatService, ChatService>();
-
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
-
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChatService, ChatService>();
-
-
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITransportRequestService, TransportRequestService>();
-
-
 builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 builder.Services.AddScoped<ITransportRequestsPageService, TransportRequestsPageService>();
-
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();
 builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
 builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
