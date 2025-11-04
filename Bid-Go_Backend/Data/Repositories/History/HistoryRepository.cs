@@ -16,11 +16,9 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
     public class HistoryRepository : IHistoryRepository
     {
         private readonly BidGoDbContext _context;
-        private readonly ILogger<HistoryRepository> _logger;
-        public HistoryRepository(BidGoDbContext context, ILogger<HistoryRepository> logger)
+        public HistoryRepository(BidGoDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public async Task<List<BidHistoryDTO>> GetDriverHistoryAsync(int driverId)
@@ -81,8 +79,6 @@ namespace Bid_Go_Backend.Data.Repositories.Requests
                     Status = transport.Status.ToString()
                 }
             ).ToListAsync();
-
-            _logger.LogInformation("Histórico de transportes obtido: {Count}", history.Count);
             return history;
         }
     }   

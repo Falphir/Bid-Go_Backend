@@ -1,122 +1,45 @@
 ﻿using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 {
     public class TransportUpdateStatusRepository : ITransportUpdateStatus
     {
         private readonly BidGoDbContext _context;
-        private readonly INotificationRepository _notificationRepo;
-        public TransportUpdateStatusRepository(BidGoDbContext context, INotificationRepository notificationRepo)
+        public TransportUpdateStatusRepository(BidGoDbContext context)
         {
             _context = context;
-            _notificationRepo = notificationRepo;
         }
 
-        public async Task<TransportRequestResponseDTO> UpdateRequestStatusAsync(int id, int companyID, ERequestStatus newStatus)
+        public async Task<TransportRequest?> GetTransportRequestWithBidsAsync(int id)
         {
-            var request = await _context.TransportRequests
-                 .Include(r => r.Bids)
-                 .FirstOrDefaultAsync(r => r.TransportRequestId == id);
-            if (request == null)
-            {
-                throw new Exception("Transport request not found.");
-            }
+            return await _context.TransportRequests
+                .Include(r => r.Bids)
+                .FirstOrDefaultAsync(r => r.TransportRequestId == id);
+        }
 
-            var user = await _context.Users.FindAsync(companyID);
-            if (user == null)
-            {
-                throw new InvalidOperationException("User not found.");
-            }
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users.FindAsync(userId);
+        }
 
-            bool isValidTransition = false;
-            string userRole;
-
-            if (user is Company)
-            {
-                userRole = "Company";
-                isValidTransition = request.Status switch
-                {
-                    ERequestStatus.Active => newStatus is ERequestStatus.Pending or ERequestStatus.Canceled,
-                    ERequestStatus.Pending => newStatus == ERequestStatus.WaitingPickup,
-                    _ => false
-                };
-            }
-            else if (user is Driver)
-            {
-                userRole = "Driver";
-                isValidTransition = request.Status switch
-                {
-                    ERequestStatus.WaitingPickup => newStatus == ERequestStatus.InTransit,
-                    ERequestStatus.InTransit => newStatus is ERequestStatus.Completed or ERequestStatus.Canceled,
-                    _ => false
-                };
-            }
-            else
-            {
-                throw new InvalidOperationException("User type not supported.");
-            }
-
-            if (!isValidTransition)
-            {
-                throw new InvalidOperationException(
-                    $"It is not possible to change the state of '{request.Status}' to '{newStatus}' for the type '{userRole}'.");
-            }
-
-            request.Status = newStatus;
+        public void UpdateTransportRequest(TransportRequest request)
+        {
             _context.TransportRequests.Update(request);
+        }
 
-            if (userRole == "Company" && newStatus == ERequestStatus.Canceled)
-            {
-                var pendingBids = request.Bids
-                    .Where(b => b.Status == EBidStatus.Pendent)
-                    .ToList();
+        public void UpdateBids(IEnumerable<Bid> bids)
+        {
+            _context.Bids.UpdateRange(bids);
+        }
 
-                foreach (var bid in pendingBids)
-                {
-                    await _notificationRepo.CreateAsync(
-                        bid.DriverId,
-                        "The order associated with your bid was cancelled by the company.",
-                        ENotificationType.Canceled,
-                        bid.BidId,
-                        bid.TransportRequestId
-                    );
-
-                    await _notificationRepo.SendAsync(
-                        bid.DriverId,
-                        "The order associated with your bid was cancelled by the company.",
-                        ENotificationType.Canceled
-                    );
-
-                    bid.Status = EBidStatus.Canceled;
-                }
-
-                if (pendingBids.Any())
-                    _context.Bids.UpdateRange(pendingBids);
-            }
-
+        public async Task SaveChangesAsync()
+        {
             await _context.SaveChangesAsync();
-
-          
-            return new TransportRequestResponseDTO
-            {
-                Origin = request.Origin,
-                Destination = request.Destination,
-                Package = request.Package,
-                PickupDate = request.PickupDate,
-                DeliveryDate = request.DeliveryDate,
-                Weight = request.Weight,
-                Volume = request.Volume,
-                Length = request.Length,
-                Width = request.Width,
-                Height = request.Height,
-                Image = request.Image,
-                MaxPrice = request.MaxPrice,
-                Status = request.Status
-            };
         }
     }
 }
