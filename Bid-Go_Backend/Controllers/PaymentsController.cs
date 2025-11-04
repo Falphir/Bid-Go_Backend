@@ -2,9 +2,9 @@
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Services.Interfaces;
 using Castle.Components.DictionaryAdapter.Xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,16 +15,22 @@ namespace Bid_Go_Backend.Controllers
     [Route("api/payments")]
     public class PaymentsController : ControllerBase
     {
-        private readonly IPaymentRepository _paymentRepo;
-        public PaymentsController(IPaymentRepository paymentRepo)
+        private readonly IPaymentService _payments;
+
+        public PaymentsController(IPaymentService payments)
         {
-            _paymentRepo = paymentRepo;
+            _payments = payments;
         }
 
+        /// <summary>
+        /// Processa um pagamento para o TransportRequest (usa o SelectedBid do TR).
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> ProcessPayment([FromBody] CreatePaymentRequestDTO dto)
         {
-            var result = await _paymentRepo.ProcessPaymentAsync(dto);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = await _payments.ProcessPaymentAsync(dto);
 
             if (result.Status == EPaymentStatus.Failed)
             {
@@ -42,40 +48,34 @@ namespace Bid_Go_Backend.Controllers
             });
         }
 
-
-        [HttpGet("user/{userId}")]
+        /// <summary>
+        /// Lista pagamentos por utilizador (CompanyId ou DriverId).
+        /// </summary>
+        [HttpGet("user/{userId:int}")]
         public async Task<IActionResult> GetPaymentsByUser(int userId)
         {
-            var result = await _paymentRepo.GetPaymentsByUserAsync(userId);
+            var result = await _payments.GetPaymentsByUserAsync(userId);
             return Ok(result);
         }
 
+        /// <summary>
+        /// Faz retry de um pagamento existente.
+        /// </summary>
         [HttpPost("{paymentId:int}/retry")]
         public async Task<IActionResult> Retry(int paymentId, [FromBody] RetryPaymentRequestDTO dto)
         {
-            try
-            {
-                var result = await _paymentRepo.RetryPaymentAsync(paymentId, dto.StripeToken);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                if (result.Status == EPaymentStatus.Confirmed)
-                {
-                    return Ok(new
-                    {
-                        message = "Payment completed on retry.",
-                        payment = result
-                    });
-                }
+            var (ok, error, result) = await _payments.RetryPaymentAsync(paymentId, dto.StripeToken);
 
-                return BadRequest(new
-                {
-                    message = "Retry was executed, but the payment was not completed.",
-                    payment = result
-                });
-            }
-            catch (InvalidOperationException ex)
+            if (ok)
+                return Ok(new { message = "Payment completed on retry.", payment = result });
+
+            return BadRequest(new
             {
-                return BadRequest(new { message = ex.Message });
-            }
+                message = error ?? "Retry was executed, but the payment was not completed.",
+                payment = result
+            });
         }
 
     }

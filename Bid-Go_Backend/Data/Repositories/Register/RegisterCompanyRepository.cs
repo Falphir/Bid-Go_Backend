@@ -20,14 +20,14 @@ namespace Bid_Go_Backend.Services
             _context = context;
         }
 
-        public async Task<Company?> GetByEmailAsync(string email)
-              => await _context.Companies.FirstOrDefaultAsync(c => c.Email == email);
+        public Task<Company?> GetByEmailAsync(string email)
+            => _context.Companies.FirstOrDefaultAsync(c => c.Email == email);
 
-        public async Task<Company?> GetByPhoneAsync(int phone)
-            => await _context.Companies.FirstOrDefaultAsync(c => c.PhoneNumber == phone);
+        public Task<Company?> GetByPhoneAsync(int phone)
+            => _context.Companies.FirstOrDefaultAsync(c => c.PhoneNumber == phone);
 
-        public async Task<Company?> GetByNIFAsync(int nif)
-            => await _context.Companies.FirstOrDefaultAsync(c => c.NIF == nif);
+        public Task<Company?> GetByNIFAsync(int nif)
+            => _context.Companies.FirstOrDefaultAsync(c => c.NIF == nif);
 
         public async Task<Company> CreateAsync(Company company)
         {
