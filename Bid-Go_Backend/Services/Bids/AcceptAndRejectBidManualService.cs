@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,12 @@ namespace Bid_Go_Backend.Services.Bids
     public class AcceptAndRejectBidManualService : IAcceptAndRejectBidManualService
     {
         private readonly IAcceptAndRejectBidManualRepository _repo;
-        private readonly INotificationRepository _notificationRepo;
+        private readonly INotificationService _notificationService;
 
-        public AcceptAndRejectBidManualService(IAcceptAndRejectBidManualRepository repo, INotificationRepository notificationRepo)
+        public AcceptAndRejectBidManualService(IAcceptAndRejectBidManualRepository repo, INotificationService notificationService)
         {
             _repo = repo;
-            _notificationRepo = notificationRepo;
+            _notificationService = notificationService;
         }
 
         public Task<Bid?> GetBidByIdAsync(int id) => _repo.GetByIdAsync(id);
@@ -65,13 +66,23 @@ namespace Bid_Go_Backend.Services.Bids
             await _repo.SaveChangesAsync();
 
             // Notificações
-            await _notificationRepo.CreateAsync(bid.DriverId, "Your bid was accepted.", ENotificationType.Accepted, bid.BidId, bid.TransportRequestId);
-            await _notificationRepo.SendAsync(bid.DriverId, "Your bid was accepted", ENotificationType.Accepted);
+            await _notificationService.CreateAndSendAsync(
+            bid.DriverId,
+            "Your bid was accepted.",
+            ENotificationType.Accepted,
+            bid.BidId,
+            bid.TransportRequestId
+        );
 
             foreach (var other in otherBids)
             {
-                await _notificationRepo.CreateAsync(other.DriverId, "Your bid was rejected.", ENotificationType.Rejected, other.BidId, other.TransportRequestId);
-                await _notificationRepo.SendAsync(other.DriverId, "Your bid was rejected.", ENotificationType.Rejected);
+                await _notificationService.CreateAndSendAsync(
+                    other.DriverId,
+                    "Your bid was rejected.",
+                    ENotificationType.Rejected,
+                    other.BidId,
+                    other.TransportRequestId
+                );
             }
         }
 
@@ -93,10 +104,13 @@ namespace Bid_Go_Backend.Services.Bids
             bid.Status = EBidStatus.Rejected;
             await _repo.SaveChangesAsync();
 
-            // Notificação
-            await _notificationRepo.CreateAsync(bid.DriverId, "Your bid was rejected.", ENotificationType.Rejected, bid.BidId, bid.TransportRequestId);
-            await _notificationRepo.SendAsync(bid.DriverId, "Your bid was rejected.", ENotificationType.Rejected);
+            await _notificationService.CreateAndSendAsync(
+                   bid.DriverId,
+                   "Your bid was rejected.",
+                   ENotificationType.Rejected,
+                   bid.BidId,
+                   bid.TransportRequestId
+               );
         }
     }
-
 }

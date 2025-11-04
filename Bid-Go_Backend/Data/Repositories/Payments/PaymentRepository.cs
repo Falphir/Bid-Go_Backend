@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using System;
@@ -80,6 +81,7 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                     payment.CompletedAt = DateTime.UtcNow;
                     payment.FailureReason = null;
 
+                    /*
                     await _notificationRepo.CreateAsync(
                                   payment.CompanyId,
                                   $"Payment for transport request #{payment.TransportRequestId} confirmed successfully.",
@@ -92,6 +94,7 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                         $"Payment for transport request #{payment.TransportRequestId} confirmed successfully.",
                         ENotificationType.Confirmed_Payment
                     );
+                    */
                 }
             
                 else
@@ -185,6 +188,7 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                     payment.FailureReason = null;
 
                     await _ctx.SaveChangesAsync();
+                    /*
 
                     await _notificationRepo.CreateAsync(
                         payment.CompanyId,
@@ -199,6 +203,7 @@ namespace Bid_Go_Backend.Data.Repositories.Payments
                         "Your payment was successfully completed after retry.",
                         ENotificationType.Confirmed_Payment
                     );
+                    */
                 }
                 else
                 {

@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Data.Repositories.Transport_Request
@@ -68,7 +69,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
 
             request.Status = newStatus;
             _context.TransportRequests.Update(request);
-
+            /*
             if (userRole == "Company" && newStatus == ERequestStatus.Canceled)
             {
                 var pendingBids = request.Bids
@@ -90,6 +91,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
                         "The order associated with your bid was cancelled by the company.",
                         ENotificationType.Canceled
                     );
+            
 
                     bid.Status = EBidStatus.Canceled;
                 }
@@ -97,6 +99,7 @@ namespace Bid_Go_Backend.Data.Repositories.Transport_Request
                 if (pendingBids.Any())
                     _context.Bids.UpdateRange(pendingBids);
             }
+            */
 
             await _context.SaveChangesAsync();
 

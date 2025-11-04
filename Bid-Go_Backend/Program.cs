@@ -9,7 +9,6 @@ using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Login;
-using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
 using Bid_Go_Backend.Data.Repositories.Requests;
@@ -39,6 +38,7 @@ using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepos
 using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Bids;
 using Bid_Go_Backend.Services.Profile;
+using Bid_Go_Backend.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -143,13 +143,15 @@ builder.Services.Configure<StripeSettings>(
 
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
+
+//Repositorios
 builder.Services.AddScoped<IBidsService, BidsService>();
 builder.Services.AddScoped<IBidsRepository, BidsRepository>();
-
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
@@ -157,8 +159,6 @@ builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>(
 builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
 builder.Services.AddScoped<IAcceptAndRejectBidManualService, AcceptAndRejectBidManualService>();
 builder.Services.AddScoped<IAcceptAndRejectBidManualRepository, AcceptAndRejectBidManualRepository>();
-
-
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();

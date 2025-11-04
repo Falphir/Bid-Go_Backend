@@ -33,6 +33,9 @@ namespace Bid_Go_Backend.Services
             if (bidDto.Value <= 0)
                 return (false, "Bid value must be greater than zero.", null);
 
+            if (bidDto.Value > request.MaxPrice)
+                return (false, "Bid value cannot exceed the maximum price of the transport request.", null);
+
             if (bidDto.DeliveryDeadline <= request.PickupDate)
                 return (false, "The bid's delivery deadline must be later than the pickup date.", null);
 
@@ -64,6 +67,25 @@ namespace Bid_Go_Backend.Services
 
             if (bid.Status != EBidStatus.Pendent)
                 return (false, "Only pending bids can be updated.", null);
+
+            var request = await _ctx.TransportRequests
+           .AsNoTracking()
+           .FirstOrDefaultAsync(tr => tr.TransportRequestId == bid.TransportRequestId);
+
+            if (request == null)
+                return (false, "Associated transport request not found.", null);
+
+            if (updateDto.Value <= 0)
+                return (false, "Bid value must be greater than zero.", null);
+
+            if (updateDto.Value > request.MaxPrice)
+                return (false, "Bid value cannot exceed the maximum price of the transport request.", null);
+
+            if (updateDto.DeliveryDeadline <= request.PickupDate)
+                return (false, "The bid's delivery deadline must be later than the pickup date.", null);
+
+            if (updateDto.DeliveryDeadline > request.DeliveryDate)
+                return (false, "The bid's delivery deadline cannot be later than the delivery date.", null);
 
             bid.Value = updateDto.Value;
             bid.DeliveryDeadline = updateDto.DeliveryDeadline;

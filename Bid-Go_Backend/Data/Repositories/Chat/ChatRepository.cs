@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Data.Repositories.Chat
@@ -81,7 +82,7 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
 
             await _context.SaveChangesAsync();
 
-
+            /*
             string notificationMessage;
             int receiverId;
             ENotificationType notificationType = ENotificationType.New_message;
@@ -132,6 +133,7 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
                     notificationType
                 );
             }
+            */
 
             return message;
         }
