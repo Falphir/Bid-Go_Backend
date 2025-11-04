@@ -2,7 +2,7 @@
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,15 +15,15 @@ namespace Bid_Go_Backend.Tests.Controllers
 {
     public class HistoryControllerTests
     {
-        private readonly Mock<IHistoryRepository> _mockRepo;
+        private readonly Mock<IHistoryService> _mockService;
         private readonly Mock<ILogger<HistoryController>> _mockLogger;
         private readonly HistoryController _controller;
 
         public HistoryControllerTests()
         {
-            _mockRepo = new Mock<IHistoryRepository>();
+            _mockService = new Mock<IHistoryService>();
             _mockLogger = new Mock<ILogger<HistoryController>>();
-            _controller = new HistoryController(_mockRepo.Object, _mockLogger.Object);
+            _controller = new HistoryController(_mockService.Object, _mockLogger.Object);
         }
 
 
@@ -49,7 +49,7 @@ namespace Bid_Go_Backend.Tests.Controllers
                 }
             };
 
-            _mockRepo.Setup(r => r.GetDriverHistoryAsync(1)).ReturnsAsync(list);
+            _mockService.Setup(r => r.GetDriverHistoryAsync(1)).ReturnsAsync(list);
 
             var result = await _controller.GetDriverHistory(1);
 
@@ -68,7 +68,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         [Fact]
         public async Task GetDriverHistory_ShouldReturnNotFound_WhenHistoryIsNullOrEmpty()
         {
-            _mockRepo.Setup(r => r.GetDriverHistoryAsync(2)).ReturnsAsync((List<BidHistoryDTO>?)null);
+            _mockService.Setup(r => r.GetDriverHistoryAsync(2)).ReturnsAsync((List<BidHistoryDTO>?)null);
 
             var result = await _controller.GetDriverHistory(2);
 
@@ -88,7 +88,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         [Fact]
         public async Task GetDriverHistory_ShouldReturnStatus500_OnException()
         {
-            _mockRepo.Setup(r => r.GetDriverHistoryAsync(3)).ThrowsAsync(new Exception("fail"));
+            _mockService.Setup(r => r.GetDriverHistoryAsync(3)).ThrowsAsync(new Exception("fail"));
 
             var result = await _controller.GetDriverHistory(3);
 
@@ -122,7 +122,7 @@ namespace Bid_Go_Backend.Tests.Controllers
                 }
             };
 
-            _mockRepo.Setup(r => r.GetTransportHistoryAsync(10)).ReturnsAsync(list);
+            _mockService.Setup(r => r.GetTransportHistoryAsync(10)).ReturnsAsync(list);
 
             var result = await _controller.GetCompanyHistory(10);
 
@@ -140,7 +140,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         [Fact]
         public async Task GetCompanyHistory_ShouldReturnNotFound_WhenHistoryIsNullOrEmpty()
         {
-            _mockRepo.Setup(r => r.GetTransportHistoryAsync(11)).ReturnsAsync(new List<TransportHistoryDTO>());
+            _mockService.Setup(r => r.GetTransportHistoryAsync(11)).ReturnsAsync(new List<TransportHistoryDTO>());
 
             var result = await _controller.GetCompanyHistory(11);
 
@@ -160,7 +160,7 @@ namespace Bid_Go_Backend.Tests.Controllers
         [Fact]
         public async Task GetCompanyHistory_ShouldReturnStatus500_OnException()
         {
-            _mockRepo.Setup(r => r.GetTransportHistoryAsync(12)).ThrowsAsync(new Exception("fail"));
+            _mockService.Setup(r => r.GetTransportHistoryAsync(12)).ThrowsAsync(new Exception("fail"));
 
             var result = await _controller.GetCompanyHistory(12);
 

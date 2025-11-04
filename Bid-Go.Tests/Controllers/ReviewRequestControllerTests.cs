@@ -1,6 +1,6 @@
 ﻿using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -11,15 +11,15 @@ using Xunit;
 
 namespace Bid_Go.Tests.Controllers
 {
-    public class ReviewRequestServiceControllerTests
+    public class ReviewRequestControllerTests
     {
-        private readonly Mock<IReviewRequestServiceRepository> _mockRepo;
-        private readonly ReviewRequestServiceController _controller;
+        private readonly Mock<IReviewRequestService> _mockRepo;
+        private readonly ReviewRequestController _controller;
 
-        public ReviewRequestServiceControllerTests()
+        public ReviewRequestControllerTests()
         {
-            _mockRepo = new Mock<IReviewRequestServiceRepository>();
-            _controller = new ReviewRequestServiceController(_mockRepo.Object);
+            _mockRepo = new Mock<IReviewRequestService>();
+            _controller = new ReviewRequestController(_mockRepo.Object);
         }
 
         [Fact]

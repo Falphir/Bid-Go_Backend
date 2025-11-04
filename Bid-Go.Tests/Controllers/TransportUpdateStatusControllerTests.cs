@@ -3,7 +3,7 @@ using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Repositories.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -23,13 +23,13 @@ namespace Bid_Go.Tests.Controllers
 {
     public class TransportUpdateStatusControllerTests
     {
-        private readonly Mock<ITransportUpdateStatus> _mockRepo;
+        private readonly Mock<ITransportUpdateStatusService> _mockRepo;
         private readonly BidGoDbContext _ctx;
         private readonly TransportUpdateStatusController _controller;
 
         public TransportUpdateStatusControllerTests()
         {
-            _mockRepo = new Mock<ITransportUpdateStatus>();
+            _mockRepo = new Mock<ITransportUpdateStatusService>();
 
             var options = new DbContextOptionsBuilder<BidGoDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -51,10 +51,10 @@ namespace Bid_Go.Tests.Controllers
                 Status = ERequestStatus.Active
             };
 
-            int requestID = 1;
+            int requestID =1;
 
             //Act
-            var result = await _controller.UpdateRequestStatus(requestID, 1, requestStatus);
+            var result = await _controller.UpdateRequestStatus(requestID,1, requestStatus);
 
             //Assert
             Assert.IsType<NotFoundObjectResult>(result);
@@ -64,8 +64,8 @@ namespace Bid_Go.Tests.Controllers
         public async Task UpdateRequestStatus_ShouldReturnOK_WhenSuccessful()
         {
             // Arrange
-            var companyId = 1;
-            var requestId = 1;
+            var companyId =1;
+            var requestId =1;
 
             var requestStatus = new RequestStatusDTO
             {
@@ -79,13 +79,13 @@ namespace Bid_Go.Tests.Controllers
                 Package = "Envelope",
                 PickupDate = DateTime.Now,
                 DeliveryDate = DateTime.Now.AddDays(1),
-                Weight = 2,
-                Volume = 1,
-                Length = 0.5m,
-                Width = 0.5m,
-                Height = 0.5m,
+                Weight =2,
+                Volume =1,
+                Length =0.5m,
+                Width =0.5m,
+                Height =0.5m,
                 Image = "image.jpg",
-                MaxPrice = 50,
+                MaxPrice =50,
                 Status = ERequestStatus.Completed
             };
 
@@ -107,7 +107,7 @@ namespace Bid_Go.Tests.Controllers
         {
             // Arrange
             var dto = new RequestStatusDTO { Status = ERequestStatus.Active };
-            int requestID = 1, companyID = 1;
+            int requestID =1, companyID =1;
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, dto.Status))
@@ -126,7 +126,7 @@ namespace Bid_Go.Tests.Controllers
         {
             // Arrange
             var dto = new RequestStatusDTO { Status = ERequestStatus.Active };
-            int requestID = 1, companyID = 1;
+            int requestID =1, companyID =1;
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, dto.Status))
@@ -144,8 +144,8 @@ namespace Bid_Go.Tests.Controllers
         public async Task CancelRequestStatus_ShouldReturnNotFound_WhenTransportRequestDoesNotExist()
         {
             // Arrange
-            int requestID = 10;
-            int companyID = 1;
+            int requestID =10;
+            int companyID =1;
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, ERequestStatus.Canceled))
@@ -162,8 +162,8 @@ namespace Bid_Go.Tests.Controllers
         public async Task CancelRequestStatus_ShouldReturnOK_WhenSuccessful()
         {
             // Arrange
-            int requestID = 10;
-            int companyID = 1;
+            int requestID =10;
+            int companyID =1;
 
             var responseDto = new TransportRequestResponseDTO
             {
@@ -172,13 +172,13 @@ namespace Bid_Go.Tests.Controllers
                 Package = "Caixa",
                 PickupDate = DateTime.Now,
                 DeliveryDate = DateTime.Now.AddDays(1),
-                Weight = 10,
-                Volume = 5,
-                Length = 2,
-                Width = 1,
-                Height = 1,
+                Weight =10,
+                Volume =5,
+                Length =2,
+                Width =1,
+                Height =1,
                 Image = "image.jpg",
-                MaxPrice = 100,
+                MaxPrice =100,
                 Status = ERequestStatus.Canceled
             };
 
@@ -199,8 +199,8 @@ namespace Bid_Go.Tests.Controllers
         public async Task CancelRequestStatus_ShouldReturnBadRequest_WhenRepoThrowsInvalidOperation()
         {
             // Arrange
-            int requestID = 10;
-            int companyID = 1;
+            int requestID =10;
+            int companyID =1;
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, ERequestStatus.Canceled))
@@ -218,8 +218,8 @@ namespace Bid_Go.Tests.Controllers
         public async Task CancelRequestStatus_ShouldReturn500_WhenRepoThrowsUnexpectedException()
         {
             // Arrange
-            int requestID = 10;
-            int companyID = 1;
+            int requestID =10;
+            int companyID =1;
 
             _mockRepo
                 .Setup(r => r.UpdateRequestStatusAsync(requestID, companyID, ERequestStatus.Canceled))
