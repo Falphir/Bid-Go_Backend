@@ -1,9 +1,10 @@
-﻿using Bid_Go_Backend.Data.Repositories.Interfaces;
+﻿using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace Bid_Go_Backend.Services
+namespace Bid_Go_Backend.Services.Email
 {
     public class EmailService : IEmailService
     {
@@ -12,12 +13,12 @@ namespace Bid_Go_Backend.Services
         private readonly string _smtpUser;
         private readonly string _smtpPass;
 
-        public EmailService(string smtpHost, int smtpPort, string smtpUser, string smtpPass)
+        public EmailService(IConfiguration configuration)
         {
-            _smtpHost = smtpHost;
-            _smtpPort = smtpPort;
-            _smtpUser = smtpUser;
-            _smtpPass = smtpPass;
+            _smtpHost = configuration["SmtpSettings:Host"];
+            _smtpPort = int.Parse(configuration["SmtpSettings:Port"]);
+            _smtpUser = configuration["SmtpSettings:User"];
+            _smtpPass = configuration["SmtpSettings:Pass"];
         }
 
         public virtual async Task SendEmailAsync(string to, string subject, string body)

@@ -1,9 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -11,149 +8,38 @@ namespace Bid_Go_Backend.Controllers
     [Route("api/transport")]
     public class TransportRequestsController : ControllerBase
     {
-        private readonly ITransportRequestRepository _repository;
+        private readonly ITransportRequestService _service;
 
-        public TransportRequestsController(ITransportRequestRepository repository)
+        public TransportRequestsController(ITransportRequestService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
- 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTransportRequestDTO dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             try
-            { 
-                if (dto.PickupDate >= dto.DeliveryDate)
-                    return BadRequest(new { message = "A data de recolha deve ser anterior à data de entrega." });
-
-                if (string.IsNullOrWhiteSpace(dto.Image))
-                    return BadRequest(new { message = "A imagem é obrigatória para publicar o pedido." });
-
-                if (dto.Weight <= 0 || dto.Volume <= 0)
-                    return BadRequest(new { message = "O peso e o volume devem ser superiores a zero." });
-
-                if (dto.MaxPrice < 20)
-                    return BadRequest(new { message = "O preço deve ser superior ou igual a vinte." });
-
-
-                var request = new TransportRequest
-                {
-                    Origin = dto.Origin,
-                    Destination = dto.Destination,
-                    Package = dto.Package,
-                    Weight = dto.Weight,
-                    Volume = dto.Volume,
-                    Length = dto.Length,
-                    Width = dto.Width,
-                    Height = dto.Height,
-                    PickupDate = dto.PickupDate,
-                    DeliveryDate = dto.DeliveryDate,
-                    Image = dto.Image,
-                    MaxPrice = dto.MaxPrice,
-                    CompanyId = dto.CompanyId,
-                    Status = ERequestStatus.Draft
-                };
-
-                var created = await _repository.CreateAsync(request);
-                return CreatedAtAction(nameof(Create), new { id = created.TransportRequestId }, created);
-            }
-            catch (DbUpdateException ex)
             {
-                return BadRequest(new { message = "Erro ao gravar no banco de dados: " + (ex.InnerException?.Message ?? ex.Message) });
+                var created = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.TransportRequestId }, created);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTransportRequestDTO dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             try
             {
-                // Validações 
-  
-                var existingRequest = await _repository.GetByIdAsync(id);
-
-                if (existingRequest == null)
-                    return NotFound(new { message = "Pedido de transporte não existe." });
-
-                if (existingRequest.Status != ERequestStatus.Draft)
-                    return BadRequest(new { message = "Só é possível atualizar pedidos com estado DRAFT." });
-
-                if (dto.PickupDate.HasValue && dto.DeliveryDate.HasValue && dto.PickupDate >= dto.DeliveryDate)
-                    return BadRequest(new { message = "A data de recolha deve ser anterior à data de entrega." });
-
-                if (dto.Image != null && string.IsNullOrWhiteSpace(dto.Image))
-                    return BadRequest(new { message = "A imagem é obrigatória para publicar o pedido." });
-
-                if (dto.Weight.HasValue && dto.Weight <= 0)
-                    return BadRequest(new { message = "O peso deve ser superior a zero." });
-
-                if (dto.Volume.HasValue && dto.Volume <= 0)
-                    return BadRequest(new { message = "O volume deve ser superior a zero." });
-
-
-                if (!dto.MaxPrice.HasValue || dto.MaxPrice.Value < 20)
-                    return BadRequest(new { message = "O preço deve ser superior ou igual a vinte." });
-
-            
-
-                // Assim vai atualizar os campos que queremos meter no body
-                if (!string.IsNullOrWhiteSpace(dto.Origin))
-                    existingRequest.Origin = dto.Origin;
-
-                if (!string.IsNullOrWhiteSpace(dto.Destination))
-                    existingRequest.Destination = dto.Destination;
-
-                if (!string.IsNullOrWhiteSpace(dto.Package))
-                    existingRequest.Package = dto.Package;
-
-                if (dto.PickupDate.HasValue)
-                    existingRequest.PickupDate = dto.PickupDate.Value;
-
-                if (dto.DeliveryDate.HasValue)
-                    existingRequest.DeliveryDate = dto.DeliveryDate.Value;
-
-                if (dto.Weight.HasValue)
-                    existingRequest.Weight = dto.Weight.Value;
-
-                if (dto.Volume.HasValue)
-                    existingRequest.Volume = dto.Volume.Value;
-
-                if (dto.Length.HasValue)
-                    existingRequest.Length = dto.Length.Value;
-
-                if (dto.Width.HasValue)
-                    existingRequest.Width = dto.Width.Value;
-
-                if (dto.Height.HasValue)
-                    existingRequest.Height = dto.Height.Value;
-
-                if (!string.IsNullOrWhiteSpace(dto.Image))
-                    existingRequest.Image = dto.Image;
-
-                if (dto.MaxPrice.HasValue)
-                    existingRequest.MaxPrice = dto.MaxPrice.Value;
-
-                var updatedRequest = await _repository.UpdateAsync(id, existingRequest);
-                return Ok(updatedRequest);
-            }
-            catch (DbUpdateException ex)
-            {
-                return BadRequest(new { message = "Erro ao gravar na base de dados: " + (ex.InnerException?.Message ?? ex.Message) });
+                var updated = await _service.UpdateAsync(id, dto);
+                return Ok(updated);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -162,98 +48,30 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                var existing = await _repository.GetByIdAsync(id);
-                if (existing == null)
-                    return NotFound(new { message = "Pedido não encontrado." });
-
-                if (existing.Status != ERequestStatus.Active)
-                    return Conflict(new { message = "Apenas pedidos ativos podem ser eliminados." });
-
-                await _repository.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return Ok(new { message = "Pedido eliminado com sucesso." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro ao eliminar o pedido: " + ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
-
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
+            var request = await _service.GetByIdAsync(id);
+            if (request == null)
+                return NotFound(new { message = "Pedido não encontrado." });
 
-            try
-            {
-                var alvo = await _repository.GetByIdAsync(id);
-
-                if (alvo == null)
-                    return NotFound("Pedido de transporte não existe");
-
-                var responseDto = new TransportRequestResponseDTO
-                {
-
-                    Origin = alvo.Origin,
-                    Destination = alvo.Destination,
-                    Package = alvo.Package,
-                    PickupDate = alvo.PickupDate,
-                    DeliveryDate = alvo.DeliveryDate,
-                    Weight = alvo.Weight,
-                    Volume = alvo.Volume,
-                    Length = alvo.Length,
-                    Width = alvo.Width,
-                    Height = alvo.Height,
-                    Image = alvo.Image,
-                    MaxPrice = alvo.MaxPrice
-                };
-
-                return Ok(responseDto);
-            }catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
-            }
-           
-
+            return Ok(request);
         }
 
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetByCompany(int companyId)
         {
-
-            try
-            {
-                var requests = await _repository.GetAllByCompanyAsync(companyId);
-
-                if (requests == null)
-                    return NotFound("Não foram encontrados pedidos de transporte da company");
-
-                var response = requests.Select(r => new TransportRequestResponseDTO
-                {
-
-                    Origin = r.Origin,
-                    Destination = r.Destination,
-                    Package = r.Package,
-                    PickupDate = r.PickupDate,
-                    DeliveryDate = r.DeliveryDate,
-                    Weight = r.Weight,
-                    Volume = r.Volume,
-                    Length = r.Length,
-                    Width = r.Width,
-                    Height = r.Height,
-                    Image = r.Image,
-                    MaxPrice = r.MaxPrice,
-                    Status = r.Status
-                }).ToList();
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
-            }
-
-
+            var requests = await _service.GetByCompanyAsync(companyId);
+            return Ok(requests);
         }
-
     }
 }
