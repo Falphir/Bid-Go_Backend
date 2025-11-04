@@ -6,7 +6,7 @@ using Bid_Go_Backend.Services;
 using Moq;
 using Xunit;
 
-namespace Bid_Go_Backend.Tests.Services
+namespace Bid_Go.Tests.Services
 {
     public class TransportRequestServiceTests
     {

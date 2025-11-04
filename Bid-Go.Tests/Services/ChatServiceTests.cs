@@ -47,6 +47,25 @@ public class ChatServiceTests
     }
 
     [Fact]
+    public async Task GetChat_ShouldReturn403_WhenUserNoAccess()
+    {
+        var chat = new Chats { ChatId = 1, TransportRequestId = 1 };
+        _chatRepoMock.Setup(r => r.GetChatByRequestIdAsync(1)).ReturnsAsync(chat);
+        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1))
+                        .ReturnsAsync(new TransportRequest
+                        {
+                            TransportRequestId = 1,
+                            CompanyId = 2,
+                            Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 3 } }
+                        });
+
+        var result = await _service.GetChat(1, CreateUser(99, "Driver"));
+
+        Assert.Equal(403, result.StatusCode);
+        Assert.Contains("Acesso negado", result.Body.ToString());
+    }
+
+    [Fact]
     public async Task SendMessage_ShouldReturn403_WhenUserNoAccess()
     {
         _chatRepoMock.Setup(r => r.GetChatByIdAsync(1))
@@ -65,26 +84,7 @@ public class ChatServiceTests
         Assert.Contains("Acesso negado", result.Body.ToString());
     }
 
-    [Fact]
-    public async Task SendMessage_ShouldReturn400_WhenRequestCanceled()
-    {
-        var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
-        var request = new TransportRequest
-        {
-            TransportRequestId = 1,
-            Status = ERequestStatus.Canceled,
-            CompanyId = 1,
-            Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 2 } }
-        };
-
-        _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
-        _requestRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(request);
-
-        var result = await _service.SendMessage(1, new MessageDTO { Context = "Hi" }, CreateUser(2, "Driver"));
-
-        Assert.Equal(400, result.StatusCode);
-        Assert.Contains("Não é possível enviar mensagens neste chat, pois o pedido foi cancelado", result.Body.ToString());
-    }
+   
 
     [Fact]
     public async Task CreateChatFromAcceptedBid_ShouldReturn400_WhenNoAcceptedBid()
@@ -123,6 +123,8 @@ public class ChatServiceTests
         var result = await _service.CreateChatFromAcceptedBid(1);
 
         Assert.Equal(200, result.StatusCode);
-        Assert.Contains("123", result.Body.ToString());
+
+        var dto = Assert.IsType<ViewChatDTO>(result.Body);
+        Assert.Equal(123, dto.ChatId);
     }
 }

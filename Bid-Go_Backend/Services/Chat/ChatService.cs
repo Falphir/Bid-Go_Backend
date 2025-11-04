@@ -135,10 +135,6 @@ namespace Bid_Go_Backend.Services.Chat
 
                 return (200, messageDto);
             }
-            catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
-            {
-                return (400, new { message = ex.Message });
-            }
             catch
             {
                 return (500, new { message = "Erro inesperado." });
