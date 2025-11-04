@@ -38,6 +38,7 @@ using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryR
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Bids;
+using Bid_Go_Backend.Services.Profile;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -158,7 +159,8 @@ builder.Services.AddScoped<IAcceptAndRejectBidManualService, AcceptAndRejectBidM
 builder.Services.AddScoped<IAcceptAndRejectBidManualRepository, AcceptAndRejectBidManualRepository>();
 
 
-builder.Services.AddScoped<IProfileCRUD, ProfileCRUD>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
