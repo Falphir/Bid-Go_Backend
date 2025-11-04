@@ -37,6 +37,7 @@ using System.Text.Json;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 using Bid_Go_Backend.Services.Interfaces;
+using Bid_Go_Backend.Services.Bids;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -153,7 +154,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
 builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();
 builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
-builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
+builder.Services.AddScoped<IAcceptAndRejectBidManualService, AcceptAndRejectBidManualService>();
+builder.Services.AddScoped<IAcceptAndRejectBidManualRepository, AcceptAndRejectBidManualRepository>();
+
+
 builder.Services.AddScoped<IProfileCRUD, ProfileCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
