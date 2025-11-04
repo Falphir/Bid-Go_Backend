@@ -1,6 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models;
 
-namespace Bid_Go_Backend.Data.Repositories.Interfaces
+namespace Bid_Go_Backend.Services.Interfaces
 {
     public interface IAutomaticSelectionAlgorithmService
     {

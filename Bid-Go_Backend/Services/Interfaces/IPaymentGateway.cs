@@ -1,5 +1,6 @@
-﻿
-namespace Bid_Go_Backend.Services.Payments
+﻿using Bid_Go_Backend.Services.Payments;
+
+namespace Bid_Go_Backend.Services.Interfaces
 {
     public interface IPaymentGateway
     {

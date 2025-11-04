@@ -18,6 +18,7 @@ using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services;
 using Bid_Go_Backend.Services.Bids;
+using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Payments;
 using Bid_Go_Backend.Services.Register;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

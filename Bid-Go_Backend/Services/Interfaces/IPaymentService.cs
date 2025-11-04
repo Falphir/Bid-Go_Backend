@@ -1,9 +1,13 @@
 ﻿// Services/Payments/PaymentService.cs
 
 // Services/Payments/PaymentService.cs
+
+// Services/Payments/PaymentService.cs
+
+// Services/Payments/PaymentService.cs
 using Bid_Go_Backend.Data.Models.DTOs;
 
-namespace Bid_Go_Backend.Data.Repositories.Interfaces
+namespace Bid_Go_Backend.Services.Interfaces
 {
     public interface IPaymentService
     {

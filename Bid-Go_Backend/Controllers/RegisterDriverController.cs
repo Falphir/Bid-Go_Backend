@@ -1,8 +1,8 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
+using Bid_Go_Backend.Services.Interfaces;
 
 namespace Bid_Go_Backend.Controllers
 {
