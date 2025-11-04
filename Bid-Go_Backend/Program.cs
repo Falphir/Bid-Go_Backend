@@ -2,7 +2,6 @@
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Data.Repositories.Review;
 using Bid_Go_Backend.Controllers;
-
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
 using Bid_Go_Backend.Data.Repositories;
@@ -39,6 +38,10 @@ using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Bids;
 using Bid_Go_Backend.Services.Profile;
 using Bid_Go_Backend.Repositories;
+using Bid_Go_Backend.Services.History;
+using Bid_Go_Backend.Services.Transport_Request;
+using Bid_Go_Backend.Services.Review;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -161,8 +164,11 @@ builder.Services.AddScoped<IAcceptAndRejectBidManualRepository, AcceptAndRejectB
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
-builder.Services.AddScoped<IReviewRequestServiceRepository, ReviewRequestServiceRepository>();
+builder.Services.AddScoped<IReviewRequestService, ReviewRequestService>();
+builder.Services.AddScoped<IReviewRequestRepository, ReviewRequestRepository>();
+builder.Services.AddScoped<ITransportUpdateStatusService, TransportUpdateStatusService>();
 builder.Services.AddScoped<ITransportUpdateStatus, TransportUpdateStatusRepository>();
 
 builder.Services.AddControllers()
