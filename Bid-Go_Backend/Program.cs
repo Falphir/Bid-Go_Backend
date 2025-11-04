@@ -36,6 +36,7 @@ using System.Text;
 using System.Text.Json;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
+using Bid_Go_Backend.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -140,7 +141,9 @@ builder.Services.Configure<StripeSettings>(
 
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
-builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
+builder.Services.AddScoped<IBidsService, BidsService>();
+builder.Services.AddScoped<IBidsRepository, BidsRepository>();
+
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
