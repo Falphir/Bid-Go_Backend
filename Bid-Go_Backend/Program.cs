@@ -8,7 +8,6 @@ using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Login;
 using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
