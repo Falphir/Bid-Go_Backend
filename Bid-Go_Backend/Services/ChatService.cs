@@ -153,13 +153,7 @@ namespace Bid_Go_Backend.Services
                 var existingChat = await _chatRepository.GetChatByTransportRequestIdAsync(transportRequestId);
                 if (existingChat != null)
                 {
-                    var existingChatDto = new ViewChatDTO
-                    {
-                        ChatId = existingChat.ChatId,
-                        TransportRequestId = existingChat.TransportRequestId,
-                    };
-
-                    return (200, existingChatDto);
+                    return (200, new { message = "Chat já existente." });
                 }
 
              

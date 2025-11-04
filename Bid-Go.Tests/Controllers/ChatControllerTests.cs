@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,18 +14,18 @@ namespace Bid_Go_Backend.Controllers
     [Authorize]
     public class ChatController : ControllerBase
     {
-        private readonly IChatRepository _chatRepository;
+        private readonly IChatService _chatService;
         private readonly ITransportRequestRepository _requestRepository;
 
-        public ChatController(IChatRepository chatRepository, ITransportRequestRepository requestRepository)
+        public ChatController(IChatService chatRepository, ITransportRequestRepository requestRepository)
         {
-            _chatRepository = chatRepository;
+            _chatService = chatRepository;
             _requestRepository = requestRepository;
         }
 
         private async Task<bool> UserHasAccessToChatAsync(int chatId)
         {
-            var chat = await _chatRepository.GetChatByIdAsync(chatId);
+            var chat = await _chatRepository.GetChatById(chatId);
             if (chat == null) return false;
 
             var request = await _requestRepository.GetRequestWithBidsByIdAsync(chat.TransportRequestId);
