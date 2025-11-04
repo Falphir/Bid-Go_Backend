@@ -1,13 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Caching.Memory;
-using Moq;
-using Xunit;
-using Bid_Go_Backend.Data.Models;
+﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Auth;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Moq;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
+using Xunit;
 
 public class AuthServiceTests
 {
@@ -24,7 +25,7 @@ public class AuthServiceTests
         _configMock = new Mock<IConfiguration>();
 
  
-        _configMock.Setup(c => c["Jwt:Key"]).Returns("supersecretkey1234567890");
+        _configMock.Setup(c => c["Jwt:Key"]).Returns("supersecretkey1234567890supersecret!");
         _configMock.Setup(c => c["Jwt:Issuer"]).Returns("TestIssuer");
         _configMock.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
         _configMock.Setup(c => c["Jwt:ExpireMinutes"]).Returns("60");
@@ -115,4 +116,38 @@ public class AuthServiceTests
         Assert.Equal("Password alterada com sucesso.", result.Message);
         Assert.True(BCrypt.Net.BCrypt.Verify("newpassword", user.Password));
     }
+
+    [Fact]
+    public void GenerateJwtToken_ShouldReturnValidToken()
+    {
+        // Arrange
+        var user = new Driver
+        {
+            Id = 1,
+            Name = "Teste",
+            Email = "teste@test.com",
+            Password = BCrypt.Net.BCrypt.HashPassword("password")
+        };
+
+        // Act
+        var tokenString = _service.GenerateJwtToken(user);
+
+        // Assert
+        Assert.False(string.IsNullOrEmpty(tokenString));
+
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(tokenString);
+
+        // Verifica claims
+        Assert.Equal(user.Email, token.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value);
+        Assert.Equal(user.Id.ToString(), token.Claims.First(c => c.Type == "userId").Value);
+        Assert.Equal(user.GetType().Name, token.Claims.First(c => c.Type == "userType").Value);
+
+        // Verifica tempo de expiração
+        var expectedExpiration = DateTime.UtcNow.AddMinutes(60);
+        Assert.True(token.ValidTo > DateTime.UtcNow);
+    }
+
+
+
 }

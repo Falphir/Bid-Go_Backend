@@ -83,7 +83,7 @@ namespace Bid_Go_Backend.Services.Auth
         private string GeneratePasswordResetToken() =>
             Guid.NewGuid().ToString("N");
 
-        private string GenerateJwtToken(User user)
+        public string GenerateJwtToken(User user)
         {
             var claims = new[]
             {
