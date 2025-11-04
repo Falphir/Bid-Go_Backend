@@ -18,13 +18,13 @@ namespace Bid_Go_Backend.Services
             _requestRepository = requestRepository;
         }
 
-        public async Task<(int StatusCode, object Body)> GetChatAsync(int requestId, ClaimsPrincipal user)
+        public async Task<(int StatusCode, object Body)> GetChat(int requestId, ClaimsPrincipal user)
         {
             var chat = await _chatRepository.GetChatByRequestIdAsync(requestId);
             if (chat == null)
                 return (404, new { message = "Chat não encontrado." });
 
-            if (!await UserHasAccessToChatAsync(user, chat.ChatId))
+            if (!await UserHasAccessToChat(user, chat.ChatId))
                 return (403, new { message = "Acesso negado." });
 
             var dto = new ChatDTO
@@ -44,9 +44,9 @@ namespace Bid_Go_Backend.Services
             return (200, dto);
         }
 
-        public async Task<(int StatusCode, object Body)> GetMessagesAsync(int chatId, ClaimsPrincipal user)
+        public async Task<(int StatusCode, object Body)> GetMessages(int chatId, ClaimsPrincipal user)
         {
-            if (!await UserHasAccessToChatAsync(user, chatId))
+            if (!await UserHasAccessToChat(user, chatId))
                 return (403, new { message = "Acesso negado." });
 
             var messages = await _chatRepository.GetMessagesAsync(chatId);
@@ -56,17 +56,41 @@ namespace Bid_Go_Backend.Services
 
             return (200, messages);
         }
-
-        public async Task<(int StatusCode, object Body)> SendMessageAsync(int chatId, MessageDTO dto, ClaimsPrincipal user)
+        public async Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageDTO dto, ClaimsPrincipal user)
         {
             try
             {
-                if (!await UserHasAccessToChatAsync(user, chatId))
+                // Verifica acesso
+                if (!await UserHasAccessToChat(user, chatId))
                     return (403, new { message = "Acesso negado." });
 
+                // Busca o chat e pedido associado
                 var chat = await _chatRepository.GetChatByIdAsync(chatId);
-                var request = await _requestRepository.GetByIdAsync(chat.TransportRequestId);
+                if (chat == null)
+                    return (404, new { message = "Chat não encontrado." });
 
+                var request = await _requestRepository.GetByIdAsync(chat.TransportRequestId);
+                if (request == null)
+                    return (404, new { message = "Pedido de transporte não encontrado." });
+
+                // Regras de negócio — bloqueios conforme status do pedido
+                if (request.Status == ERequestStatus.Canceled)
+                {
+                   
+                    return (400, new { message = "Não é possível enviar mensagens neste chat, pois o pedido foi cancelado." });
+                }
+
+                if (request.Status == ERequestStatus.Completed)
+                {
+               
+                    return (400, new { message = "Não é possível enviar mensagens neste chat, pois o pedido foi concluído." });
+                }
+
+                // Regras de negócio — bloqueio se chat já estiver arquivado/cancelado
+                if (chat.Status == EChatStatus.Archived || chat.Status == EChatStatus.Canceled)
+                    return (400, new { message = "Não é possível enviar mensagens neste chat." });
+
+                // Determina quem está enviando
                 var userId = int.Parse(user.FindFirst("userId")!.Value);
                 var role = user.FindFirst("userType")!.Value;
 
@@ -87,16 +111,20 @@ namespace Bid_Go_Backend.Services
                     driverId = acceptedBid.DriverId;
                 }
 
+                // Criação da mensagem
                 var message = new Message
                 {
                     ChatId = chatId,
                     Context = dto.Context,
                     DriverId = driverId,
-                    CompanyId = companyId
+                    CompanyId = companyId,
+                    TimeStamp = DateTime.UtcNow
                 };
 
-                var result = await _chatRepository.SendMessageAsync(message);
+                // Persistência (repository)
+                var result = await _chatRepository.AddMessageAsync(message);
 
+                // Retorno formatado
                 var messageDto = new MessageDTO
                 {
                     Context = result.Context,
@@ -107,13 +135,9 @@ namespace Bid_Go_Backend.Services
 
                 return (200, messageDto);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
             {
                 return (400, new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return (404, new { message = ex.Message });
             }
             catch
             {
@@ -121,7 +145,7 @@ namespace Bid_Go_Backend.Services
             }
         }
 
-        public async Task<(int StatusCode, object Body)> CreateChatFromAcceptedBidAsync(int transportRequestId)
+        public async Task<(int StatusCode, object Body)> CreateChatFromAcceptedBid(int transportRequestId)
         {
             try
             {
@@ -134,7 +158,7 @@ namespace Bid_Go_Backend.Services
             }
         }
 
-        private async Task<bool> UserHasAccessToChatAsync(ClaimsPrincipal user, int chatId)
+        private async Task<bool> UserHasAccessToChat(ClaimsPrincipal user, int chatId)
         {
             var chat = await _chatRepository.GetChatByIdAsync(chatId);
             if (chat == null) return false;
