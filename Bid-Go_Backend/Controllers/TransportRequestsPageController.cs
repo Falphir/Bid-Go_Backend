@@ -1,25 +1,18 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Transport_Request;
+using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
-
     [ApiController]
     [Route("api/PageRequests")]
     public class TransportRequestsPageController : ControllerBase
     {
-        private readonly ITransportRequestsPageRepository _repository;
+        private readonly ITransportRequestsPageService _service;
 
-        public TransportRequestsPageController(ITransportRequestsPageRepository repository)
+        public TransportRequestsPageController(ITransportRequestsPageService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
         // GET: api/PageRequests
@@ -28,27 +21,36 @@ namespace Bid_Go_Backend.Controllers
             [FromQuery] string? origin,
             [FromQuery] string? destination,
             [FromQuery] DateTime? deliveryDate,
-            [FromQuery] string? priceOrder
-        )
+            [FromQuery] string? priceOrder)
         {
-            var requests = await _repository.GetActiveAsync(origin, destination, deliveryDate, priceOrder);
-
-            if (!requests.Any())
-                return Ok(new { message = "Não existem pedidos ativos no momento." });
-
-            var dtoList = requests.Select(tr => new TransportRequestsPageDTO
+            try
             {
+                var requests = await _service.GetActiveAsync(origin, destination, deliveryDate, priceOrder);
 
-                Origin = tr.Origin,
-                Destination = tr.Destination,
-                Package = tr.Package,
-                PickupDate = tr.PickupDate,
-                DeliveryDate = tr.DeliveryDate,
-                Image = tr.Image,
-                MaxPrice = tr.MaxPrice
-            });
+                if (!requests.Any())
+                    return Ok(new { message = "Não existem pedidos ativos no momento." });
 
-            return Ok(dtoList);
+                var dtoList = requests.Select(tr => new TransportRequestsPageDTO
+                {
+                    Origin = tr.Origin,
+                    Destination = tr.Destination,
+                    Package = tr.Package,
+                    PickupDate = tr.PickupDate,
+                    DeliveryDate = tr.DeliveryDate,
+                    Image = tr.Image,
+                    MaxPrice = tr.MaxPrice
+                });
+
+                return Ok(dtoList);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+            }
         }
 
         // GET: api/PageRequests/{id}
@@ -57,14 +59,13 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                var alvo = await _repository.GetByIdAsync(id);
+                var alvo = await _service.GetByIdAsync(id);
 
                 if (alvo == null)
-                    return NotFound("Pedido de transporte não existe");
+                    return NotFound(new { message = "Pedido de transporte não existe." });
 
                 var responseDto = new TransportRequestResponseDTO
                 {
-
                     Origin = alvo.Origin,
                     Destination = alvo.Destination,
                     Package = alvo.Package,
@@ -81,11 +82,14 @@ namespace Bid_Go_Backend.Controllers
 
                 return Ok(responseDto);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
             }
-
         }
     }
 }
