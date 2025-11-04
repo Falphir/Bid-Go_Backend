@@ -33,6 +33,7 @@ using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepos
 using Bid_Go_Backend.Services.Chat;
 using Bid_Go_Backend.Services.Auth;
 using Bid_Go_Backend.Services.Email;
+using ITransportRequestsPageService = Bid_Go_Backend.Services.ITransportRequestsPageService;
 
 
 
@@ -145,6 +146,10 @@ builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITransportRequestService, TransportRequestService>();
+
+
+builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPageRepository>();
+builder.Services.AddScoped<ITransportRequestsPageService, TransportRequestsPageService>();
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
