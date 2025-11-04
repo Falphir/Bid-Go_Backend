@@ -2,7 +2,6 @@
 using Bid_Go_Backend.Data.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Extensions.Configuration;
 
 namespace Bid_Go_Backend.Data
 {

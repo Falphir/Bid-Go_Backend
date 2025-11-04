@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -8,34 +9,34 @@ namespace Bid_Go_Backend.Controllers
     [Route("api/bids")]
     public class AutomaticSelectionAlgorithmController : ControllerBase
     {
-        private readonly IAutomaticSelectionAlgorithmRepository _selectionRepo;
+        private readonly IAutomaticSelectionAlgorithmService _service;
 
-        public AutomaticSelectionAlgorithmController(IAutomaticSelectionAlgorithmRepository selectionRepo)
+        public AutomaticSelectionAlgorithmController(IAutomaticSelectionAlgorithmService service)
         {
-            _selectionRepo = selectionRepo;
+            _service = service;
         }
 
-        [HttpPost("execute/{transportRequestId}")]
+        [HttpPost("execute/{transportRequestId:int}")]
         public async Task<IActionResult> ExecuteAlgorithm(int transportRequestId)
         {
-            var result = await _selectionRepo.ExecuteAutomaticSelectionAsync(transportRequestId);
+            var (success, message, selectedBid) = await _service.ExecuteAsync(transportRequestId);
 
-            if (!result.Success)
-                return BadRequest(result.Message);
+            if (!success)
+                return BadRequest(message ?? "Automatic selection could not be executed.");
 
-            var DriverDto = new DriverDTO
+            var driverDto = new DriverDTO
             {
-                Id = result.SelectedBid.DriverId,
-                Name = result.SelectedBid.Driver.Name,
-                Email = result.SelectedBid.Driver.Email,
-                PhoneNumber = result.SelectedBid.Driver.PhoneNumber
+                Id = selectedBid!.DriverId,
+                Name = selectedBid.Driver!.Name,
+                Email = selectedBid.Driver.Email,
+                PhoneNumber = selectedBid.Driver.PhoneNumber
             };
 
             var bidDto = new BidDTO
             {
-                BidId = result.SelectedBid.BidId,
-                Value = result.SelectedBid.Value,
-                Driver = DriverDto
+                BidId = selectedBid.BidId,
+                Value = selectedBid.Value,
+                Driver = driverDto
             };
 
             return Ok(new

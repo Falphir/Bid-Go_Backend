@@ -1,11 +1,12 @@
-﻿using Bid_Go_Backend.Data.Models.DTOs;
+﻿using Bid_Go_Backend.Data.Models;
 
 namespace Bid_Go_Backend.Data.Repositories.Interfaces
 {
     public interface IPaymentRepository
     {
-        Task<List<PaymentResultDTO>> GetPaymentsByUserAsync(int userId);
-        Task<PaymentResultDTO> ProcessPaymentAsync(CreatePaymentRequestDTO request);
-        Task<PaymentResultDTO> RetryPaymentAsync(int paymentId, string stripeToken);
+        Task AddAsync(Payment payment);
+        Task<Payment?> GetByIdForUpdateAsync(int paymentId);
+        Task<List<Payment>> ListByUserAsync(int userId);
+        Task SaveChangesAsync();
     }
 }

@@ -10,55 +10,37 @@ namespace Bid_Go_Backend.Controllers
     [Route("api/[controller]")]
     public class RegisterDriverController : ControllerBase
     {
-        private readonly IRegisterDriverRepository _driverRepository;
+        private readonly IRegisterDriverService _driverService;
 
-        public RegisterDriverController(IRegisterDriverRepository driverRepository)
+        public RegisterDriverController(IRegisterDriverService driverService)
         {
-            _driverRepository = driverRepository;
+            _driverService = driverService;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDriverDTO dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // check if email already exists
-            var existingByEmail = await _driverRepository.GetByEmailAsync(dto.Email);
-            if (existingByEmail != null)
-                return Conflict(new { message = "Email is already registered." });
+            var (success, error, driver) = await _driverService.RegisterAsync(dto);
 
-            // check if phone already exists
-            var existingByPhone = await _driverRepository.GetByPhoneAsync(dto.PhoneNumber);
-            if (existingByPhone != null)
-                return Conflict(new { message = "Phone number is already registered." });
-
-            // check if NIF already exists
-            var existingByNIF = await _driverRepository.GetByNIFAsync(dto.NIF);
-            if (existingByNIF != null)
-                return Conflict(new { message = "Tax ID (NIF) is already registered." });
-
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-            var driver = new Driver
+            if (!success)
             {
-                Name = dto.Name,
-                DriverLicense = dto.DriverLicense,
-                Insurance = dto.Insurance,
-                Email = dto.Email,
-                Password = hashedPassword,
-                PhoneNumber = dto.PhoneNumber,
-                NIF = dto.NIF
-            };
-
-            await _driverRepository.CreateAsync(driver);
+                return error switch
+                {
+                    "EMAIL_EXISTS" => Conflict(new { message = "Email is already registered." }),
+                    "PHONE_EXISTS" => Conflict(new { message = "Phone number is already registered." }),
+                    "NIF_EXISTS" => Conflict(new { message = "Tax ID (NIF) is already registered." }),
+                    _ => StatusCode(500, new { message = "Unexpected error." })
+                };
+            }
 
             return Ok(new
             {
                 message = "Driver account created successfully.",
                 driver = new
                 {
-                    driver.Id,
+                    driver!.Id,
                     driver.Name,
                     driver.DriverLicense,
                     driver.Email,
