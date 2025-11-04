@@ -5,7 +5,7 @@ using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
 using System.Security.Claims;
 
-namespace Bid_Go_Backend.Services
+namespace Bid_Go_Backend.Services.Chat
 {
     public class ChatService : IChatService
     {
@@ -208,8 +208,8 @@ namespace Bid_Go_Backend.Services
             var acceptedBid = request.Bids?.FirstOrDefault(b => b.Status == EBidStatus.Accepted);
             if (acceptedBid == null) return false;
 
-            return (roleClaim == "Driver" && acceptedBid.DriverId == userId) ||
-                   (roleClaim == "Company" && request.CompanyId == userId);
+            return roleClaim == "Driver" && acceptedBid.DriverId == userId ||
+                   roleClaim == "Company" && request.CompanyId == userId;
         }
     }
 }

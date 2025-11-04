@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace Bid_Go_Backend.Services
+namespace Bid_Go_Backend.Services.Email
 {
     public class EmailService : IEmailService
     {

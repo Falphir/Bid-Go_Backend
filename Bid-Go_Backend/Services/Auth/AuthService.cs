@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Bid_Go_Backend.Services
+namespace Bid_Go_Backend.Services.Auth
 {
     public class AuthService : IAuthService
     {

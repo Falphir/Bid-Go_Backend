@@ -30,6 +30,9 @@ using System.Text;
 using System.Text.Json;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
+using Bid_Go_Backend.Services.Chat;
+using Bid_Go_Backend.Services.Auth;
+using Bid_Go_Backend.Services.Email;
 
 
 
