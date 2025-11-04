@@ -144,6 +144,7 @@ builder.Services.AddScoped<IChatService, ChatService>();
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITransportRequestService, TransportRequestService>();
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
