@@ -2,167 +2,174 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Bid_Go_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Xunit;
 
-namespace Bid_Go_Backend.Controllers
+namespace Bid_Go.Tests.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class ChatController : ControllerBase
+    public class ChatControllerTests
     {
-        private readonly IChatService _chatService;
-        private readonly ITransportRequestRepository _requestRepository;
+        private readonly Mock<IChatRepository> _chatRepo;
+        private readonly Mock<ITransportRequestRepository> _requestRepo;
+        private readonly ChatService _service;
 
-        public ChatController(IChatService chatRepository, ITransportRequestRepository requestRepository)
+        public ChatControllerTests()
         {
-            _chatService = chatRepository;
-            _requestRepository = requestRepository;
+            _chatRepo = new Mock<IChatRepository>();
+            _requestRepo = new Mock<ITransportRequestRepository>();
+            _service = new ChatService(_chatRepo.Object, _requestRepo.Object);
         }
 
-        private async Task<bool> UserHasAccessToChatAsync(int chatId)
+        private static ClaimsPrincipal MakeUser(int id, string type)
         {
-            var chat = await _chatRepository.GetChatById(chatId);
-            if (chat == null) return false;
-
-            var request = await _requestRepository.GetRequestWithBidsByIdAsync(chat.TransportRequestId);
-            if (request == null) return false;
-
-            var userIdClaim = User.FindFirst("userId")?.Value;
-            var roleClaim = User.FindFirst("userType")?.Value;
-
-            if (!int.TryParse(userIdClaim, out int userId) || string.IsNullOrEmpty(roleClaim))
-                return false;
-
-            var acceptedBid = request.Bids?.FirstOrDefault(b => b.Status == EBidStatus.Accepted);
-            if (acceptedBid == null) return false;
-
-            return (roleClaim == "Driver" && acceptedBid.DriverId == userId) ||
-                   (roleClaim == "Company" && request.CompanyId == userId);
-        }
-
-
-        [HttpGet("{requestId}")]
-        public async Task<IActionResult> GetChat(int requestId)
-        {
-            try
+            var claims = new[]
             {
-                var chat = await _chatRepository.GetChatByRequestIdAsync(requestId);
-                if (chat == null)
-                    return NotFound(new { message = "Chat não encontrado." });
+                new Claim("userId", id.ToString()),
+                new Claim("userType", type)
+            };
+            return new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
+        }
 
-                if (!await UserHasAccessToChatAsync(chat.ChatId))
-                    return StatusCode(403, new { message = "Acesso negado. Não pertence a este pedido de transporte." });
+        [Fact]
+        public async Task GetChat_ShouldReturn404_WhenChatNotFound()
+        {
+            _chatRepo.Setup(r => r.GetChatByRequestIdAsync(9)).ReturnsAsync((Chats)null);
 
-                var chatDto = new ChatDTO
+            var (status, body) = await _service.GetChat(9, MakeUser(1, "Driver"));
+
+            Assert.Equal(404, status);
+            var msg = body.GetType().GetProperty("message")!.GetValue(body) as string;
+            Assert.Equal("Chat não encontrado.", msg);
+        }
+
+        [Fact]
+        public async Task GetChat_ShouldReturn403_WhenNoAccess()
+        {
+            var chat = new Chats { ChatId = 1, TransportRequestId = 5, Status = EChatStatus.Active, Messages = new List<Message>() };
+            var request = new TransportRequest { TransportRequestId = 5, CompanyId = 99, Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 2 } } };
+
+            _chatRepo.Setup(r => r.GetChatByRequestIdAsync(5)).ReturnsAsync(chat);
+            _chatRepo.Setup(r => r.GetChatByIdAsync(chat.ChatId)).ReturnsAsync(chat);
+            _requestRepo.Setup(r => r.GetRequestWithBidsByIdAsync(request.TransportRequestId)).ReturnsAsync(request);
+
+            var (status, body) = await _service.GetChat(5, MakeUser(1, "Driver"));
+
+            Assert.Equal(403, status);
+        }
+
+        [Fact]
+        public async Task GetChat_ShouldReturn200_WithDTO()
+        {
+            var chat = new Chats
+            {
+                ChatId = 1,
+                TransportRequestId = 5,
+                Status = EChatStatus.Active,
+                Messages = new List<Message>
                 {
-                    ChatId = chat.ChatId,
-                    Status = chat.Status,
-                    TransportRequestId = chat.TransportRequestId,
-                    Messages = chat.Messages.Select(m => new MessageDTO
-                    {
-                        Context = m.Context,
-                        DriverId = m.DriverId,
-                        CompanyId = m.CompanyId,
-                        TimeStamp = m.TimeStamp
-                    }).ToList()
-                };
-
-                return Ok(chatDto);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado." });
-            }
-        }
-
-        [HttpPost("{chatId}/messages")]
-        public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageDTO dto)
-        {
-            try
-            {
-                if (!await UserHasAccessToChatAsync(chatId))
-                    return StatusCode(403, new { message = "Acesso negado. Não pertence a este pedido de transporte." });
-
-                var chat = await _chatRepository.GetChatByIdAsync(chatId);
-                var request = await _requestRepository.GetByIdAsync(chat.TransportRequestId);
-
-                var userId = int.Parse(User.FindFirst("userId")!.Value);
-                var role = User.FindFirst("userType")!.Value;
-
-
-
-                int driverId = 0;
-                int companyId = 0;
-
-                if (role == "Driver")
-                {
-                    driverId = userId;
-                    companyId = request.CompanyId;
+                    new Message { Context = "Hi", DriverId = 1, CompanyId = 2, TimeStamp = DateTime.UtcNow }
                 }
-                else if (role == "Company")
-                {
-                    companyId = userId;
-                    var acceptedBid = request.Bids?.FirstOrDefault(b => b.Status == EBidStatus.Accepted);
-                    if (acceptedBid == null)
-                        return BadRequest(new { message = "Nenhuma bid aceite encontrada." });
+            };
+            var request = new TransportRequest { TransportRequestId = 5, CompanyId = 2, Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 1 } } };
 
-                    driverId = acceptedBid.DriverId;
-                }
+            _chatRepo.Setup(r => r.GetChatByRequestIdAsync(5)).ReturnsAsync(chat);
+            _chatRepo.Setup(r => r.GetChatByIdAsync(chat.ChatId)).ReturnsAsync(chat);
+            _requestRepo.Setup(r => r.GetRequestWithBidsByIdAsync(request.TransportRequestId)).ReturnsAsync(request);
 
-                var message = new Message
-                {
-                    ChatId = chatId,
-                    Context = dto.Context,
-                    DriverId = driverId,
-                    CompanyId = companyId
-                };
+            var (status, body) = await _service.GetChat(5, MakeUser(1, "Driver"));
 
-                var result = await _chatRepository.SendMessageAsync(message);
-
-                var messageDto = new MessageDTO
-                {
-                    Context = result.Context,
-                    TimeStamp = result.TimeStamp,
-                    DriverId = result.DriverId,
-                    CompanyId = result.CompanyId
-                };
-
-                return Ok(messageDto);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado." });
-            }
+            Assert.Equal(200, status);
+            Assert.Equal(1, (int)body.GetType().GetProperty("ChatId")!.GetValue(body));
         }
 
-
-        [HttpGet("{chatId}/messages")]
-        public async Task<IActionResult> GetMessages(int chatId)
+        [Fact]
+        public async Task SendMessage_ShouldReturn400_WhenRequestCanceled()
         {
-            if (!await UserHasAccessToChatAsync(chatId))
-                return StatusCode(403, new { message = "Acesso negado. Não pertence a este pedido de transporte." });
+            var chat = new Chats { ChatId = 1, TransportRequestId = 5, Status = EChatStatus.Active };
+            var request = new TransportRequest { TransportRequestId = 5, CompanyId = 2, Status = ERequestStatus.Canceled };
 
-            var messages = await _chatRepository.GetMessagesAsync(chatId);
-            return Ok(messages);
+            _chatRepo.Setup(r => r.GetChatByIdAsync(chat.ChatId)).ReturnsAsync(chat);
+            _requestRepo.Setup(r => r.GetByIdAsync(chat.TransportRequestId)).ReturnsAsync(request);
+
+            _requestRepo.Setup(r => r.GetRequestWithBidsByIdAsync(chat.TransportRequestId))
+                .ReturnsAsync(new TransportRequest
+                {
+                    TransportRequestId = 5,
+                    CompanyId = 2,
+                    Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 1 } }
+                });
+
+            var dto = new MessageDTO { Context = "Test" };
+            var (status, body) = await _service.SendMessage(1, dto, MakeUser(1, "Driver"));
+
+            Assert.Equal(400, status);
+            var msg = body.GetType().GetProperty("message")!.GetValue(body) as string;
+            Assert.Equal("Não é possível enviar mensagens neste chat, pois o pedido foi cancelado.", msg);
         }
 
-        [HttpPost("create/{transportRequestId}")]
-        public async Task<IActionResult> CreateChatFromAcceptedBid(int transportRequestId)
+        [Fact]
+        public async Task SendMessage_ShouldReturn200_WhenOk()
         {
-            var chat = await _chatRepository.CreateChatFromAcceptedBidAsync(transportRequestId);
-            return Ok(chat);
+            var chatId = 1;
+            var chat = new Chats { ChatId = chatId, TransportRequestId = 5, Status = EChatStatus.Active };
+            var request = new TransportRequest
+            {
+                TransportRequestId = 5,
+                CompanyId = 2,
+                Status = ERequestStatus.Active,
+                Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 1 } }
+            };
+
+            _chatRepo.Setup(r => r.GetChatByIdAsync(chatId)).ReturnsAsync(chat);
+            _requestRepo.Setup(r => r.GetByIdAsync(request.TransportRequestId)).ReturnsAsync(request);
+            _chatRepo.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync((Message m) => { m.TimeStamp = DateTime.UtcNow; return m; });
+
+            // For access check
+            _requestRepo.Setup(r => r.GetRequestWithBidsByIdAsync(request.TransportRequestId)).ReturnsAsync(request);
+
+            var dto = new MessageDTO { Context = "Hello" };
+            var (status, body) = await _service.SendMessage(chatId, dto, MakeUser(1, "Driver"));
+
+            Assert.Equal(200, status);
+            Assert.Equal("Hello", (string)body.GetType().GetProperty("Context")!.GetValue(body));
+        }
+
+        [Fact]
+        public async Task GetMessages_ShouldReturn404_WhenEmpty()
+        {
+            var chatId = 7;
+            var chat = new Chats { ChatId = chatId, TransportRequestId = 3 };
+            var request = new TransportRequest { TransportRequestId = 3, CompanyId = 2, Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 1 } } };
+
+            _chatRepo.Setup(r => r.GetChatByIdAsync(chatId)).ReturnsAsync(chat);
+            _requestRepo.Setup(r => r.GetRequestWithBidsByIdAsync(request.TransportRequestId)).ReturnsAsync(request);
+            _chatRepo.Setup(r => r.GetMessagesAsync(chatId)).ReturnsAsync(new List<ChatMessageDTO>());
+
+            var (status, body) = await _service.GetMessages(chatId, MakeUser(1, "Driver"));
+
+            Assert.Equal(404, status);
+        }
+
+        [Fact]
+        public async Task CreateChatFromAcceptedBid_ShouldReturnOk_WhenChatCreated()
+        {
+            var transportRequestId = 10;
+            _chatRepo.Setup(r => r.GetChatByTransportRequestIdAsync(transportRequestId)).ReturnsAsync((Chats)null);
+            _chatRepo.Setup(r => r.GetAcceptedBidByRequestIdAsync(transportRequestId)).ReturnsAsync(new Bid { DriverId = 3, Status = EBidStatus.Accepted });
+            _chatRepo.Setup(r => r.GetTransportRequestByIdAsync(transportRequestId)).ReturnsAsync(new TransportRequest { TransportRequestId = transportRequestId });
+            _chatRepo.Setup(r => r.AddChatAsync(It.IsAny<Chats>())).ReturnsAsync((Chats c) => { c.ChatId = 123; return c; });
+
+            var (status, body) = await _service.CreateChatFromAcceptedBid(transportRequestId);
+
+            Assert.Equal(200, status);
+            Assert.Equal(transportRequestId, (int)body.GetType().GetProperty("TransportRequestId")!.GetValue(body));
         }
     }
 }
