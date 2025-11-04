@@ -1,10 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Services.Bids
 {
