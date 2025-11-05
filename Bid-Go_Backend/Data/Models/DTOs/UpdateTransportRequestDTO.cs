@@ -13,11 +13,15 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public string? Package { get; set; }
         public DateTime? PickupDate { get; set; }
         public DateTime? DeliveryDate { get; set; }
+
+        public bool? IsAutomaticSelectionEnabled { get; set; }
         public decimal? Weight { get; set; }
         public decimal? Volume { get; set; }
         public decimal? Length { get; set; }
         public decimal? Width { get; set; }
         public decimal? Height { get; set; }
+        public DateTime? BiddingStartDate { get; set; }
+        public DateTime? BiddingEndDate { get; set; }
         public string? Image { get; set; }
         public decimal? MaxPrice { get; set; }
 
