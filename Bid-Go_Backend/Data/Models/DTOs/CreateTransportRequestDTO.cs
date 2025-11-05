@@ -18,6 +18,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public decimal Height { get; set; }
         public DateTime PickupDate { get; set; }
         public DateTime DeliveryDate { get; set; }
+        public bool IsAutomaticSelectionEnabled { get; set; }
         public string Image { get; set; } = string.Empty;
         public decimal MaxPrice { get; set; }
         public int CompanyId { get; set; }

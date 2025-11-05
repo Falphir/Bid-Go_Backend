@@ -40,6 +40,7 @@ namespace Bid_Go_Backend.Services
                 Height = dto.Height,
                 PickupDate = dto.PickupDate,
                 DeliveryDate = dto.DeliveryDate,
+                IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled,
                 Image = dto.Image,
                 MaxPrice = dto.MaxPrice,
                 CompanyId = dto.CompanyId,
@@ -75,6 +76,8 @@ namespace Bid_Go_Backend.Services
             existing.Image = dto.Image ?? existing.Image;
             existing.PickupDate = dto.PickupDate ?? existing.PickupDate;
             existing.DeliveryDate = dto.DeliveryDate ?? existing.DeliveryDate;
+            if (dto.IsAutomaticSelectionEnabled.HasValue)
+                existing.IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled.Value;
             existing.MaxPrice = dto.MaxPrice ?? existing.MaxPrice;
 
             return await _repository.UpdateAsync(id, existing);
