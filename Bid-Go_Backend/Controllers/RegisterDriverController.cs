@@ -18,9 +18,10 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDriverDTO dto)
+        public async Task<IActionResult> Register([FromForm] RegisterDriverDTO dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var (success, error, driver) = await _driverService.RegisterAsync(dto);
 
@@ -50,5 +51,6 @@ namespace Bid_Go_Backend.Controllers
                 }
             });
         }
+
     }
 }

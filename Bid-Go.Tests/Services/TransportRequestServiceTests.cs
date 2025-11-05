@@ -6,18 +6,49 @@ using Bid_Go_Backend.Services.Transport_Request;
 using Moq;
 using Stripe;
 using Xunit;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using Bid_Go_Backend.Services.Interfaces;
+using Bid_Go_Backend.Services.Transport_Request;
 
 namespace Bid_Go.Tests.Services
 {
     public class TransportRequestServiceTests
     {
         private readonly Mock<ITransportRequestRepository> _repositoryMock;
+        private readonly Mock<ICloudflareR2Service> _mockR2;
         private readonly TransportRequestService _service;
 
         public TransportRequestServiceTests()
         {
             _repositoryMock = new Mock<ITransportRequestRepository>();
-            _service = new TransportRequestService(_repositoryMock.Object);
+
+            _mockR2 = new Mock<ICloudflareR2Service>();
+            _mockR2.Setup(r => r.UploadImageAsync(It.IsAny<IFormFile>()))
+                   .ReturnsAsync((IFormFile f) => "https://cdn.example.com/" + f.FileName);
+            _mockR2.Setup(r => r.DeleteImageAsync(It.IsAny<string>()))
+                   .Returns(Task.CompletedTask);
+
+            _service = new TransportRequestService(_repositoryMock.Object, _mockR2.Object);
+
+        }
+
+        private static IFormFile MakeFormFile(string fileName = "image.jpg")
+        {
+            var content = "fake image content";
+            var bytes = Encoding.UTF8.GetBytes(content);
+            var stream = new MemoryStream(bytes);
+            stream.Position = 0;
+            return new FormFile(stream, 0, stream.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/jpeg"
+            };
         }
 
         [Fact]
@@ -29,13 +60,22 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(1),
                 BiddingStartDate = DateTime.UtcNow,
                 BiddingEndDate = DateTime.UtcNow.AddHours(2),
-                Image = "image.jpg",
                 Weight = 10,
                 Volume = 10,
-                MaxPrice = 50
+                MaxPrice = 50,
+                Origin = "O",
+                Destination = "D",
+                Package = "P",
+                Length = 10,
+                Width = 10,
+                Height = 10,
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            var file = MakeFormFile();
+
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto, file));
         }
 
         [Fact]
@@ -47,13 +87,22 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(5),
                 BiddingStartDate = DateTime.UtcNow.AddHours(5),
                 BiddingEndDate = DateTime.UtcNow.AddHours(1), // inválido
-                Image = "img.jpg",
                 Weight = 10,
                 Volume = 10,
-                MaxPrice = 50
+                MaxPrice = 50,
+                Origin = "O",
+                Destination = "D",
+                Package = "P",
+                Length = 10,
+                Width = 10,
+                Height = 10,
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            var file = MakeFormFile();
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto, file));
             Assert.Equal("A data de início das licitações deve ser anterior à data de fim.", ex.Message);
         }
 
@@ -66,13 +115,22 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(3),
                 BiddingStartDate = DateTime.UtcNow,
                 BiddingEndDate = DateTime.UtcNow.AddDays(2),
-                Image = "img.jpg",
                 Weight = 10,
                 Volume = 10,
-                MaxPrice = 50
+                MaxPrice = 50,
+                Origin = "O",
+                Destination = "D",
+                Package = "P",
+                Length = 10,
+                Width = 10,
+                Height = 10,
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            var file = MakeFormFile();
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto, file));
             Assert.Equal("A data de recolha deve ser posterior ao fim das licitações.", ex.Message);
         }
 
@@ -85,13 +143,22 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(3),
                 BiddingStartDate = DateTime.UtcNow,
                 BiddingEndDate = DateTime.UtcNow.AddHours(1),
-                Image = "",
                 Weight = 10,
                 Volume = 10,
-                MaxPrice = 50
+                MaxPrice = 50,
+                Origin = "O",
+                Destination = "D",
+                Package = "P",
+                Length = 10,
+                Width = 10,
+                Height = 10,
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            IFormFile? file = null; // missing
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto, file!));
             Assert.Equal("A imagem é obrigatória.", exception.Message);
         }
 
@@ -107,14 +174,14 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(5),
                 BiddingStartDate = DateTime.UtcNow,
                 BiddingEndDate = DateTime.UtcNow.AddDays(2),
-                Image = "img.jpg",
                 Weight = 10,
                 Volume = 10,
                 Length = 50,
                 Width = 30,
                 Height = 40,
                 MaxPrice = 60,
-                CompanyId = 1
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
             var expected = new TransportRequest { TransportRequestId = 1, Origin = dto.Origin };
@@ -123,7 +190,9 @@ namespace Bid_Go.Tests.Services
                 .Setup(r => r.CreateAsync(It.IsAny<TransportRequest>()))
                 .ReturnsAsync(expected);
 
-            var result = await _service.CreateAsync(dto);
+            var file = MakeFormFile();
+
+            var result = await _service.CreateAsync(dto, file);
 
             Assert.NotNull(result);
             Assert.Equal(expected.TransportRequestId, result.TransportRequestId);
@@ -140,16 +209,22 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(5),
                 BiddingStartDate = DateTime.UtcNow,
                 BiddingEndDate = DateTime.UtcNow.AddDays(2),
-                Image = "img.jpg",
                 Weight = 10,
                 Volume = 10,
                 Length = 0, // inválido
                 Width = 30,
                 Height = 40,
-                MaxPrice = 50
+                MaxPrice = 50,
+                Origin = "O",
+                Destination = "D",
+                Package = "P",
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            var file = MakeFormFile();
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto, file));
             Assert.Equal("As dimensões devem ser superiores a zero.", ex.Message);
         }
 
@@ -162,16 +237,22 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(5),
                 BiddingStartDate = DateTime.UtcNow,
                 BiddingEndDate = DateTime.UtcNow.AddDays(2),
-                Image = "img.jpg",
                 Weight = 10,
                 Volume = 0, // inválido
                 Length = 50,
                 Width = 30,
                 Height = 40,
-                MaxPrice = 60
+                MaxPrice = 60,
+                Origin = "O",
+                Destination = "D",
+                Package = "P",
+                CompanyId = 1,
+                IsAutomaticSelectionEnabled = false
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            var file = MakeFormFile();
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto, file));
             Assert.Equal("Peso e volume devem ser superiores a zero.", ex.Message);
         }
 
@@ -184,7 +265,7 @@ namespace Bid_Go.Tests.Services
             _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((TransportRequest?)null);
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.UpdateAsync(1, new UpdateTransportRequestDTO()));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.UpdateAsync(1, new UpdateTransportRequestDTO(), null));
         }
 
         [Fact]
@@ -193,7 +274,7 @@ namespace Bid_Go.Tests.Services
             var existing = new TransportRequest { Status = ERequestStatus.Active };
             _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.UpdateAsync(1, new UpdateTransportRequestDTO()));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.UpdateAsync(1, new UpdateTransportRequestDTO(), null));
         }
 
         [Fact]
@@ -208,7 +289,7 @@ namespace Bid_Go.Tests.Services
                 DeliveryDate = DateTime.UtcNow.AddDays(1)
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto, null));
             Assert.Equal("A data de recolha deve ser anterior à data de entrega.", ex.Message);
         }
 
@@ -224,7 +305,7 @@ namespace Bid_Go.Tests.Services
                 BiddingEndDate = DateTime.UtcNow.AddDays(1)
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto, null));
             Assert.Equal("A data de início das licitações deve ser anterior à data de fim.", ex.Message);
         }
 
@@ -240,7 +321,7 @@ namespace Bid_Go.Tests.Services
                 PickupDate = DateTime.UtcNow.AddDays(1)
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto, null));
             Assert.Equal("A data de recolha deve ser posterior ao fim das licitações.", ex.Message);
         }
 
@@ -255,7 +336,7 @@ namespace Bid_Go.Tests.Services
                 MaxPrice = 10
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto, null));
             Assert.Equal("O preço deve ser igual ou superior a 20.", ex.Message);
         }
 
@@ -291,7 +372,7 @@ namespace Bid_Go.Tests.Services
             _repositoryMock.Setup(r => r.UpdateAsync(1, It.IsAny<TransportRequest>()))
                 .ReturnsAsync((int id, TransportRequest req) => req);
 
-            var result = await _service.UpdateAsync(1, dto);
+            var result = await _service.UpdateAsync(1, dto, null);
 
             Assert.NotNull(result);
             Assert.Equal("Lisboa", result.Origin);
@@ -316,7 +397,7 @@ namespace Bid_Go.Tests.Services
                 Height = 20
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto, null));
             Assert.Equal("As dimensões devem ser superiores a zero.", ex.Message);
         }
 
@@ -331,7 +412,7 @@ namespace Bid_Go.Tests.Services
                 Volume = 0 // inválido
             };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto, null));
             Assert.Equal("O volume deve ser superior a zero.", ex.Message);
         }
 

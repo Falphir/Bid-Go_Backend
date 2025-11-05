@@ -1,24 +1,28 @@
-﻿
-using Bid_Go_Backend.Data.Models;
+﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Profile;
 using Moq;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Xunit;
+using Bid_Go_Backend.Services.Interfaces;
 
 namespace Bid_Go.Tests.Services
 {
     public class ProfileServiceTests
     {
         private readonly Mock<IProfileRepository> _mockRepo;
+        private readonly Mock<ICloudflareR2Service> _mockCloudflare;
         private readonly ProfileService _service;
 
         public ProfileServiceTests()
         {
             _mockRepo = new Mock<IProfileRepository>();
-            _service = new ProfileService(_mockRepo.Object);
+            // Use a simple mock for the interface
+            _mockCloudflare = new Mock<ICloudflareR2Service>();
+            _service = new ProfileService(_mockRepo.Object, _mockCloudflare.Object);
         }
 
         // === GetProfileAsync ===
@@ -53,9 +57,9 @@ namespace Bid_Go.Tests.Services
             await Assert.ThrowsAsync<Exception>(() => _service.GetProfileAsync(1));
         }
 
-        // === UpdateProfileAsync (Driver) ===
+        // === UpdateDriverProfileAsync ===
         [Fact]
-        public async Task UpdateProfileAsync_UpdatesDriverSuccessfully()
+        public async Task UpdateDriverProfileAsync_UpdatesDriverSuccessfully()
         {
             var driver = new Driver
             {
@@ -65,7 +69,7 @@ namespace Bid_Go.Tests.Services
                 Email = "old@email.com"
             };
 
-            var dto = new DriverProfileDTO
+            var dto = new DriverProfileUpdateDTO
             {
                 Name = "New",
                 Email = "new@email.com"
@@ -73,38 +77,39 @@ namespace Bid_Go.Tests.Services
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
             _mockRepo
-        .Setup(r => r.UpdateDriverAsync(It.IsAny<Driver>()))
-        .ReturnsAsync(true);
+                .Setup(r => r.UpdateDriverAsync(It.IsAny<Driver>()))
+                .ReturnsAsync(true);
 
-            var result = await _service.UpdateProfileAsync(1, dto);
+            var result = await _service.UpdateDriverProfileAsync(1, dto);
 
             Assert.True(result);
             _mockRepo.Verify(r => r.UpdateDriverAsync(It.IsAny<Driver>()), Times.Once);
         }
 
         [Fact]
-        public async Task UpdateProfileAsync_Throws_WhenDriverHasNoChanges()
+        public async Task UpdateDriverProfileAsync_Throws_WhenDriverHasNoChanges()
         {
             var driver = new Driver { Id = 1, IsActive = true, Name = "Same" };
-            var dto = new DriverProfileDTO { Name = "Same" };
+            var dto = new DriverProfileUpdateDTO { Name = "Same" };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
 
-            await Assert.ThrowsAsync<Exception>(() => _service.UpdateProfileAsync(1, dto));
+            await Assert.ThrowsAsync<Exception>(() => _service.UpdateDriverProfileAsync(1, dto));
         }
 
         [Fact]
-        public async Task UpdateProfileAsync_Throws_WhenInvalidDriverDto()
+        public async Task UpdateDriverProfileAsync_Throws_WhenInvalidDriverDto()
         {
             var driver = new Driver { Id = 1, IsActive = true };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
 
-            await Assert.ThrowsAsync<Exception>(() => _service.UpdateProfileAsync(1, new CompanyProfileDTO()));
+            // Passing a CompanyProfileDTO to the driver update should cause an exception in the service
+            await Assert.ThrowsAsync<Exception>(() => _service.UpdateDriverProfileAsync(1, new DriverProfileUpdateDTO()));
         }
 
-        // === UpdateProfileAsync (Company) ===
+        // === UpdateCompanyProfileAsync ===
         [Fact]
-        public async Task UpdateProfileAsync_UpdatesCompanySuccessfully()
+        public async Task UpdateCompanyProfileAsync_UpdatesCompanySuccessfully()
         {
             var company = new Company
             {
@@ -122,32 +127,32 @@ namespace Bid_Go.Tests.Services
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(company);
             _mockRepo
-    .Setup(r => r.UpdateCompanyAsync(It.IsAny<Company>()))
-    .ReturnsAsync(true);
+                .Setup(r => r.UpdateCompanyAsync(It.IsAny<Company>()))
+                .ReturnsAsync(true);
 
 
-            var result = await _service.UpdateProfileAsync(1, dto);
+            var result = await _service.UpdateCompanyProfileAsync(1, dto);
 
             Assert.True(result);
             _mockRepo.Verify(r => r.UpdateCompanyAsync(It.IsAny<Company>()), Times.Once);
         }
 
         [Fact]
-        public async Task UpdateProfileAsync_Throws_WhenInvalidCompanyDto()
+        public async Task UpdateCompanyProfileAsync_Throws_WhenInvalidCompanyDto()
         {
             var company = new Company { Id = 1, IsActive = true };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(company);
 
-            await Assert.ThrowsAsync<Exception>(() => _service.UpdateProfileAsync(1, new DriverProfileDTO()));
+            await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
         }
 
         [Fact]
-        public async Task UpdateProfileAsync_Throws_WhenUserInactive()
+        public async Task UpdateCompanyProfileAsync_Throws_WhenUserInactive()
         {
             var user = new Company { Id = 1, IsActive = false };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
-            await Assert.ThrowsAsync<Exception>(() => _service.UpdateProfileAsync(1, new DriverProfileDTO()));
+            await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
         }
 
         // === ChangePasswordAsync ===

@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
@@ -22,12 +23,12 @@ namespace Bid_Go_Backend.Controllers
 
         [Authorize(Policy = "CompanyOnly")]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateTransportRequestDTO dto)
+        public async Task<IActionResult> Create([FromForm] CreateTransportRequestDTO dto, IFormFile image)
         {
 
             try
             {
-                var created = await _service.CreateAsync(dto);
+                var created = await _service.CreateAsync(dto, image);
                 return CreatedAtAction(nameof(GetById), new { id = created.TransportRequestId }, created);
             }
             catch (ArgumentException ex)
@@ -38,7 +39,7 @@ namespace Bid_Go_Backend.Controllers
 
         [Authorize(Policy = "CompanyOnly")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateTransportRequestDTO dto)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateTransportRequestDTO dto, IFormFile? image)
         {
 
 
@@ -50,7 +51,7 @@ namespace Bid_Go_Backend.Controllers
 
             try
             {
-                var updated = await _service.UpdateAsync(id, dto);
+                var updated = await _service.UpdateAsync(id, dto, image);
                 return Ok(updated);
             }
             catch (Exception ex)
@@ -58,6 +59,7 @@ namespace Bid_Go_Backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
 
         [Authorize(Policy = "CompanyOnly")]
         [HttpDelete("{id}")]

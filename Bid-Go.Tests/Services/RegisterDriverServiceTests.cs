@@ -4,16 +4,36 @@ using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Register;
 using Moq;
 using Xunit;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using Bid_Go_Backend.Services.Interfaces;
 
 namespace Bid_Go.Tests.Services
 {
     public class RegisterDriverServiceTests
     {
+      
+        private static IFormFile MakeFormFile(string fileName = "file.png")
+        {
+            var content = "fake image content";
+            var bytes = Encoding.UTF8.GetBytes(content);
+            var stream = new MemoryStream(bytes);
+            stream.Position = 0;
+            return new FormFile(stream, 0, stream.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/png"
+            };
+        }
+
         private static RegisterDriverDTO MakeDto() => new RegisterDriverDTO
         {
             Name = "João Motorista",
-            DriverLicense = "DL-PT-12345",
-            Insurance = "INS-0001",
+            DriverLicense = MakeFormFile("license.png"),
+            Insurance = MakeFormFile("insurance.png"),
             Email = "driver@example.com",
             Password = "PlainPassword123!",
             PhoneNumber = 912345678,
@@ -36,7 +56,10 @@ namespace Bid_Go.Tests.Services
                 .Callback<Driver>(d => { d.Id = 77; captured = d; })
                 .ReturnsAsync((Driver d) => d);
 
-            var service = new RegisterDriverService(repo.Object);
+            var mockCloud = new Mock<ICloudflareR2Service>();
+            mockCloud.Setup(c => c.UploadImageAsync(It.IsAny<IFormFile>())).ReturnsAsync((IFormFile f) => "https://cdn.example.com/" + f.FileName);
+
+            var service = new RegisterDriverService(repo.Object, mockCloud.Object);
             var dto = MakeDto();
 
             // Act
@@ -66,7 +89,8 @@ namespace Bid_Go.Tests.Services
             repo.Setup(r => r.GetByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(new Driver { Email = "driver@example.com" });
 
-            var service = new RegisterDriverService(repo.Object);
+            var mockCloud = new Mock<ICloudflareR2Service>();
+            var service = new RegisterDriverService(repo.Object, mockCloud.Object);
             var dto = MakeDto();
 
             // Act
@@ -88,7 +112,8 @@ namespace Bid_Go.Tests.Services
             repo.Setup(r => r.GetByPhoneAsync(It.IsAny<int>()))
                 .ReturnsAsync(new Driver { PhoneNumber = 912345678 });
 
-            var service = new RegisterDriverService(repo.Object);
+            var mockCloud = new Mock<ICloudflareR2Service>();
+            var service = new RegisterDriverService(repo.Object, mockCloud.Object);
             var dto = MakeDto();
 
             // Act
@@ -111,7 +136,8 @@ namespace Bid_Go.Tests.Services
             repo.Setup(r => r.GetByNIFAsync(It.IsAny<int>()))
                 .ReturnsAsync(new Driver { NIF = 123456789 });
 
-            var service = new RegisterDriverService(repo.Object);
+            var mockCloud = new Mock<ICloudflareR2Service>();
+            var service = new RegisterDriverService(repo.Object, mockCloud.Object);
             var dto = MakeDto();
 
             // Act

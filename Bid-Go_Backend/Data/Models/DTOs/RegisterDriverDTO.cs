@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bid_Go_Backend.Data.Models.DTOs
 {
@@ -8,13 +9,11 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Driver license is required.")]
-        [MaxLength(256, ErrorMessage = "Driver license cannot exceed 256 characters.")]
-        public string DriverLicense { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Driver license image is required.")]
+        public IFormFile DriverLicense { get; set; } = null!;
 
-        [Required(ErrorMessage = "Insurance is required.")]
-        [MaxLength(256, ErrorMessage = "Insurance cannot exceed 256 characters.")]
-        public string Insurance { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Insurance image is required.")]
+        public IFormFile Insurance { get; set; } = null!;
 
         [Required(ErrorMessage = "Email is required.")]
         [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
