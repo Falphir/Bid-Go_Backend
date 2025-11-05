@@ -127,4 +127,66 @@ public class ChatServiceTests
         var dto = Assert.IsType<ViewChatDTO>(result.Body);
         Assert.Equal(123, dto.ChatId);
     }
+
+    [Fact]
+    public async Task SendMessage_ShouldReturn200_WhenMessageSentByCompany_WithAcceptedBid()
+    {
+        // Arrange
+        var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
+        var request = new TransportRequest
+        {
+            TransportRequestId = 1,
+            Status = ERequestStatus.Active,
+            CompanyId = 10,
+            Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 2 } }
+        };
+
+        _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
+        _requestRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(request);
+        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request); 
+        _chatRepoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>())).ReturnsAsync((Message m) => m);
+
+        var user = CreateUser(10, "Company");
+
+        // Act
+        var result = await _service.SendMessage(1, new MessageDTO { Context = "Olá driver" }, user);
+
+        // Assert
+        Assert.Equal(200, result.StatusCode);
+        var dto = Assert.IsType<MessageDTO>(result.Body);
+        Assert.Equal("Olá driver", dto.Context);
+        Assert.Equal(2, dto.DriverId);
+        Assert.Equal(10, dto.CompanyId);
+    }
+
+
+    [Fact]
+    public async Task SendMessage_ShouldReturn403_WhenCompanyHasNoAcceptedBid()
+    {
+        // Arrange
+        var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
+        var request = new TransportRequest
+        {
+            TransportRequestId = 1,
+            Status = ERequestStatus.Active,
+            CompanyId = 10,
+            Bids = new List<Bid> { new Bid { Status = EBidStatus.Pendent, DriverId = 2 } } // nenhuma bid aceita
+        };
+
+        _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
+        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request);
+
+        var user = CreateUser(10, "Company");
+
+        // Act
+        var result = await _service.SendMessage(1, new MessageDTO { Context = "Oi" }, user);
+
+        // Assert
+        // Na prática, como não há bid aceita, o acesso falha → 403
+        Assert.Equal(403, result.StatusCode);
+        Assert.Contains("Acesso negado", result.Body.ToString());
+    }
+
+
+
 }
