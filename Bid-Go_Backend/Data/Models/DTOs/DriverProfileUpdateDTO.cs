@@ -12,7 +12,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs
     {
         [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string? Name { get; set; }
-        public IFormFile? DriverLicense { get; set; }  // upload
+        public IFormFile? DriverLicense { get; set; }  
         public IFormFile? Insurance { get; set; }
 
         [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",

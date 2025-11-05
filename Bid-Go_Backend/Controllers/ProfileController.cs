@@ -70,13 +70,18 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPut("driver/{id}")]
         public async Task<IActionResult> UpdateDriverProfile(int id, [FromForm] DriverProfileUpdateDTO dto)
         {
-
             var userIdClaim = User.FindFirst("userId")?.Value;
-            if (userIdClaim == null || int.Parse(userIdClaim) != id)
+
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
+
+            if (int.Parse(userIdClaim) != id)
                 return Forbid();
+
 
             try
             {
@@ -92,10 +97,18 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        [Authorize(Policy = "CompanyOnly")]
         [HttpPut("company/{id}")]
-
         public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
         {
+
+            var userIdClaim = User.FindFirst("userId")?.Value;
+
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
+
+            if (int.Parse(userIdClaim) != id)
+                return Forbid();
             try
             {
                 var success = await _service.UpdateCompanyProfileAsync(id, dto);

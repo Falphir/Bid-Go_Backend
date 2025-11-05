@@ -1,17 +1,11 @@
-using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
-using Bid_Go_Backend.Data.Repositories.Register;
-using Bid_Go_Backend.Data.Repositories.Requests;
-using Bid_Go_Backend.Data.Repositories.Review;
 using Bid_Go_Backend.Data.Repositories.Review;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
 using Bid_Go_Backend.Repositories;
@@ -23,7 +17,6 @@ using Bid_Go_Backend.Services.Auth;
 using Bid_Go_Backend.Services.Bids;
 using Bid_Go_Backend.Services.Email;
 using Bid_Go_Backend.Services.History;
-using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Payments;
 using Bid_Go_Backend.Services.Profile;
@@ -37,9 +30,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Stripe;
@@ -48,14 +39,7 @@ using System.Text.Json;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.ITransportRequestsPageService;
-using Bid_Go_Backend.Services.Auth;
-using Bid_Go_Backend.Services.Email;
-using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.ITransportRequestsPageService;
-using Bid_Go_Backend.Services.Profile;
-using Bid_Go_Backend.Repositories;
-using Bid_Go_Backend.Services.History;
-using Bid_Go_Backend.Services.Review;
-using Bid_Go_Backend.Services.Transport_Request;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -192,7 +176,7 @@ builder.Services.AddScoped<ITransportUpdateStatus, TransportUpdateStatusReposito
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 builder.Services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
 
-builder.Services.AddSingleton<CloudflareR2Service>(sp =>
+builder.Services.AddSingleton<ICloudflareR2Service, CloudflareR2Service>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     var accessKey = config["CloudflareR2:AccessKeyId"];
