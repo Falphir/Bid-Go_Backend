@@ -29,6 +29,7 @@ using Bid_Go_Backend.Services.Payments;
 using Bid_Go_Backend.Services.Profile;
 using Bid_Go_Backend.Services.Register;
 using Bid_Go_Backend.Services.Review;
+using Bid_Go_Backend.Services.Transport_Request;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -46,7 +47,7 @@ using System.Text;
 using System.Text.Json;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
-using ITransportRequestsPageService = Bid_Go_Backend.Services.ITransportRequestsPageService;
+using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.ITransportRequestsPageService;
 
 
 var builder = WebApplication.CreateBuilder(args);

@@ -6,7 +6,7 @@ using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bid_Go_Backend.Services
+namespace Bid_Go_Backend.Services.Transport_Request
 {
     public class TransportRequestService : ITransportRequestService
     {
@@ -87,9 +87,9 @@ namespace Bid_Go_Backend.Services
             if (dto.MaxPrice.HasValue && dto.MaxPrice < 20)
                 throw new ArgumentException("O preço deve ser igual ou superior a 20.");
 
-            if ((dto.Length.HasValue && dto.Length <= 0) ||
-                (dto.Width.HasValue && dto.Width <= 0) ||
-                (dto.Height.HasValue && dto.Height <= 0))
+            if (dto.Length.HasValue && dto.Length <= 0 ||
+                dto.Width.HasValue && dto.Width <= 0 ||
+                dto.Height.HasValue && dto.Height <= 0)
                 throw new ArgumentException("As dimensões devem ser superiores a zero.");
 
             if (dto.Volume.HasValue && dto.Volume <= 0)
