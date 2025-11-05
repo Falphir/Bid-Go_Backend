@@ -53,60 +53,6 @@ namespace Bid_Go_Backend.Data.Repositories.Chat
         {
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
-
-            /*
-            string notificationMessage;
-            int receiverId;
-            ENotificationType notificationType = ENotificationType.New_message;
-
-            if (message.DriverId == 0 && message.CompanyId != 0)
-            {
-                // Mensagem enviada pela empresa → notifica o motorista
-                var acceptedBid = await _context.Bids
-                    .FirstOrDefaultAsync(b => b.TransportRequestId == chat.TransportRequestId && b.Status == EBidStatus.Accepted);
-
-                if (acceptedBid != null)
-                {
-                    receiverId = acceptedBid.DriverId;
-                    notificationMessage = $"Nova mensagem da empresa no pedido #{chat.TransportRequestId}.";
-
-                    await _notificationRepo.CreateAsync(
-                        receiverId,
-                        notificationMessage,
-                        notificationType,
-                        null,
-                        chat.TransportRequestId
-                    );
-
-                    await _notificationRepo.SendAsync(
-                        receiverId,
-                        notificationMessage,
-                        notificationType
-                    );
-                }
-            }
-            else if (message.DriverId != 0)
-            {
-                // Mensagem enviada pelo motorista → notifica a empresa
-                receiverId = request.CompanyId;
-                notificationMessage = $"Nova mensagem do motorista no pedido #{chat.TransportRequestId}.";
-
-                await _notificationRepo.CreateAsync(
-                    receiverId,
-                    notificationMessage,
-                    notificationType,
-                    null,
-                    chat.TransportRequestId
-                );
-
-                await _notificationRepo.SendAsync(
-                    receiverId,
-                    notificationMessage,
-                    notificationType
-                );
-            }
-            */
-
             return message;
         }
 

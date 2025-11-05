@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251104184317_teste")]
-    partial class teste
+    [Migration("20251105004514_BidGo")]
+    partial class BidGo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
