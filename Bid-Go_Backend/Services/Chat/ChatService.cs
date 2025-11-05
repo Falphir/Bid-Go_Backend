@@ -2,20 +2,26 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
 using System.Security.Claims;
 
-namespace Bid_Go_Backend.Services.Chat
+namespace Bid_Go_Backend.Services
 {
     public class ChatService : IChatService
     {
         private readonly IChatRepository _chatRepository;
         private readonly ITransportRequestRepository _requestRepository;
+        private readonly INotificationService _notificationService;
 
-        public ChatService(IChatRepository chatRepository, ITransportRequestRepository requestRepository)
+        public ChatService(
+            IChatRepository chatRepository,
+            ITransportRequestRepository requestRepository,
+            INotificationService notificationService)
         {
             _chatRepository = chatRepository;
             _requestRepository = requestRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<(int StatusCode, object Body)> GetChat(int requestId, ClaimsPrincipal user)
@@ -61,11 +67,9 @@ namespace Bid_Go_Backend.Services.Chat
         {
             try
             {
-   
                 if (!await UserHasAccessToChat(user, chatId))
                     return (403, new { message = "Acesso negado." });
 
-        
                 var chat = await _chatRepository.GetChatByIdAsync(chatId);
                 if (chat == null)
                     return (404, new { message = "Chat não encontrado." });
@@ -74,33 +78,23 @@ namespace Bid_Go_Backend.Services.Chat
                 if (request == null)
                     return (404, new { message = "Pedido de transporte não encontrado." });
 
-     
-                if (request.Status == ERequestStatus.Canceled)
-                {
-                   
-                    return (400, new { message = "Não é possível enviar mensagens neste chat, pois o pedido foi cancelado." });
-                }
-
-                if (request.Status == ERequestStatus.Completed)
-                {
-               
-                    return (400, new { message = "Não é possível enviar mensagens neste chat, pois o pedido foi concluído." });
-                }
-
- 
-                if (chat.Status == EChatStatus.Archived || chat.Status == EChatStatus.Canceled)
+                if (request.Status is ERequestStatus.Canceled or ERequestStatus.Completed)
                     return (400, new { message = "Não é possível enviar mensagens neste chat." });
 
-     
+                if (chat.Status is EChatStatus.Archived or EChatStatus.Canceled)
+                    return (400, new { message = "Não é possível enviar mensagens neste chat." });
+
                 var userId = int.Parse(user.FindFirst("userId")!.Value);
                 var role = user.FindFirst("userType")!.Value;
 
                 int driverId = 0, companyId = 0;
+                int destinatarioId;
 
                 if (role == "Driver")
                 {
                     driverId = userId;
                     companyId = request.CompanyId;
+                    destinatarioId = companyId;
                 }
                 else if (role == "Company")
                 {
@@ -110,9 +104,13 @@ namespace Bid_Go_Backend.Services.Chat
                         return (400, new { message = "Nenhuma bid aceite encontrada." });
 
                     driverId = acceptedBid.DriverId;
+                    destinatarioId = driverId;
+                }
+                else
+                {
+                    return (403, new { message = "Tipo de utilizador inválido." });
                 }
 
-    
                 var message = new Message
                 {
                     ChatId = chatId,
@@ -122,8 +120,16 @@ namespace Bid_Go_Backend.Services.Chat
                     TimeStamp = DateTime.UtcNow
                 };
 
-        
                 var result = await _chatRepository.AddMessageAsync(message);
+
+          
+                await _notificationService.CreateAndSendAsync(
+                    destinatarioId,
+                    "Nova mensagem no chat.",
+                    ENotificationType.New_message,
+                    null,
+                    chat.TransportRequestId
+                );
 
                 var messageDto = new MessageDTO
                 {
@@ -145,34 +151,26 @@ namespace Bid_Go_Backend.Services.Chat
         {
             try
             {
-      
                 var existingChat = await _chatRepository.GetChatByTransportRequestIdAsync(transportRequestId);
                 if (existingChat != null)
-                {
                     return (200, new { message = "Chat já existente." });
-                }
 
-             
                 var acceptedBid = await _chatRepository.GetAcceptedBidByRequestIdAsync(transportRequestId);
                 if (acceptedBid == null)
                     return (400, new { message = "Nenhuma bid aceite encontrada para este pedido." });
 
-         
                 var transportRequest = await _chatRepository.GetTransportRequestByIdAsync(transportRequestId);
                 if (transportRequest == null)
                     return (404, new { message = "Pedido de transporte não encontrado." });
 
-        
                 var newChat = new Chats
                 {
                     Status = EChatStatus.Active,
                     TransportRequestId = transportRequestId
                 };
 
-         
                 var createdChat = await _chatRepository.AddChatAsync(newChat);
 
-    
                 var chatDto = new ViewChatDTO
                 {
                     ChatId = createdChat.ChatId,
@@ -204,8 +202,8 @@ namespace Bid_Go_Backend.Services.Chat
             var acceptedBid = request.Bids?.FirstOrDefault(b => b.Status == EBidStatus.Accepted);
             if (acceptedBid == null) return false;
 
-            return roleClaim == "Driver" && acceptedBid.DriverId == userId ||
-                   roleClaim == "Company" && request.CompanyId == userId;
+            return (roleClaim == "Driver" && acceptedBid.DriverId == userId) ||
+                   (roleClaim == "Company" && request.CompanyId == userId);
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
+using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
@@ -13,24 +11,22 @@ namespace Bid_Go_Backend.Controllers
     [Route("api/notifications")]
     public class NotificationController : ControllerBase
     {
-        private readonly INotificationRepository _repo;
+        private readonly INotificationService _service;
 
-        public NotificationController(INotificationRepository repo)
+        public NotificationController(INotificationService service)
         {
-            _repo = repo;
+            _service = service;
         }
 
-        // GET /api/notifications?userId=1&type=BidAccepted&from=2025-10-01&to=2025-10-28&order=asc
+        // GET /api/notifications?userId=1&type=BidAccepted&order=desc
         [HttpGet]
         public async Task<IActionResult> GetNotifications(
-      [FromQuery] int userId,
-      [FromQuery] ENotificationType? type,
-      [FromQuery] string order = "desc") // "asc" ou "desc"
+            [FromQuery] int userId,
+            [FromQuery] ENotificationType? type,
+            [FromQuery] string order = "desc")
         {
-            var notifications = await _repo.GetNotificationsAsync(userId, type, order);
+            var notifications = await _service.GetNotificationsAsync(userId, type, order);
             return Ok(notifications);
         }
-
     }
 }
-

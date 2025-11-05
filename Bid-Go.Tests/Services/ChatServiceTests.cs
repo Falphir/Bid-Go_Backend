@@ -1,27 +1,32 @@
-﻿using System;
+﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
+using Bid_Go_Backend.Data.Models.Enums;
+using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services;
+using Bid_Go_Backend.Services.Interfaces;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Services.Chat;
-using Moq;
 using Xunit;
 
 public class ChatServiceTests
 {
     private readonly Mock<IChatRepository> _chatRepoMock;
     private readonly Mock<ITransportRequestRepository> _requestRepoMock;
+    private readonly Mock<INotificationService> _notificationServiceMock;
     private readonly ChatService _service;
+
 
     public ChatServiceTests()
     {
         _chatRepoMock = new Mock<IChatRepository>();
         _requestRepoMock = new Mock<ITransportRequestRepository>();
-        _service = new ChatService(_chatRepoMock.Object, _requestRepoMock.Object);
+        _notificationServiceMock = new Mock<INotificationService>();
+        _service = new ChatService(_chatRepoMock.Object, _requestRepoMock.Object, _notificationServiceMock.Object);
+     ;
     }
 
     private ClaimsPrincipal CreateUser(int userId, string role)
@@ -84,7 +89,7 @@ public class ChatServiceTests
         Assert.Contains("Acesso negado", result.Body.ToString());
     }
 
-   
+
 
     [Fact]
     public async Task CreateChatFromAcceptedBid_ShouldReturn400_WhenNoAcceptedBid()
@@ -143,7 +148,7 @@ public class ChatServiceTests
 
         _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
         _requestRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(request);
-        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request); 
+        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request);
         _chatRepoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>())).ReturnsAsync((Message m) => m);
 
         var user = CreateUser(10, "Company");

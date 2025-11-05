@@ -52,9 +52,9 @@ namespace Bid_Go.Tests.Services
         {
             // Arrange
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var tr = MakeTR();
@@ -103,16 +103,13 @@ namespace Bid_Go.Tests.Services
             gateway.VerifyAll();
 
             // Notificações enviadas
-            notifs.Verify(n => n.CreateAsync(tr.CompanyId,
+            // Notificação combinada
+            notifs.Verify(n => n.CreateAndSendAsync(
+                    tr.CompanyId,
                     It.Is<string>(s => s.Contains($"#{tr.TransportRequestId}")),
                     ENotificationType.Confirmed_Payment,
                     null,
                     tr.TransportRequestId),
-                Times.Once);
-
-            notifs.Verify(n => n.SendAsync(tr.CompanyId,
-                    It.Is<string>(s => s.Contains($"#{tr.TransportRequestId}")),
-                    ENotificationType.Confirmed_Payment),
                 Times.Once);
         }
 
@@ -121,9 +118,9 @@ namespace Bid_Go.Tests.Services
         {
             // Arrange
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var tr = MakeTR();
@@ -156,17 +153,17 @@ namespace Bid_Go.Tests.Services
             Assert.Equal(EPaymentStatus.Failed, result.Status);
 
             // Notificações NÃO enviadas
-            notifs.Verify(n => n.CreateAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), null, It.IsAny<int>()), Times.Never);
-            notifs.Verify(n => n.SendAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>()), Times.Never);
+            notifs.Verify(n => n.CreateAndSendAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
         }
 
         [Fact]
         public async Task ProcessPayment_ShouldThrow_WhenTransportRequestNotFound()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             trs.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((TransportRequest?)null);
@@ -180,9 +177,9 @@ namespace Bid_Go.Tests.Services
         public async Task ProcessPayment_ShouldThrow_WhenNoSelectedBid()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var tr = MakeTR(selectedBidId: null);
@@ -197,9 +194,9 @@ namespace Bid_Go.Tests.Services
         public async Task ProcessPayment_ShouldThrow_WhenSelectedBidNotFound()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var tr = MakeTR();
@@ -215,9 +212,9 @@ namespace Bid_Go.Tests.Services
         public async Task ProcessPayment_ShouldThrow_WhenSelectedBidDoesNotBelongToTR()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var tr = MakeTR(trId: 100);
@@ -235,9 +232,9 @@ namespace Bid_Go.Tests.Services
         public async Task GetPaymentsByUserAsync_ShouldMapToDto()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var list = new List<Payment>
@@ -261,9 +258,9 @@ namespace Bid_Go.Tests.Services
         public async Task RetryPayment_ShouldThrow_WhenPaymentNotFound()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             payments.Setup(r => r.GetByIdForUpdateAsync(999)).ReturnsAsync((Payment?)null);
@@ -277,9 +274,9 @@ namespace Bid_Go.Tests.Services
         public async Task RetryPayment_ShouldReturnFalse_WhenAlreadyConfirmed()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var payment = MakePayment();
@@ -296,16 +293,17 @@ namespace Bid_Go.Tests.Services
             Assert.Equal(EPaymentStatus.Confirmed, result!.Status);
 
             gateway.Verify(g => g.ChargeAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()), Times.Never);
-            notifs.Verify(n => n.CreateAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), null, It.IsAny<int>()), Times.Never);
+            notifs.Verify(n => n.CreateAndSendAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
         }
 
         [Fact]
         public async Task RetryPayment_ShouldReturnFalse_WhenDeadlinePassed()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var payment = MakePayment();
@@ -326,16 +324,17 @@ namespace Bid_Go.Tests.Services
             payments.Verify(p => p.SaveChangesAsync(), Times.Once);
 
             gateway.Verify(g => g.ChargeAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()), Times.Never);
-            notifs.Verify(n => n.CreateAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), null, It.IsAny<int>()), Times.Never);
+            notifs.Verify(n => n.CreateAndSendAsync(
+               It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
         }
 
         [Fact]
         public async Task RetryPayment_ShouldConfirm_AndNotify_OnGatewaySuccess()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var payment = MakePayment(trId: 100, companyId: 200);
@@ -351,6 +350,10 @@ namespace Bid_Go.Tests.Services
                     It.IsAny<IDictionary<string, string>>()))
                    .ReturnsAsync(new ChargeResult(true, null));
 
+        
+            var transportRequest = new TransportRequest { TransportRequestId = 100, Status = ERequestStatus.Pending };
+            trs.Setup(r => r.GetByIdAsync(payment.TransportRequestId)).ReturnsAsync(transportRequest);
+
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
@@ -362,26 +365,23 @@ namespace Bid_Go.Tests.Services
             Assert.Null(payment.FailureReason);
             payments.Verify(p => p.SaveChangesAsync(), Times.Once);
 
-            notifs.Verify(n => n.CreateAsync(payment.CompanyId,
-                    It.Is<string>(s => s.Contains("successfully completed after retry")),
-                    ENotificationType.Confirmed_Payment,
-                    null,
-                    payment.TransportRequestId),
-                Times.Once);
-
-            notifs.Verify(n => n.SendAsync(payment.CompanyId,
-                    It.Is<string>(s => s.Contains("successfully completed after retry")),
-                    ENotificationType.Confirmed_Payment),
-                Times.Once);
+            notifs.Verify(n => n.CreateAndSendAsync(
+                  payment.CompanyId,
+                  It.Is<string>(s => s.Contains("successfully completed after retry")),
+                  ENotificationType.Confirmed_Payment,
+                  null,
+                  payment.TransportRequestId),
+                  Times.Once);
         }
+
 
         [Fact]
         public async Task RetryPayment_ShouldFail_AndNotNotify_OnGatewayFailure()
         {
             var payments = new Mock<IPaymentRepository>();
-            var bids = new Mock<IBidsCRUD>();
+            var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
-            var notifs = new Mock<INotificationRepository>();
+            var notifs = new Mock<INotificationService>();
             var gateway = new Mock<IPaymentGateway>();
 
             var payment = MakePayment();
@@ -397,6 +397,10 @@ namespace Bid_Go.Tests.Services
                     It.IsAny<IDictionary<string, string>>()))
                    .ReturnsAsync(new ChargeResult(false, "declined"));
 
+            var transportRequest = new TransportRequest { TransportRequestId = 100, Status = ERequestStatus.Pending };
+            trs.Setup(r => r.GetByIdAsync(payment.TransportRequestId)).ReturnsAsync(transportRequest);
+
+
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
@@ -408,8 +412,8 @@ namespace Bid_Go.Tests.Services
             Assert.Equal("declined", payment.FailureReason);
             payments.Verify(p => p.SaveChangesAsync(), Times.Once);
 
-            notifs.Verify(n => n.CreateAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), null, It.IsAny<int>()), Times.Never);
-            notifs.Verify(n => n.SendAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>()), Times.Never);
+            notifs.Verify(n => n.CreateAndSendAsync(
+                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ENotificationType>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
         }
     }
 }

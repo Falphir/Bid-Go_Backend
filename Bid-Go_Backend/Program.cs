@@ -8,12 +8,10 @@ using Bid_Go_Backend.Data.Repositories;
 using Bid_Go_Backend.Data.Repositories.Bids;
 using Bid_Go_Backend.Data.Repositories.Chat;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
 using Bid_Go_Backend.Data.Repositories.Requests;
 using Bid_Go_Backend.Data.Repositories.Review;
-using Bid_Go_Backend.Data.Repositories.Notifications;
 using Bid_Go_Backend.Data.Repositories.Payments;
 using Bid_Go_Backend.Data.Repositories.Register;
 using Bid_Go_Backend.Data.Repositories.Transport_Request;
@@ -41,13 +39,12 @@ using System.Text;
 using System.Text.Json;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
-using Bid_Go_Backend.Services.Chat;
 using Bid_Go_Backend.Services.Auth;
 using Bid_Go_Backend.Services.Email;
 using ITransportRequestsPageService = Bid_Go_Backend.Services.ITransportRequestsPageService;
-using Bid_Go_Backend.Services.Interfaces;
+using Bid_Go_Backend.Services.Profile;
+using Bid_Go_Backend.Repositories;
 using Bid_Go_Backend.Services.History;
-using Bid_Go_Backend.Services.Transport_Request;
 using Bid_Go_Backend.Services.Review;
 
 
@@ -145,13 +142,15 @@ builder.Services.Configure<StripeSettings>(
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
 
-
-builder.Services.AddScoped<IBidsCRUD, BidsCRUD>();
+//Repositorios
+builder.Services.AddScoped<IBidsService, BidsService>();
+builder.Services.AddScoped<IBidsRepository, BidsRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IRegisterCompanyRepository, RegisterCompanyRepository>();
 builder.Services.AddScoped<IRegisterCompanyService, RegisterCompanyService>();
 builder.Services.AddScoped<ITransportRequestRepository, TransportRequestRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -160,11 +159,14 @@ builder.Services.AddScoped<ITransportRequestsPageRepository, TransportRequestsPa
 builder.Services.AddScoped<ITransportRequestsPageService, TransportRequestsPageService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRegisterDriverRepository, RegisterDriverRepository>();
+builder.Services.AddTransient<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
+builder.Services.AddScoped<IAcceptAndRejectBidManualService, AcceptAndRejectBidManualService>();
+builder.Services.AddScoped<IAcceptAndRejectBidManualRepository, AcceptAndRejectBidManualRepository>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IRegisterDriverService, RegisterDriverService>();
 builder.Services.AddScoped<IAutomaticSelectionAlgorithmRepository, AutomaticSelectionAlgorithmRepository>();
 builder.Services.AddScoped<IAutomaticSelectionAlgorithmService, AutomaticSelectionAlgorithmService>();
-builder.Services.AddScoped<IAcceptAndRejectBidManual, AcceptAndRejectBidManual>();
-builder.Services.AddScoped<IProfileCRUD, ProfileCRUD>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();

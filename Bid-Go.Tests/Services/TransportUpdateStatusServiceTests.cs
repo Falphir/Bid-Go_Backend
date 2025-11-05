@@ -1,7 +1,8 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Services.Transport_Request;
+using Bid_Go_Backend.Services;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
@@ -15,14 +16,14 @@ namespace Bid_Go_Backend.Tests.Services
     public class TransportUpdateStatusServiceTests
     {
         private readonly Mock<ITransportUpdateStatus> _mockRepo;
-        private readonly Mock<INotificationRepository> _mockNotif;
+        private readonly Mock<INotificationService> _mockNotif;
         private readonly Mock<ILogger<TransportUpdateStatusService>> _mockLogger;
         private readonly TransportUpdateStatusService _service;
 
         public TransportUpdateStatusServiceTests()
         {
             _mockRepo = new Mock<ITransportUpdateStatus>(MockBehavior.Strict);
-            _mockNotif = new Mock<INotificationRepository>(MockBehavior.Strict);
+            _mockNotif = new Mock<INotificationService>(MockBehavior.Strict);
             _mockLogger = new Mock<ILogger<TransportUpdateStatusService>>();
             _service = new TransportUpdateStatusService(_mockRepo.Object, _mockNotif.Object, _mockLogger.Object);
         }
@@ -132,10 +133,14 @@ namespace Bid_Go_Backend.Tests.Services
             _mockRepo.Setup(r => r.UpdateBids(It.IsAny<IEnumerable<Bid>>()));
             _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
-            _mockNotif.Setup(n => n.CreateAsync(It.IsAny<int>(), It.IsAny<string>(), ENotificationType.Canceled, It.IsAny<int?>(), It.IsAny<int?>()))
-                .ReturnsAsync(new Notification());
-            _mockNotif.Setup(n => n.SendAsync(It.IsAny<int>(), It.IsAny<string>(), ENotificationType.Canceled))
-                .Returns(Task.CompletedTask);
+            _mockNotif.Setup(n => n.CreateAndSendAsync(
+         It.IsAny<int>(),                
+         It.IsAny<string>(),            
+         ENotificationType.Canceled,     
+         It.IsAny<int?>(),                
+         It.IsAny<int?>()))             
+     .ReturnsAsync(new Notification());
+
 
             var result = await _service.UpdateRequestStatusAsync(1, 100, ERequestStatus.Canceled);
 
@@ -149,10 +154,20 @@ namespace Bid_Go_Backend.Tests.Services
             _mockRepo.Verify(r => r.UpdateBids(It.Is<IEnumerable<Bid>>(bs => bs.All(b => (b.BidId == 1 || b.BidId == 3) && b.Status == EBidStatus.Canceled) && bs.Count() == 2)), Times.Once);
 
             // notifications sent for each pending bid
-            _mockNotif.Verify(n => n.CreateAsync(10, It.IsAny<string>(), ENotificationType.Canceled, 1, 1), Times.Once);
-            _mockNotif.Verify(n => n.SendAsync(10, It.IsAny<string>(), ENotificationType.Canceled), Times.Once);
-            _mockNotif.Verify(n => n.CreateAsync(12, It.IsAny<string>(), ENotificationType.Canceled, 3, 1), Times.Once);
-            _mockNotif.Verify(n => n.SendAsync(12, It.IsAny<string>(), ENotificationType.Canceled), Times.Once);
+            _mockNotif.Verify(n => n.CreateAndSendAsync(
+                10,
+                It.IsAny<string>(),
+                ENotificationType.Canceled,
+                1,
+                1), Times.Once);
+
+            _mockNotif.Verify(n => n.CreateAndSendAsync(
+                12,
+                It.IsAny<string>(),
+                ENotificationType.Canceled,
+                3,
+                1), Times.Once);
+
 
             _mockRepo.Verify(r => r.UpdateTransportRequest(It.Is<TransportRequest>(t => t.Status == ERequestStatus.Canceled)), Times.Once);
             _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
