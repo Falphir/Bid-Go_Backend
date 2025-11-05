@@ -5,6 +5,7 @@ using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using System.Text.Json;
 
 namespace Bid_Go_Backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/profile")]
     public class ProfileController : ControllerBase
@@ -28,6 +30,12 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProfile(int id)
         {
+
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || int.Parse(userIdClaim) != id)
+                return Forbid();
+
+
             try
             {
                 var user = await _service.GetProfileAsync(id);
@@ -65,6 +73,11 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("driver/{id}")]
         public async Task<IActionResult> UpdateDriverProfile(int id, [FromForm] DriverProfileUpdateDTO dto)
         {
+
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || int.Parse(userIdClaim) != id)
+                return Forbid();
+
             try
             {
                 var success = await _service.UpdateDriverProfileAsync(id, dto);
@@ -100,6 +113,11 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("{id}/ChangePassword")]
         public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDTO dto)
         {
+
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || int.Parse(userIdClaim) != id)
+                return Forbid();
+
             try
             {
                 await _service.ChangePasswordAsync(id, dto.CurrentPassword, dto.NewPassword);
@@ -114,6 +132,11 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateUser(int id)
         {
+
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || int.Parse(userIdClaim) != id)
+                return Forbid();
+
             try
             {
                 await _service.DeactivateUserAsync(id);

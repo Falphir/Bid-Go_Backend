@@ -1,13 +1,16 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
+   
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ReviewRequestController : ControllerBase
     {
         private readonly IReviewRequestService _service;
@@ -45,6 +48,7 @@ namespace Bid_Go_Backend.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado.", detail = ex.Message });
             }
         }
+
 
         [HttpGet("avaliacoes/{request_id}")]
         public async Task<IActionResult> GetReviewsByService(int request_id)

@@ -317,5 +317,63 @@ namespace Bid_Go.Tests.Services
             Assert.Equal(EBidStatus.Canceled, bid.Status);
             _mockRepo.Verify(r => r.UpdateAsync(It.IsAny<Bid>()), Times.Once);
         }
+
+        [Fact]
+        public async Task GetBidsByTransportRequestAsync_ShouldReturnListOfBids()
+        {
+            // Arrange
+            int transportRequestId = 1;
+            var expectedBids = new List<Bid> { new Bid { BidId = 1 }, new Bid { BidId = 2 } };
+
+            _mockRepo.Setup(r => r.GetByTransportRequestAsync(transportRequestId))
+                     .ReturnsAsync(expectedBids);
+
+            // Act
+            var result = await _service.GetBidsByTransportRequestAsync(transportRequestId);
+
+            // Assert
+            Assert.Equal(expectedBids, result);
+            _mockRepo.Verify(r => r.GetByTransportRequestAsync(transportRequestId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetBidsByTransportRequestAndStatusAsync_ShouldReturnFilteredBids()
+        {
+            // Arrange
+            int transportRequestId = 1;
+            var status = EBidStatus.Accepted;
+            var expectedBids = new List<Bid> { new Bid { BidId = 3, Status = status } };
+
+            _mockRepo.Setup(r => r.GetByTransportRequestAndStatusAsync(transportRequestId, status))
+                     .ReturnsAsync(expectedBids);
+
+            // Act
+            var result = await _service.GetBidsByTransportRequestAndStatusAsync(transportRequestId, status);
+
+            // Assert
+            Assert.Equal(expectedBids, result);
+            _mockRepo.Verify(r => r.GetByTransportRequestAndStatusAsync(transportRequestId, status), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetActiveBidsAsync_ShouldReturnOrderedBids()
+        {
+            // Arrange
+            int transportRequestId = 1;
+            string orderBy = "value";
+            bool descending = true;
+            var expectedBids = new List<Bid> { new Bid { BidId = 5 }, new Bid { BidId = 6 } };
+
+            _mockRepo.Setup(r => r.GetActiveBidsAsync(transportRequestId, orderBy, descending))
+                     .ReturnsAsync(expectedBids);
+
+            // Act
+            var result = await _service.GetActiveBidsAsync(transportRequestId, orderBy, descending);
+
+            // Assert
+            Assert.Equal(expectedBids, result);
+            _mockRepo.Verify(r => r.GetActiveBidsAsync(transportRequestId, orderBy, descending), Times.Once);
+        }
     }
 }
+

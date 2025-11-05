@@ -48,6 +48,14 @@ using System.Text.Json;
 using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepository;
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.ITransportRequestsPageService;
+using Bid_Go_Backend.Services.Auth;
+using Bid_Go_Backend.Services.Email;
+using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.ITransportRequestsPageService;
+using Bid_Go_Backend.Services.Profile;
+using Bid_Go_Backend.Repositories;
+using Bid_Go_Backend.Services.History;
+using Bid_Go_Backend.Services.Review;
+using Bid_Go_Backend.Services.Transport_Request;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -181,6 +189,8 @@ builder.Services.AddScoped<IReviewRequestService, ReviewRequestService>();
 builder.Services.AddScoped<IReviewRequestRepository, ReviewRequestRepository>();
 builder.Services.AddScoped<ITransportUpdateStatusService, TransportUpdateStatusService>();
 builder.Services.AddScoped<ITransportUpdateStatus, TransportUpdateStatusRepository>();
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
 
 builder.Services.AddSingleton<CloudflareR2Service>(sp =>
 {
