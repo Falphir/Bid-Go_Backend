@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,11 @@ namespace Bid_Go_Backend.Data.Repositories.Bids
     internal class AutomaticSelectionAlgorithmRepository : IAutomaticSelectionAlgorithmRepository
     {
         private readonly BidGoDbContext _ctx;
-
-        public AutomaticSelectionAlgorithmRepository(BidGoDbContext ctx)
+        private readonly INotificationService _notificationService;
+        public AutomaticSelectionAlgorithmRepository(BidGoDbContext ctx, INotificationService notificationService)
         {
             _ctx = ctx;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<Bid>> GetEligibleBidsAsync(int transportRequestId)
@@ -118,6 +120,40 @@ namespace Bid_Go_Backend.Data.Repositories.Bids
 
             // Guardar Bid Selecionada na BD
             transportRequest.SelectedBidId = selectedBid.BidId;
+
+            selectedBid.Status = EBidStatus.Accepted;
+            transportRequest.Status = ERequestStatus.Pending;
+
+            // Rejeitar outras pendentes
+            var otherBids = transportRequest.Bids
+                .Where(b => b.BidId != selectedBid.BidId && b.Status == EBidStatus.Pendent)
+                .ToList();
+
+            foreach (var other in otherBids)
+            {
+                other.Status = EBidStatus.Rejected;
+
+                // Notificação para bids rejeitadas
+                await _notificationService.CreateAndSendAsync(
+                    other.DriverId,
+                    "Your bid was rejected.",
+                    ENotificationType.Rejected,
+                    other.BidId,
+                    transportRequest.TransportRequestId
+                );
+            }
+
+            // Notificação para a bid aceite
+            await _notificationService.CreateAndSendAsync(
+                selectedBid.DriverId,
+                "Your bid was accepted.",
+                ENotificationType.Accepted,
+                selectedBid.BidId,
+                transportRequest.TransportRequestId
+            );
+
+
+
             await _ctx.SaveChangesAsync();
 
             return new AutomaticSelectionResult { SelectedBid = selectedBid };

@@ -53,6 +53,10 @@ namespace Bid_Go_Backend.Services.Bids
             // Aceita a bid
             bid.Status = EBidStatus.Accepted;
 
+            bid.TransportRequest.Status = ERequestStatus.Pending;
+
+            bid.TransportRequest.SelectedBidId = bid.BidId;
+
             // Rejeita outras bids pendentes
             var otherBids = (await _repo.GetByTransportRequestAsync(bid.TransportRequestId))
                             .Where(b => b.BidId != id && b.Status == EBidStatus.Pendent)
@@ -61,7 +65,7 @@ namespace Bid_Go_Backend.Services.Bids
             foreach (var other in otherBids)
                 other.Status = EBidStatus.Rejected;
 
-            bid.TransportRequest.Status = ERequestStatus.Pending;
+            
 
             await _repo.SaveChangesAsync();
 
