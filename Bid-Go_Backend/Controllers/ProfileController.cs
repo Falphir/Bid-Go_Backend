@@ -62,26 +62,38 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProfile(int id, [FromBody] JsonElement dto)
+        [HttpPut("driver/{id}")]
+        public async Task<IActionResult> UpdateDriverProfile(int id, [FromForm] DriverProfileUpdateDTO dto)
         {
             try
             {
-                object profileDto;
-                var user = await _service.GetProfileAsync(id);
-                if (user is Driver)
-                    profileDto = JsonConvert.DeserializeObject<DriverProfileDTO>(dto.ToString())!;
-                else
-                    profileDto = JsonConvert.DeserializeObject<CompanyProfileDTO>(dto.ToString())!;
+                var success = await _service.UpdateDriverProfileAsync(id, dto);
+                if (!success)
+                    return BadRequest("No valid fields provided.");
 
-                var success = await _service.UpdateProfileAsync(id, profileDto);
-                if (!success) return BadRequest("No valid fields provided.");
-
-                return Ok("Profile updated successfully.");
+                return Ok("Driver profile updated successfully.");
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("company/{id}")]
+
+        public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
+        {
+            try
+            {
+                var success = await _service.UpdateCompanyProfileAsync(id, dto);
+                if (!success)
+                    return BadRequest("No valid fields provided.");
+
+                return Ok("Company profile updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 

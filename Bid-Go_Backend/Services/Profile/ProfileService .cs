@@ -15,12 +15,13 @@ namespace Bid_Go_Backend.Services.Profile
     public class ProfileService : IProfileService
     {
         private readonly IProfileRepository _repo;
+        private readonly ICloudflareR2Service _cloudflareR2;
 
-        public ProfileService(IProfileRepository repo)
+        public ProfileService(IProfileRepository repo, ICloudflareR2Service cloudflareR2)
         {
             _repo = repo;
+            _cloudflareR2 = cloudflareR2;
         }
-
         public async Task<User?> GetProfileAsync(int id)
         {
             var user = await _repo.GetUserByIdAsync(id);
@@ -29,80 +30,82 @@ namespace Bid_Go_Backend.Services.Profile
             return user;
         }
 
-        public async Task<bool> UpdateProfileAsync(int id, object dto)
+        public async Task<bool> UpdateDriverProfileAsync(int id, DriverProfileUpdateDTO dto)
         {
             var user = await _repo.GetUserByIdAsync(id);
-            if (user == null) throw new Exception("User not found.");
-            if (!user.IsActive) throw new Exception("User is inactive.");
+            if (user is not Driver driver)
+                throw new Exception("Driver not found.");
+            if (!driver.IsActive) throw new Exception("Driver is inactive.");
 
-            bool updated = false;
+            bool anyChange = false;
 
-            if (user is Driver driver)
+            if (!string.IsNullOrEmpty(dto.Name) && dto.Name != driver.Name)
+            { driver.Name = dto.Name; anyChange = true; }
+
+            if (!string.IsNullOrEmpty(dto.Email) && dto.Email != driver.Email)
+            { driver.Email = dto.Email; anyChange = true; }
+
+            if (dto.PhoneNumber.HasValue && dto.PhoneNumber.Value != driver.PhoneNumber)
+            { driver.PhoneNumber = dto.PhoneNumber.Value; anyChange = true; }
+
+            if (dto.NIF.HasValue && dto.NIF.Value != driver.NIF)
+            { driver.NIF = dto.NIF.Value; anyChange = true; }
+
+            // Upload nova carta de condução, se enviada
+            if (dto.DriverLicense != null && dto.DriverLicense.Length > 0)
             {
-                var driverDto = dto as DriverProfileDTO ?? throw new Exception("Invalid driver data.");
-
-                bool anyChange = false;
-
-                if (!string.IsNullOrEmpty(driverDto.Name) && driverDto.Name != driver.Name)
-                { driver.Name = driverDto.Name; anyChange = true; }
-
-                if (!string.IsNullOrEmpty(driverDto.Email) && driverDto.Email != driver.Email)
-                { driver.Email = driverDto.Email; anyChange = true; }
-
-                if (driverDto.PhoneNumber.HasValue && driverDto.PhoneNumber.Value != driver.PhoneNumber)
-                { driver.PhoneNumber = driverDto.PhoneNumber.Value; anyChange = true; }
-
-                if (driverDto.NIF.HasValue && driverDto.NIF.Value != driver.NIF)
-                { driver.NIF = driverDto.NIF.Value; anyChange = true; }
-
-                if (!string.IsNullOrEmpty(driverDto.DriverLicense) && driverDto.DriverLicense != driver.DriverLicense)
-                { driver.DriverLicense = driverDto.DriverLicense; anyChange = true; }
-
-                if (!string.IsNullOrEmpty(driverDto.Insurance) && driverDto.Insurance != driver.Insurance)
-                { driver.Insurance = driverDto.Insurance; anyChange = true; }
-
-                if (!anyChange)
-                    throw new Exception("No valid fields provided to update.");
-
-                await _repo.UpdateDriverAsync(driver);
-                updated = true;
-            }
-            else if (user is Company company)
-            {
-                var companyDto = dto as CompanyProfileDTO ?? throw new Exception("Invalid company data.");
-
-                bool anyChange = false;
-
-                if (!string.IsNullOrEmpty(companyDto.Name) && companyDto.Name != company.Name)
-                { company.Name = companyDto.Name; anyChange = true; }
-
-                if (!string.IsNullOrEmpty(companyDto.Email) && companyDto.Email != company.Email)
-                { company.Email = companyDto.Email; anyChange = true; }
-
-                if (companyDto.PhoneNumber.HasValue && companyDto.PhoneNumber.Value != company.PhoneNumber)
-                { company.PhoneNumber = companyDto.PhoneNumber.Value; anyChange = true; }
-
-                if (companyDto.NIF.HasValue && companyDto.NIF.Value != company.NIF)
-                { company.NIF = companyDto.NIF.Value; anyChange = true; }
-
-                if (!string.IsNullOrEmpty(companyDto.CompanyName) && companyDto.CompanyName != company.CompanyName)
-                { company.CompanyName = companyDto.CompanyName; anyChange = true; }
-
-                if (!string.IsNullOrEmpty(companyDto.Address) && companyDto.Address != company.Address)
-                { company.Address = companyDto.Address; anyChange = true; }
-
-                if (!anyChange)
-                    throw new Exception("No valid fields provided to update.");
-
-                await _repo.UpdateCompanyAsync(company);
-                updated = true;
-            }
-            else
-            {
-                throw new Exception("Unknown user type.");
+                var licenseUrl = await _cloudflareR2.UploadImageAsync(dto.DriverLicense);
+                driver.DriverLicense = licenseUrl;
+                anyChange = true;
             }
 
-            return updated;
+            // Upload novo seguro, se enviado
+            if (dto.Insurance != null && dto.Insurance.Length > 0)
+            {
+                var insuranceUrl = await _cloudflareR2.UploadImageAsync(dto.Insurance);
+                driver.Insurance = insuranceUrl;
+                anyChange = true;
+            }
+
+            if (!anyChange)
+                throw new Exception("No valid fields provided to update.");
+
+            await _repo.UpdateDriverAsync(driver);
+            return true;
+        }
+
+        public async Task<bool> UpdateCompanyProfileAsync(int id, CompanyProfileDTO dto)
+        {
+            var user = await _repo.GetUserByIdAsync(id);
+            if (user is not Company company)
+                throw new Exception("Company not found.");
+            if (!company.IsActive) throw new Exception("Company is inactive.");
+
+            bool anyChange = false;
+
+            if (!string.IsNullOrEmpty(dto.Name) && dto.Name != company.Name)
+            { company.Name = dto.Name; anyChange = true; }
+
+            if (!string.IsNullOrEmpty(dto.Email) && dto.Email != company.Email)
+            { company.Email = dto.Email; anyChange = true; }
+
+            if (dto.PhoneNumber.HasValue && dto.PhoneNumber.Value != company.PhoneNumber)
+            { company.PhoneNumber = dto.PhoneNumber.Value; anyChange = true; }
+
+            if (dto.NIF.HasValue && dto.NIF.Value != company.NIF)
+            { company.NIF = dto.NIF.Value; anyChange = true; }
+
+            if (!string.IsNullOrEmpty(dto.CompanyName) && dto.CompanyName != company.CompanyName)
+            { company.CompanyName = dto.CompanyName; anyChange = true; }
+
+            if (!string.IsNullOrEmpty(dto.Address) && dto.Address != company.Address)
+            { company.Address = dto.Address; anyChange = true; }
+
+            if (!anyChange)
+                throw new Exception("No valid fields provided to update.");
+
+            await _repo.UpdateCompanyAsync(company);
+            return true;
         }
 
 

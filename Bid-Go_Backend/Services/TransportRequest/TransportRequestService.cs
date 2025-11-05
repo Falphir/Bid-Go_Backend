@@ -3,6 +3,7 @@ using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Services
@@ -10,23 +11,29 @@ namespace Bid_Go_Backend.Services
     public class TransportRequestService : ITransportRequestService
     {
         private readonly ITransportRequestRepository _repository;
-
-        public TransportRequestService(ITransportRequestRepository repository)
+        private readonly ICloudflareR2Service _r2Service;
+        public TransportRequestService(ITransportRequestRepository repository, ICloudflareR2Service r2Service)
         {
-            _repository = repository;
+            _repository = repository;  
+            _r2Service = r2Service;
+            
         }
 
-        public async Task<TransportRequest> CreateAsync(CreateTransportRequestDTO dto)
+        public async Task<TransportRequest> CreateAsync(CreateTransportRequestDTO dto, IFormFile imageFile)
         {
-       
+
+            if (imageFile == null || imageFile.Length == 0)
+                throw new ArgumentException("A imagem é obrigatória.");
+
+            // Salva a imagem localmente e obtém o caminho relativo
+            string imageUrl = await _r2Service.UploadImageAsync(imageFile);
+
             if (dto.PickupDate >= dto.DeliveryDate)
                 throw new ArgumentException("A data de recolha deve ser anterior à data de entrega.");
             if (dto.BiddingStartDate >= dto.BiddingEndDate)
                 throw new ArgumentException("A data de início das licitações deve ser anterior à data de fim.");
             if (dto.PickupDate <= dto.BiddingEndDate)
                 throw new ArgumentException("A data de recolha deve ser posterior ao fim das licitações.");
-            if (string.IsNullOrWhiteSpace(dto.Image))
-                throw new ArgumentException("A imagem é obrigatória.");
             if (dto.Weight <= 0 || dto.Volume <= 0)
                 throw new ArgumentException("Peso e volume devem ser superiores a zero.");
             if (dto.MaxPrice < 20)
@@ -49,7 +56,7 @@ namespace Bid_Go_Backend.Services
                 BiddingStartDate = dto.BiddingStartDate,
                 BiddingEndDate = dto.BiddingEndDate,
                 IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled,
-                Image = dto.Image,
+                Image = imageUrl,
                 MaxPrice = dto.MaxPrice,
                 CompanyId = dto.CompanyId,
                 Status = ERequestStatus.Draft
@@ -58,7 +65,8 @@ namespace Bid_Go_Backend.Services
             return await _repository.CreateAsync(request);
         }
 
-        public async Task<TransportRequest?> UpdateAsync(int id, UpdateTransportRequestDTO dto)
+        public async Task<TransportRequest?> UpdateAsync(int id, UpdateTransportRequestDTO dto, IFormFile? imageFile)
+
         {
             var existing = await _repository.GetByIdAsync(id);
             if (existing == null)
@@ -95,13 +103,26 @@ namespace Bid_Go_Backend.Services
             existing.Length = dto.Length ?? existing.Length;
             existing.Width = dto.Width ?? existing.Width;
             existing.Height = dto.Height ?? existing.Height;
-            existing.Image = dto.Image ?? existing.Image;
             existing.PickupDate = dto.PickupDate ?? existing.PickupDate;
             existing.DeliveryDate = dto.DeliveryDate ?? existing.DeliveryDate;
             existing.BiddingStartDate = dto.BiddingStartDate ?? existing.BiddingStartDate;
             existing.BiddingEndDate = dto.BiddingEndDate ?? existing.BiddingEndDate;
             existing.IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled ?? existing.IsAutomaticSelectionEnabled;
             existing.MaxPrice = dto.MaxPrice ?? existing.MaxPrice;
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                
+                if (!string.IsNullOrEmpty(existing.Image))
+                {
+                    await _r2Service.DeleteImageAsync(existing.Image);
+                }
+
+                // faz upload da nova imagem
+                var imageUrl = await _r2Service.UploadImageAsync(imageFile);
+                existing.Image = imageUrl;
+            }
+
 
             return await _repository.UpdateAsync(id, existing);
         }
