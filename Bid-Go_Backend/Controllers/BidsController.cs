@@ -3,11 +3,14 @@ using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Migrations;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -15,10 +18,16 @@ namespace Bid_Go_Backend.Controllers
     [Route("api/[controller]")]
     public class BidsController : ControllerBase
     {
+        private readonly IAuthorizationService _authorizationService;
         private readonly IBidsService _service;
 
-        public BidsController(IBidsService service) => _service = service;
+        public BidsController(IBidsService service, IAuthorizationService authorizationService)
+        {
+            _service = service;
+            _authorizationService = authorizationService;
+        }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPost]
         public async Task<IActionResult> AddBid([FromBody] AddBidDTO bidDto)
         {
@@ -29,9 +38,18 @@ namespace Bid_Go_Backend.Controllers
             return CreatedAtAction(nameof(AddBid), new { id = result.Bid!.BidId }, result.Bid);
         }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBid(int id, [FromBody] BidUpdateDTO dto)
         {
+
+            var driverId = int.Parse(User.FindFirst("userId")?.Value);
+
+            var ownsBid = await _authorizationService.DriverOwnsBidAsync(driverId, id);
+            if (!ownsBid)
+                return Forbid();
+
+
             var result = await _service.UpdateBidAsync(id, dto);
             if (!result.Success)
                 return BadRequest(result.Message);
@@ -39,9 +57,18 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Bid);
         }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPatch("{id}/cancel")]
         public async Task<IActionResult> CancelBid(int id)
         {
+
+            var driverId = int.Parse(User.FindFirst("userId")?.Value);
+
+            var ownsBid = await _authorizationService.DriverOwnsBidAsync(driverId, id);
+            if (!ownsBid)
+                return Forbid();
+
+
             var result = await _service.CancelBidAsync(id);
             if (!result.Success)
                 return BadRequest(result.Message);
@@ -49,6 +76,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Message);
         }
 
+        [Authorize]
         [HttpGet("{bidId}")]
         public async Task<IActionResult> GetBidById(int bidId)
         {
@@ -58,6 +86,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bid);
         }
 
+        [Authorize]
         [HttpGet("by-request/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
@@ -67,6 +96,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
+        [Authorize]
         [HttpGet("active")]
         public async Task<IActionResult> GetActiveBids([FromQuery] int transportRequestId, [FromQuery] string orderBy = "value", [FromQuery] bool descending = false)
         {

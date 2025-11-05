@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         // GET /api/notifications?userId=1&type=BidAccepted&order=desc
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetNotifications(
             [FromQuery] int userId,
