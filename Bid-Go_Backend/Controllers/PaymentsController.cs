@@ -6,11 +6,13 @@ using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
 using Castle.Components.DictionaryAdapter.Xml;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/payments")]
     public class PaymentsController : ControllerBase
@@ -25,6 +27,7 @@ namespace Bid_Go_Backend.Controllers
         /// <summary>
         /// Processa um pagamento para o TransportRequest (usa o SelectedBid do TR).
         /// </summary>
+        [Authorize(Policy = "CompanyOnly")]
         [HttpPost]
         public async Task<IActionResult> ProcessPayment([FromBody] CreatePaymentRequestDTO dto)
         {
@@ -51,6 +54,7 @@ namespace Bid_Go_Backend.Controllers
         /// <summary>
         /// Lista pagamentos por utilizador (CompanyId ou DriverId).
         /// </summary>
+        [Authorize(Policy = "CompanyOnly")]
         [HttpGet("user/{userId:int}")]
         public async Task<IActionResult> GetPaymentsByUser(int userId)
         {
@@ -61,6 +65,7 @@ namespace Bid_Go_Backend.Controllers
         /// <summary>
         /// Faz retry de um pagamento existente.
         /// </summary>
+        [Authorize(Policy = "CompanyOnly")]
         [HttpPost("{paymentId:int}/retry")]
         public async Task<IActionResult> Retry(int paymentId, [FromBody] RetryPaymentRequestDTO dto)
         {

@@ -177,6 +177,8 @@ builder.Services.AddScoped<IReviewRequestService, ReviewRequestService>();
 builder.Services.AddScoped<IReviewRequestRepository, ReviewRequestRepository>();
 builder.Services.AddScoped<ITransportUpdateStatusService, TransportUpdateStatusService>();
 builder.Services.AddScoped<ITransportUpdateStatus, TransportUpdateStatusRepository>();
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

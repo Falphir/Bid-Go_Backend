@@ -46,6 +46,7 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+
         [HttpGet("avaliacoes/{request_id}")]
         public async Task<IActionResult> GetReviewsByService(int request_id)
         {

@@ -1,5 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 
@@ -16,9 +17,25 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
+        [Authorize(Policy = "CompanyOnly")]
         [HttpPost("execute/{transportRequestId:int}")]
         public async Task<IActionResult> ExecuteAlgorithm(int transportRequestId)
         {
+
+
+            var companyIdClaim = User.FindFirst("userId")?.Value;
+            if (companyIdClaim == null)
+                return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
+
+            //var companyId = int.Parse(companyIdClaim);
+
+
+            //var ownsRequest = await _service.CompanyOwnsTransportRequestAsync(companyId, transportRequestId);
+            //if (!ownsRequest)
+              //  return Forbid();
+
+
+
             var (success, message, selectedBid) = await _service.ExecuteAsync(transportRequestId);
 
             if (!success)

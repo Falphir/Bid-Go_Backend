@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -19,6 +20,7 @@ namespace Bid_Go_Backend.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpGet("driver/{driverId}")]
         public async Task<IActionResult> GetDriverHistory(int driverId)
         {
@@ -40,6 +42,7 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        [Authorize(Policy = "CompanyOnly")]
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetCompanyHistory(int companyId)
         {

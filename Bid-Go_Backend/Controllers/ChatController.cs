@@ -25,6 +25,7 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, result.Body);
         }
 
+        [Authorize]
         [HttpPost("{chatId}/messages")]
         public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageDTO dto)
         {
@@ -32,6 +33,7 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, result.Body);
         }
 
+        [Authorize]
         [HttpGet("{chatId}/get_messages")]
         public async Task<IActionResult> GetMessages(int chatId)
         {
@@ -39,6 +41,7 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, result.Body);
         }
 
+        [Authorize]
         [HttpPost("create/{transportRequestId}")]
         public async Task<IActionResult> CreateChatFromAcceptedBid(int transportRequestId)
         {

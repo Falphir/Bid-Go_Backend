@@ -53,8 +53,17 @@ namespace Bid_Go_Backend.Controllers
         [Authorize]
         public IActionResult Me()
         {
-            var userEmail = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            return Ok(new { message = "Endpoint protegido", email = userEmail });
+            var claims = User.Claims.Select(c => new
+            {
+                Type = c.Type,
+                Value = c.Value
+            });
+
+            return Ok(new
+            {
+                message = "Token claims",
+                claims
+            });
         }
 
         [HttpGet("company-endpoint")]

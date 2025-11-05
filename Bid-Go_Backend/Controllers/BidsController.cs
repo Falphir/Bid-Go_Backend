@@ -6,6 +6,7 @@ using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Repositories.BidRepo;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ namespace Bid_Go_Backend.Controllers
 
         public BidsController(IBidsService service) => _service = service;
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPost]
         public async Task<IActionResult> AddBid([FromBody] AddBidDTO bidDto)
         {
@@ -29,6 +31,7 @@ namespace Bid_Go_Backend.Controllers
             return CreatedAtAction(nameof(AddBid), new { id = result.Bid!.BidId }, result.Bid);
         }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBid(int id, [FromBody] BidUpdateDTO dto)
         {
@@ -39,6 +42,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Bid);
         }
 
+        [Authorize(Policy = "DriverOnly")]
         [HttpPatch("{id}/cancel")]
         public async Task<IActionResult> CancelBid(int id)
         {
@@ -49,6 +53,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Message);
         }
 
+        [Authorize]
         [HttpGet("{bidId}")]
         public async Task<IActionResult> GetBidById(int bidId)
         {
@@ -58,6 +63,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bid);
         }
 
+        [Authorize]
         [HttpGet("by-request/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
@@ -67,6 +73,7 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
+        [Authorize]
         [HttpGet("active")]
         public async Task<IActionResult> GetActiveBids([FromQuery] int transportRequestId, [FromQuery] string orderBy = "value", [FromQuery] bool descending = false)
         {
