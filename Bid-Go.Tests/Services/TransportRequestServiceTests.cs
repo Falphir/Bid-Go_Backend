@@ -2,7 +2,7 @@
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Services;
+using Bid_Go_Backend.Services.Transport_Request;
 using Moq;
 using Stripe;
 using Xunit;

@@ -34,7 +34,6 @@
     <Compile Remove="Migrations\20251103162837_lds.cs" />
     <Compile Remove="Migrations\20251103162837_lds.Designer.cs" />
     <Compile Remove="Migrations\BidGoDbContextModelSnapshot.cs" />
-    <Compile Remove="Services\TransportRequest\TransportRequestPageService.cs" />
   </ItemGroup>
 
   <ItemGroup>

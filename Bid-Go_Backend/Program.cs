@@ -41,11 +41,12 @@ using HistoryRepository = Bid_Go_Backend.Data.Repositories.Requests.HistoryRepos
 using IHistoryRepository = Bid_Go_Backend.Data.Repositories.Interfaces.IHistoryRepository;
 using Bid_Go_Backend.Services.Auth;
 using Bid_Go_Backend.Services.Email;
-using ITransportRequestsPageService = Bid_Go_Backend.Services.ITransportRequestsPageService;
+using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.ITransportRequestsPageService;
 using Bid_Go_Backend.Services.Profile;
 using Bid_Go_Backend.Repositories;
 using Bid_Go_Backend.Services.History;
 using Bid_Go_Backend.Services.Review;
+using Bid_Go_Backend.Services.Transport_Request;
 
 
 var builder = WebApplication.CreateBuilder(args);

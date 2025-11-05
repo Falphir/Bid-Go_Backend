@@ -2,7 +2,7 @@
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Bid_Go_Backend.Services
+namespace Bid_Go_Backend.Services.Transport_Request
 {
     public interface ITransportRequestsPageService
     {
