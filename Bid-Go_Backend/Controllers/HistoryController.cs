@@ -1,4 +1,5 @@
-﻿using Bid_Go_Backend.Services.Interfaces;
+﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,15 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("driver/{driverId}")]
         public async Task<IActionResult> GetDriverHistory(int driverId)
         {
+
+            var userId = int.Parse(User.FindFirst("userId")!.Value);
+
+            if(userId!= driverId)
+            {
+                return Forbid();
+
+            }
+
             try
             {
                 var history = await _service.GetDriverHistoryAsync(driverId);
@@ -46,6 +56,16 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetCompanyHistory(int companyId)
         {
+
+            var userId = int.Parse(User.FindFirst("userId")!.Value);
+
+            if (userId != companyId)
+            {
+                return Forbid();
+
+            }
+
+
             try
             {
                 var history = await _service.GetTransportHistoryAsync(companyId);

@@ -9,6 +9,7 @@ using Castle.Components.DictionaryAdapter.Xml;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -18,10 +19,12 @@ namespace Bid_Go_Backend.Controllers
     public class PaymentsController : ControllerBase
     {
         private readonly IPaymentService _payments;
+        private readonly IAuthorizationService _authorizationService;
 
-        public PaymentsController(IPaymentService payments)
+        public PaymentsController(IPaymentService payments, IAuthorizationService authorizationService)
         {
             _payments = payments;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -31,6 +34,16 @@ namespace Bid_Go_Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessPayment([FromBody] CreatePaymentRequestDTO dto)
         {
+
+
+            var companyId = int.Parse(User.FindFirst("userId")!.Value);
+
+            var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, dto.TransportRequestId);
+            if (!hasPermission)
+                return Forbid();
+
+
+
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var result = await _payments.ProcessPaymentAsync(dto);
@@ -69,6 +82,7 @@ namespace Bid_Go_Backend.Controllers
         [HttpPost("{paymentId:int}/retry")]
         public async Task<IActionResult> Retry(int paymentId, [FromBody] RetryPaymentRequestDTO dto)
         {
+
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var (ok, error, result) = await _payments.RetryPaymentAsync(paymentId, dto.StripeToken);

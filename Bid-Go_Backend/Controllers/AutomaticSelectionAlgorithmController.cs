@@ -27,13 +27,6 @@ namespace Bid_Go_Backend.Controllers
             if (companyIdClaim == null)
                 return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
 
-            //var companyId = int.Parse(companyIdClaim);
-
-
-            //var ownsRequest = await _service.CompanyOwnsTransportRequestAsync(companyId, transportRequestId);
-            //if (!ownsRequest)
-              //  return Forbid();
-
 
 
             var (success, message, selectedBid) = await _service.ExecuteAsync(transportRequestId);

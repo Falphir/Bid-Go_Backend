@@ -1,13 +1,16 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
+   
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ReviewRequestController : ControllerBase
     {
         private readonly IReviewRequestService _service;

@@ -33,7 +33,7 @@ namespace Bid_Go_Backend.Controllers
 
             var userIdClaim = User.FindFirst("userId")?.Value;
             if (userIdClaim == null || int.Parse(userIdClaim) != id)
-                return Unauthorized(new { message = "Não tem permissão para aceder a este perfil." });
+                return Forbid();
 
 
             try
@@ -77,7 +77,7 @@ namespace Bid_Go_Backend.Controllers
 
             var userIdClaim = User.FindFirst("userId")?.Value;
             if (userIdClaim == null || int.Parse(userIdClaim) != id)
-                return Unauthorized(new { message = "Não tem permissão para aceder a este perfil." });
+                return Forbid();
 
             try
             {
@@ -105,7 +105,7 @@ namespace Bid_Go_Backend.Controllers
 
             var userIdClaim = User.FindFirst("userId")?.Value;
             if (userIdClaim == null || int.Parse(userIdClaim) != id)
-                return Unauthorized(new { message = "Não tem permissão para aceder a este perfil." });
+                return Forbid();
 
             try
             {
@@ -124,7 +124,7 @@ namespace Bid_Go_Backend.Controllers
 
             var userIdClaim = User.FindFirst("userId")?.Value;
             if (userIdClaim == null || int.Parse(userIdClaim) != id)
-                return Unauthorized(new { message = "Não tem permissão para aceder a este perfil." });
+                return Forbid();
 
             try
             {

@@ -1,6 +1,9 @@
-﻿using Bid_Go_Backend.Data.Models.DTOs;
+﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -9,15 +12,19 @@ namespace Bid_Go_Backend.Controllers
     public class TransportRequestsController : ControllerBase
     {
         private readonly ITransportRequestService _service;
+        private readonly IAuthorizationService _authorizationService;
 
-        public TransportRequestsController(ITransportRequestService service)
+        public TransportRequestsController(ITransportRequestService service, IAuthorizationService authorizationService)
         {
             _service = service;
+            _authorizationService = authorizationService;
         }
 
+        [Authorize(Policy = "CompanyOnly")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTransportRequestDTO dto)
         {
+
             try
             {
                 var created = await _service.CreateAsync(dto);
@@ -29,9 +36,18 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        [Authorize(Policy = "CompanyOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTransportRequestDTO dto)
         {
+
+
+            var companyId = int.Parse(User.FindFirst("userId")!.Value);
+
+            var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, id);
+            if (!hasPermission)
+                return Forbid();
+
             try
             {
                 var updated = await _service.UpdateAsync(id, dto);
@@ -43,9 +59,18 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        [Authorize(Policy = "CompanyOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+
+
+            var companyId = int.Parse(User.FindFirst("userId")!.Value);
+
+            var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, id);
+            if (!hasPermission)
+                return Forbid();
+
             try
             {
                 await _service.DeleteAsync(id);
@@ -57,6 +82,7 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
