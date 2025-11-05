@@ -11,6 +11,6 @@ namespace Bid_Go_Backend.Data.Models.DTOs
     public class CreatePaymentRequestDTO
     {
         public int TransportRequestId { get; set; }
-        public string StripeToken { get; set; } = null!;   // "tok_..."
+        public string StripeToken { get; set; } = null!;   // "tok_visa"
     }
 }

@@ -50,6 +50,7 @@ namespace Bid_Go_Backend.Data.Models
         [Required]
         public DateTime DeliveryDate { get; set; }
 
+        [MaxLength(512)]
         [Required]
         public string Image { get; set; } = string.Empty;
 

@@ -76,12 +76,8 @@ namespace Bid_Go_Backend.Controllers
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
 
-            if (userIdClaim == null)
-                return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
-
             if (int.Parse(userIdClaim) != id)
                 return Forbid();
-
 
             try
             {
@@ -101,11 +97,7 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("company/{id}")]
         public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
         {
-
             var userIdClaim = User.FindFirst("userId")?.Value;
-
-            if (userIdClaim == null)
-                return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
 
             if (int.Parse(userIdClaim) != id)
                 return Forbid();
