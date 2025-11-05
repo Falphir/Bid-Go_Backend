@@ -4,6 +4,7 @@ using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services;
 using Moq;
+using Stripe;
 using Xunit;
 
 namespace Bid_Go.Tests.Services
@@ -19,7 +20,6 @@ namespace Bid_Go.Tests.Services
             _service = new TransportRequestService(_repositoryMock.Object);
         }
 
-        
         [Fact]
         public async Task CreateAsync_ShouldThrow_WhenPickupAfterDelivery()
         {
@@ -27,6 +27,8 @@ namespace Bid_Go.Tests.Services
             {
                 PickupDate = DateTime.UtcNow.AddDays(2),
                 DeliveryDate = DateTime.UtcNow.AddDays(1),
+                BiddingStartDate = DateTime.UtcNow,
+                BiddingEndDate = DateTime.UtcNow.AddHours(2),
                 Image = "image.jpg",
                 Weight = 10,
                 Volume = 10,
@@ -37,19 +39,60 @@ namespace Bid_Go.Tests.Services
         }
 
         [Fact]
+        public async Task CreateAsync_ShouldThrow_WhenBiddingStartAfterEnd()
+        {
+            var dto = new CreateTransportRequestDTO
+            {
+                PickupDate = DateTime.UtcNow.AddDays(3),
+                DeliveryDate = DateTime.UtcNow.AddDays(5),
+                BiddingStartDate = DateTime.UtcNow.AddHours(5),
+                BiddingEndDate = DateTime.UtcNow.AddHours(1), // inválido
+                Image = "img.jpg",
+                Weight = 10,
+                Volume = 10,
+                MaxPrice = 50
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            Assert.Equal("A data de início das licitações deve ser anterior à data de fim.", ex.Message);
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldThrow_WhenPickupBeforeBiddingEnd()
+        {
+            var dto = new CreateTransportRequestDTO
+            {
+                PickupDate = DateTime.UtcNow.AddDays(1),
+                DeliveryDate = DateTime.UtcNow.AddDays(3),
+                BiddingStartDate = DateTime.UtcNow,
+                BiddingEndDate = DateTime.UtcNow.AddDays(2),
+                Image = "img.jpg",
+                Weight = 10,
+                Volume = 10,
+                MaxPrice = 50
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            Assert.Equal("A data de recolha deve ser posterior ao fim das licitações.", ex.Message);
+        }
+
+        [Fact]
         public async Task CreateAsync_ShouldThrow_WhenImageIsMissing()
         {
             var dto = new CreateTransportRequestDTO
             {
-                PickupDate = DateTime.UtcNow,
-                DeliveryDate = DateTime.UtcNow.AddDays(1),
+                PickupDate = DateTime.UtcNow.AddDays(2),
+                DeliveryDate = DateTime.UtcNow.AddDays(3),
+                BiddingStartDate = DateTime.UtcNow,
+                BiddingEndDate = DateTime.UtcNow.AddHours(1),
                 Image = "",
                 Weight = 10,
                 Volume = 10,
                 MaxPrice = 50
             };
 
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            Assert.Equal("A imagem é obrigatória.", exception.Message);
         }
 
         [Fact]
@@ -60,8 +103,10 @@ namespace Bid_Go.Tests.Services
                 Origin = "Lisboa",
                 Destination = "Porto",
                 Package = "Caixa",
-                PickupDate = DateTime.UtcNow,
-                DeliveryDate = DateTime.UtcNow.AddDays(2),
+                PickupDate = DateTime.UtcNow.AddDays(3),
+                DeliveryDate = DateTime.UtcNow.AddDays(5),
+                BiddingStartDate = DateTime.UtcNow,
+                BiddingEndDate = DateTime.UtcNow.AddDays(2),
                 Image = "img.jpg",
                 Weight = 10,
                 Volume = 10,
@@ -86,7 +131,6 @@ namespace Bid_Go.Tests.Services
             _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<TransportRequest>()), Times.Once);
         }
 
-     
         [Fact]
         public async Task UpdateAsync_ShouldThrow_WhenRequestNotFound()
         {
@@ -105,7 +149,112 @@ namespace Bid_Go.Tests.Services
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.UpdateAsync(1, new UpdateTransportRequestDTO()));
         }
 
-   
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenPickupAfterDelivery()
+        {
+            var existing = new TransportRequest { Status = ERequestStatus.Draft };
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                PickupDate = DateTime.UtcNow.AddDays(5),
+                DeliveryDate = DateTime.UtcNow.AddDays(1)
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            Assert.Equal("A data de recolha deve ser anterior à data de entrega.", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenBiddingStartAfterEnd()
+        {
+            var existing = new TransportRequest { Status = ERequestStatus.Draft };
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                BiddingStartDate = DateTime.UtcNow.AddDays(2),
+                BiddingEndDate = DateTime.UtcNow.AddDays(1)
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            Assert.Equal("A data de início das licitações deve ser anterior à data de fim.", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenPickupBeforeBiddingEnd()
+        {
+            var existing = new TransportRequest { Status = ERequestStatus.Draft };
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                BiddingEndDate = DateTime.UtcNow.AddDays(2),
+                PickupDate = DateTime.UtcNow.AddDays(1)
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            Assert.Equal("A data de recolha deve ser posterior ao fim das licitações.", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenMaxPriceBelowMinimum()
+        {
+            var existing = new TransportRequest { Status = ERequestStatus.Draft };
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                MaxPrice = 10
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            Assert.Equal("O preço deve ser igual ou superior a 20.", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldUpdateOnlyProvidedFields()
+        {
+            var existing = new TransportRequest
+            {
+                TransportRequestId = 1,
+                Origin = "Lisboa",
+                Destination = "Porto",
+                Package = "Caixa antiga",
+                Weight = 10,
+                Volume = 15,
+                Length = 50,
+                Width = 30,
+                Height = 25,
+                Image = "img1.jpg",
+                PickupDate = new DateTime(2025, 11, 1),
+                DeliveryDate = new DateTime(2025, 11, 10),
+                MaxPrice = 100,
+                Status = ERequestStatus.Draft
+            };
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                Destination = "Braga",
+                Weight = 20,
+                MaxPrice = 200
+            };
+
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+            _repositoryMock.Setup(r => r.UpdateAsync(1, It.IsAny<TransportRequest>()))
+                .ReturnsAsync((int id, TransportRequest req) => req);
+
+            var result = await _service.UpdateAsync(1, dto);
+
+            Assert.NotNull(result);
+            Assert.Equal("Lisboa", result.Origin);
+            Assert.Equal("Braga", result.Destination);
+            Assert.Equal(20, result.Weight);
+            Assert.Equal(15, result.Volume);
+            Assert.Equal(200, result.MaxPrice);
+            _repositoryMock.Verify(r => r.UpdateAsync(1, It.IsAny<TransportRequest>()), Times.Once);
+        }
+
         [Fact]
         public async Task DeleteAsync_ShouldThrow_WhenRequestNotFound()
         {
@@ -165,89 +314,5 @@ namespace Bid_Go.Tests.Services
             Assert.Equal(2, result.Count);
             Assert.All(result, r => Assert.Equal(2, r.CompanyId));
         }
-
-        [Fact]
-        public async Task UpdateAsync_ShouldUpdateOnlyProvidedFields()
-        {
-            // Arrange
-            var existing = new TransportRequest
-            {
-                TransportRequestId = 1,
-                Origin = "Lisboa",
-                Destination = "Porto",
-                Package = "Caixa antiga",
-                Weight = 10,
-                Volume = 15,
-                Length = 50,
-                Width = 30,
-                Height = 25,
-                Image = "img1.jpg",
-                PickupDate = new DateTime(2025, 11, 1),
-                DeliveryDate = new DateTime(2025, 11, 10),
-                MaxPrice = 100,
-                Status = ERequestStatus.Draft
-            };
-
-            var dto = new UpdateTransportRequestDTO
-            {
-                Destination = "Braga",
-                Weight = 20,
-                MaxPrice = 200
-                // Nota: não preenchemos os outros campos para ver se mantêm o valor anterior
-            };
-
-            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
-            _repositoryMock.Setup(r => r.UpdateAsync(1, It.IsAny<TransportRequest>()))
-                .ReturnsAsync((int id, TransportRequest req) => req);
-
-            // Act
-            var result = await _service.UpdateAsync(1, dto);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Lisboa", result.Origin); // manteve valor original
-            Assert.Equal("Braga", result.Destination); // alterado
-            Assert.Equal(20, result.Weight); // alterado
-            Assert.Equal(15, result.Volume); // manteve original
-            Assert.Equal(200, result.MaxPrice); // alterado
-
-            _repositoryMock.Verify(r => r.UpdateAsync(1, It.IsAny<TransportRequest>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task UpdateAsync_ShouldThrow_WhenPickupAfterDelivery()
-        {
-            // Arrange
-            var existing = new TransportRequest { Status = ERequestStatus.Draft };
-            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
-
-            var dto = new UpdateTransportRequestDTO
-            {
-                PickupDate = DateTime.UtcNow.AddDays(5),
-                DeliveryDate = DateTime.UtcNow.AddDays(1)
-            };
-
-            // Act + Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
-            Assert.Equal("A data de recolha deve ser anterior à data de entrega.", ex.Message);
-        }
-
-        [Fact]
-        public async Task UpdateAsync_ShouldThrow_WhenMaxPriceBelowMinimum()
-        {
-            // Arrange
-            var existing = new TransportRequest { Status = ERequestStatus.Draft };
-            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
-
-            var dto = new UpdateTransportRequestDTO
-            {
-                MaxPrice = 10 
-            };
-
-            // Act + Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
-            Assert.Equal("O preço deve ser igual ou superior a 20.", ex.Message);
-        }
-
     }
 }

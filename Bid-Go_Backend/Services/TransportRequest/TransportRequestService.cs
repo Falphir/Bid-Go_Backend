@@ -21,6 +21,10 @@ namespace Bid_Go_Backend.Services
        
             if (dto.PickupDate >= dto.DeliveryDate)
                 throw new ArgumentException("A data de recolha deve ser anterior à data de entrega.");
+            if (dto.BiddingStartDate >= dto.BiddingEndDate)
+                throw new ArgumentException("A data de início das licitações deve ser anterior à data de fim.");
+            if (dto.PickupDate <= dto.BiddingEndDate)
+                throw new ArgumentException("A data de recolha deve ser posterior ao fim das licitações.");
             if (string.IsNullOrWhiteSpace(dto.Image))
                 throw new ArgumentException("A imagem é obrigatória.");
             if (dto.Weight <= 0 || dto.Volume <= 0)
@@ -40,6 +44,8 @@ namespace Bid_Go_Backend.Services
                 Height = dto.Height,
                 PickupDate = dto.PickupDate,
                 DeliveryDate = dto.DeliveryDate,
+                BiddingStartDate = dto.BiddingStartDate,
+                BiddingEndDate = dto.BiddingEndDate,
                 IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled,
                 Image = dto.Image,
                 MaxPrice = dto.MaxPrice,
@@ -61,10 +67,16 @@ namespace Bid_Go_Backend.Services
 
             if (dto.PickupDate.HasValue && dto.DeliveryDate.HasValue && dto.PickupDate >= dto.DeliveryDate)
                 throw new ArgumentException("A data de recolha deve ser anterior à data de entrega.");
+
+            if (dto.BiddingStartDate >= dto.BiddingEndDate)
+                throw new ArgumentException("A data de início das licitações deve ser anterior à data de fim.");
+
+            if (dto.PickupDate <= dto.BiddingEndDate)
+                throw new ArgumentException("A data de recolha deve ser posterior ao fim das licitações.");
+
             if (dto.MaxPrice.HasValue && dto.MaxPrice < 20)
                 throw new ArgumentException("O preço deve ser igual ou superior a 20.");
 
-            // Atualização seletiva
             existing.Origin = dto.Origin ?? existing.Origin;
             existing.Destination = dto.Destination ?? existing.Destination;
             existing.Package = dto.Package ?? existing.Package;
@@ -76,12 +88,14 @@ namespace Bid_Go_Backend.Services
             existing.Image = dto.Image ?? existing.Image;
             existing.PickupDate = dto.PickupDate ?? existing.PickupDate;
             existing.DeliveryDate = dto.DeliveryDate ?? existing.DeliveryDate;
-            if (dto.IsAutomaticSelectionEnabled.HasValue)
-                existing.IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled.Value;
+            existing.BiddingStartDate = dto.BiddingStartDate ?? existing.BiddingStartDate;
+            existing.BiddingEndDate = dto.BiddingEndDate ?? existing.BiddingEndDate;
+            existing.IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled ?? existing.IsAutomaticSelectionEnabled;
             existing.MaxPrice = dto.MaxPrice ?? existing.MaxPrice;
 
             return await _repository.UpdateAsync(id, existing);
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {

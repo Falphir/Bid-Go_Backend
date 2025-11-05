@@ -20,6 +20,8 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public decimal? Length { get; set; }
         public decimal? Width { get; set; }
         public decimal? Height { get; set; }
+        public DateTime? BiddingStartDate { get; set; }
+        public DateTime? BiddingEndDate { get; set; }
         public string? Image { get; set; }
         public decimal? MaxPrice { get; set; }
 
