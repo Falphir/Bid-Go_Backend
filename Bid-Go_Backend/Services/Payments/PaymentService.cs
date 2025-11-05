@@ -4,6 +4,7 @@ using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
+using Stripe.Forwarding;
 
 namespace Bid_Go_Backend.Services
 {
@@ -82,6 +83,7 @@ namespace Bid_Go_Backend.Services
                 payment.PaymentStatus = EPaymentStatus.Confirmed;
                 payment.CompletedAt = DateTime.UtcNow;
                 payment.FailureReason = null;
+                tr.Status = ERequestStatus.WaitingPickup;
                 await _payments.SaveChangesAsync();
 
                 await _notificationService.CreateAndSendAsync(
@@ -111,8 +113,13 @@ namespace Bid_Go_Backend.Services
 
         public async Task<(bool Ok, string? Error, PaymentResultDTO? Result)> RetryPaymentAsync(int paymentId, string stripeToken)
         {
-            var payment = await _payments.GetByIdForUpdateAsync(paymentId)
+
+
+           var payment = await _payments.GetByIdForUpdateAsync(paymentId)
                           ?? throw new InvalidOperationException("Payment was not found.");
+
+            var tr = await _transportReqs.GetByIdAsync(payment.TransportRequestId)
+                    ?? throw new InvalidOperationException("Transport request was not found.");
 
             if (payment.PaymentStatus == EPaymentStatus.Confirmed)
                 return (false, "This payment has already been completed.", ToDto(payment));
@@ -138,6 +145,7 @@ namespace Bid_Go_Backend.Services
                 payment.PaymentStatus = EPaymentStatus.Confirmed;
                 payment.CompletedAt = DateTime.UtcNow;
                 payment.FailureReason = null;
+                tr.Status = ERequestStatus.WaitingPickup;
                 await _payments.SaveChangesAsync();
 
                 await _notificationService.CreateAndSendAsync(
