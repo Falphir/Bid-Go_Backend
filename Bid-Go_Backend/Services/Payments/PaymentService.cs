@@ -118,12 +118,11 @@ namespace Bid_Go_Backend.Services
            var payment = await _payments.GetByIdForUpdateAsync(paymentId)
                           ?? throw new InvalidOperationException("Payment was not found.");
 
-            var tr = await _transportReqs.GetByIdAsync(payment.TransportRequestId)
-                    ?? throw new InvalidOperationException("Transport request was not found.");
+           
 
             if (payment.PaymentStatus == EPaymentStatus.Confirmed)
                 return (false, "This payment has already been completed.", ToDto(payment));
-
+           
             if (payment.DeadlineToPay < DateTime.UtcNow)
             {
                 payment.PaymentStatus = EPaymentStatus.Pending;
@@ -131,6 +130,10 @@ namespace Bid_Go_Backend.Services
                 await _payments.SaveChangesAsync();
                 return (false, "The payment deadline has passed. Please create a new payment.", ToDto(payment));
             }
+
+            var tr = await _transportReqs.GetByIdAsync(payment.TransportRequestId)
+         ?? throw new InvalidOperationException("Transport request was not found.");
+
 
             var charge = await _gateway.ChargeAsync(
                 amountCents: (long)(payment.GrossValue * 100),

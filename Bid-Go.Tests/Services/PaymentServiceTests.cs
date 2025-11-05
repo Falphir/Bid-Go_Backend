@@ -350,6 +350,10 @@ namespace Bid_Go.Tests.Services
                     It.IsAny<IDictionary<string, string>>()))
                    .ReturnsAsync(new ChargeResult(true, null));
 
+        
+            var transportRequest = new TransportRequest { TransportRequestId = 100, Status = ERequestStatus.Pending };
+            trs.Setup(r => r.GetByIdAsync(payment.TransportRequestId)).ReturnsAsync(transportRequest);
+
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
@@ -369,6 +373,7 @@ namespace Bid_Go.Tests.Services
                   payment.TransportRequestId),
                   Times.Once);
         }
+
 
         [Fact]
         public async Task RetryPayment_ShouldFail_AndNotNotify_OnGatewayFailure()
@@ -391,6 +396,10 @@ namespace Bid_Go.Tests.Services
                     It.Is<string>(d => d.Contains("Retry payment")),
                     It.IsAny<IDictionary<string, string>>()))
                    .ReturnsAsync(new ChargeResult(false, "declined"));
+
+            var transportRequest = new TransportRequest { TransportRequestId = 100, Status = ERequestStatus.Pending };
+            trs.Setup(r => r.GetByIdAsync(payment.TransportRequestId)).ReturnsAsync(transportRequest);
+
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
