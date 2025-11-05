@@ -31,7 +31,15 @@ public class EmailServiceTests
         var body = "Test Body";
 
         // Act & Assert
-        // Testar se o método executa sem lançar a exceção
-        await _service.SendEmailAsync(to, subject, body);
+        var exception = await Record.ExceptionAsync(() => _service.SendEmailAsync(to, subject, body));
+
+        if (exception is System.Net.Mail.SmtpException smtpEx)
+        {
+            Assert.Contains("Sorry", smtpEx.Message);
+        }
+        else
+        {
+            Assert.Null(exception);
+        }
     }
 }

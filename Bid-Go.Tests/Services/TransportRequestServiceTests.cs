@@ -132,6 +132,53 @@ namespace Bid_Go.Tests.Services
         }
 
         [Fact]
+        public async Task CreateAsync_ShouldThrow_WhenDimensionsAreInvalid()
+        {
+            var dto = new CreateTransportRequestDTO
+            {
+                PickupDate = DateTime.UtcNow.AddDays(3),
+                DeliveryDate = DateTime.UtcNow.AddDays(5),
+                BiddingStartDate = DateTime.UtcNow,
+                BiddingEndDate = DateTime.UtcNow.AddDays(2),
+                Image = "img.jpg",
+                Weight = 10,
+                Volume = 10,
+                Length = 0, // inválido
+                Width = 30,
+                Height = 40,
+                MaxPrice = 50
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            Assert.Equal("As dimensões devem ser superiores a zero.", ex.Message);
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldThrow_WhenVolumeIsInvalid()
+        {
+            var dto = new CreateTransportRequestDTO
+            {
+                PickupDate = DateTime.UtcNow.AddDays(3),
+                DeliveryDate = DateTime.UtcNow.AddDays(5),
+                BiddingStartDate = DateTime.UtcNow,
+                BiddingEndDate = DateTime.UtcNow.AddDays(2),
+                Image = "img.jpg",
+                Weight = 10,
+                Volume = 0, // inválido
+                Length = 50,
+                Width = 30,
+                Height = 40,
+                MaxPrice = 60
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
+            Assert.Equal("Peso e volume devem ser superiores a zero.", ex.Message);
+        }
+
+
+
+
+        [Fact]
         public async Task UpdateAsync_ShouldThrow_WhenRequestNotFound()
         {
             _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
@@ -254,6 +301,41 @@ namespace Bid_Go.Tests.Services
             Assert.Equal(200, result.MaxPrice);
             _repositoryMock.Verify(r => r.UpdateAsync(1, It.IsAny<TransportRequest>()), Times.Once);
         }
+
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenDimensionsAreInvalid()
+        {
+            var existing = new TransportRequest { Status = ERequestStatus.Draft };
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                Length = 0, // inválido
+                Width = 30,
+                Height = 20
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            Assert.Equal("As dimensões devem ser superiores a zero.", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrow_WhenVolumeIsInvalid()
+        {
+            var existing = new TransportRequest { Status = ERequestStatus.Draft };
+            _repositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existing);
+
+            var dto = new UpdateTransportRequestDTO
+            {
+                Volume = 0 // inválido
+            };
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateAsync(1, dto));
+            Assert.Equal("O volume deve ser superior a zero.", ex.Message);
+        }
+
+
 
         [Fact]
         public async Task DeleteAsync_ShouldThrow_WhenRequestNotFound()

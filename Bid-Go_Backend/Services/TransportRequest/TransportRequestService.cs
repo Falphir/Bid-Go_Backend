@@ -31,6 +31,8 @@ namespace Bid_Go_Backend.Services
                 throw new ArgumentException("Peso e volume devem ser superiores a zero.");
             if (dto.MaxPrice < 20)
                 throw new ArgumentException("O preço deve ser igual ou superior a 20.");
+            if (dto.Length <= 0 || dto.Width <= 0 || dto.Height <= 0)
+                throw new ArgumentException("As dimensões devem ser superiores a zero.");
 
             var request = new TransportRequest
             {
@@ -68,7 +70,7 @@ namespace Bid_Go_Backend.Services
             if (dto.PickupDate.HasValue && dto.DeliveryDate.HasValue && dto.PickupDate >= dto.DeliveryDate)
                 throw new ArgumentException("A data de recolha deve ser anterior à data de entrega.");
 
-            if (dto.BiddingStartDate >= dto.BiddingEndDate)
+            if (dto.BiddingStartDate.HasValue && dto.BiddingEndDate.HasValue && dto.BiddingStartDate >= dto.BiddingEndDate)
                 throw new ArgumentException("A data de início das licitações deve ser anterior à data de fim.");
 
             if (dto.PickupDate <= dto.BiddingEndDate)
@@ -76,6 +78,14 @@ namespace Bid_Go_Backend.Services
 
             if (dto.MaxPrice.HasValue && dto.MaxPrice < 20)
                 throw new ArgumentException("O preço deve ser igual ou superior a 20.");
+
+            if ((dto.Length.HasValue && dto.Length <= 0) ||
+                (dto.Width.HasValue && dto.Width <= 0) ||
+                (dto.Height.HasValue && dto.Height <= 0))
+                throw new ArgumentException("As dimensões devem ser superiores a zero.");
+
+            if (dto.Volume.HasValue && dto.Volume <= 0)
+                throw new ArgumentException("O volume deve ser superior a zero.");
 
             existing.Origin = dto.Origin ?? existing.Origin;
             existing.Destination = dto.Destination ?? existing.Destination;
