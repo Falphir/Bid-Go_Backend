@@ -4,8 +4,9 @@ namespace Bid_Go_Backend.Data.Repositories.Interfaces
 {
     public interface IAutomaticSelectionAlgorithmRepository
     {
-        Task<AutomaticSelectionResult> ExecuteAutomaticSelectionAsync(int transportRequestId);
-        Task<IEnumerable<Bid>> GetEligibleBidsAsync(int transportRequestId);
-        Task<bool> IsTransportRequestCanceledAsync(int transportRequestId);
+        Task<TransportRequest?> GetTransportRequestWithBidsAsync(int transportRequestId);
+        Task<Dictionary<int, decimal>> GetDriverReputationsAsync(IEnumerable<int> driverIds);
+        Task SaveChangesAsync();
     }
+
 }
