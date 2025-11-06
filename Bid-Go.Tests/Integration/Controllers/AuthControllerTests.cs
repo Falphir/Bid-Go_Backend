@@ -1,35 +1,31 @@
-﻿using Bid_Go.Tests.Integration.Utils;
-using Bid_Go_Backend.Controllers;
+﻿using Bid_Go_Backend.Controllers;
+using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.DTOs.LoginDTOs;
-using Bid_Go_Backend.Repositories.Interfaces;
-using Bid_Go_Backend.Services.Auth;
+using Bid_Go_Backend.Repositories.Register;
+using Bid_Go_Backend.Services.Interfaces;
+using Bid_Go_Backend.Services.Register;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Memory;
+using System.Text;
 using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
     public class AuthControllerTests
     {
-        private readonly AuthController _controller;
-        private readonly FakeUserRepository _userRepo;
-        private readonly FakeEmailService _emailService;
-        private readonly FakeMemoryCache _cache;
-
-        //Fakes para simular drivers e companies
-        private readonly FakeRegisterDriverRepository _driverRepo;
-        private readonly FakeRegisterCompanyRepository _companyRepo;
-
-        public AuthControllerTests()
+        private static (AuthController controller, BidGoDbContext db, IMemoryCache cache, TestEmailService email) Build()
         {
-            _userRepo = new FakeUserRepository();
-            _emailService = new FakeEmailService();
-            _cache = new FakeMemoryCache();
-            _driverRepo = new FakeRegisterDriverRepository();
-            _companyRepo = new FakeRegisterCompanyRepository();
-
+            var options = new DbContextOptionsBuilder<BidGoDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+            var db = new BidGoDbContext(options);
+            var userRepo = new Bid_Go_Backend.Repositories.Login.UserRepository(db);
+            var email = new TestEmailService();
+            var cache = new MemoryCache(new MemoryCacheOptions());
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -37,39 +33,30 @@ namespace Bid_Go.Tests.Integration.Controllers
                     {"Jwt:Issuer", "TestIssuer"},
                     {"Jwt:Audience", "TestAudience"},
                     {"Jwt:ExpireMinutes", "60"}
-                })
-                .Build();
-
-            var authService = new AuthService(_userRepo, _emailService, config, _cache);
-            _controller = new AuthController(authService);
+                }).Build();
+            var authService = new Bid_Go_Backend.Services.Auth.AuthService(userRepo, email, config, cache);
+            var controller = new AuthController(authService);
+            return (controller, db, cache, email);
         }
 
         [Fact]
         public async Task Login_ReturnsOk_WhenCredentialsAreValid_ForDriver()
         {
-            // Arrange
-            var driver = await _driverRepo.CreateAsync(new Driver
+            var (controller, db, _, _) = Build();
+            var pwd = BCrypt.Net.BCrypt.HashPassword("123456");
+            var driver = new Driver
             {
                 Email = "driver_login@test.com",
-                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
+                Password = pwd,
                 Name = "Test Driver",
-                PhoneNumber = 912345678,
-                NIF = 123456789
-            });
+                PhoneNumber =912345678,
+                NIF =123456789
+            };
+            db.Users.Add(driver);
+            await db.SaveChangesAsync();
 
-            await _userRepo.CreateUserAsync(new Driver
-            {
-                Id = driver.Id,
-                Email = driver.Email,
-                Password = driver.Password
-            });
-
-            var loginDto = new LoginRequestDto { Email = "driver_login@test.com", Password = "123456" };
-
-            // Act
-            var result = await _controller.Login(loginDto);
-
-            // Assert
+            var loginDto = new Bid_Go_Backend.Data.Models.DTOs.LoginDTOs.LoginRequestDto { Email = "driver_login@test.com", Password = "123456" };
+            var result = await controller.Login(loginDto);
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
         }
@@ -77,30 +64,22 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Login_ReturnsOk_WhenCredentialsAreValid_ForCompany()
         {
-            // Arrange
-            var company = await _companyRepo.CreateAsync(new Company
+            var (controller, db, _, _) = Build();
+            var pwd = BCrypt.Net.BCrypt.HashPassword("123456");
+            var company = new Company
             {
                 Email = "company_login@test.com",
-                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
+                Password = pwd,
                 Name = "Test Company",
                 CompanyName = "Fake Co.",
-                PhoneNumber = 987654321,
-                NIF = 999888777
-            });
+                PhoneNumber =987654321,
+                NIF =999888777
+            };
+            db.Users.Add(company);
+            await db.SaveChangesAsync();
 
-            await _userRepo.CreateUserAsync(new Company
-            {
-                Id = company.Id,
-                Email = company.Email,
-                Password = company.Password
-            });
-
-            var loginDto = new LoginRequestDto { Email = "company_login@test.com", Password = "123456" };
-
-            // Act
-            var result = await _controller.Login(loginDto);
-
-            // Assert
+            var loginDto = new Bid_Go_Backend.Data.Models.DTOs.LoginDTOs.LoginRequestDto { Email = "company_login@test.com", Password = "123456" };
+            var result = await controller.Login(loginDto);
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
         }
@@ -108,13 +87,13 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Login_ReturnsUnauthorized_WhenPasswordIsWrong()
         {
-            // Arrange
-            var loginDto = new LoginRequestDto { Email = "user@test.com", Password = "wrong" };
+            var (controller, db, _, _) = Build();
+            var pwd = BCrypt.Net.BCrypt.HashPassword("123456");
+            db.Users.Add(new Driver { Email = "user@test.com", Password = pwd });
+            await db.SaveChangesAsync();
 
-            // Act
-            var result = await _controller.Login(loginDto);
-
-            // Assert
+            var loginDto = new Bid_Go_Backend.Data.Models.DTOs.LoginDTOs.LoginRequestDto { Email = "user@test.com", Password = "wrong" };
+            var result = await controller.Login(loginDto);
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal(401, unauthorized.StatusCode);
         }
@@ -122,33 +101,43 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task RecoverPassword_SendsEmail_AndStoresToken()
         {
-            // Arrange
-            var request = new RecoverPasswordRequestDTO { Email = "user@test.com" };
+            var (controller, db, cache, email) = Build();
+            db.Users.Add(new Driver { Email = "user@test.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") });
+            await db.SaveChangesAsync();
 
-            // Act
-            var result = await _controller.RecoverPassword(request);
-
-            // Assert
+            var request = new Bid_Go_Backend.Data.Models.DTOs.RecoverPasswordRequestDTO { Email = "user@test.com" };
+            var result = await controller.RecoverPassword(request);
             var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
-            Assert.Single(_emailService.SentEmails);
+            Assert.Single(email.Sent);
         }
 
         [Fact]
         public async Task ResetPassword_Works_WhenTokenValid()
         {
-            // Arrange
-            var request = new RecoverPasswordRequestDTO { Email = "user@test.com" };
-            await _controller.RecoverPassword(request);
-            var token = _emailService.SentEmails.First().body.Split('\'')[1]; // extrai token
+            var (controller, db, cache, email) = Build();
+            db.Users.Add(new Driver { Email = "user@test.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") });
+            await db.SaveChangesAsync();
 
-            // Act
-            var resetDto = new ResetPasswordRequestDTO { Token = token, NewPassword = "nova123" };
-            var result = await _controller.ResetPassword(resetDto);
+            var request = new Bid_Go_Backend.Data.Models.DTOs.RecoverPasswordRequestDTO { Email = "user@test.com" };
+            await controller.RecoverPassword(request);
+            var token = email.Sent.First().body.Split('\'')[1];
 
-            // Assert
+            var resetDto = new Bid_Go_Backend.Data.Models.DTOs.ResetPasswordRequestDTO { Token = token, NewPassword = "nova123" };
+            var result = await controller.ResetPassword(resetDto);
             var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
+        }
+
+        // Email test double inside the file
+        private sealed class TestEmailService : Bid_Go_Backend.Services.Interfaces.IEmailService
+        {
+            public List<(string to,string subject,string body)> Sent { get; } = new();
+            public Task SendEmailAsync(string to, string subject, string body)
+            {
+                Sent.Add((to, subject, body));
+                return Task.CompletedTask;
+            }
         }
     }
 }
