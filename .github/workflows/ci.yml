@@ -28,21 +28,13 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test (all) with coverage + TRX
-        run: |
-          dotnet test --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory "./TestResults" \
-            --logger:"trx;LogFileName=test-results.trx" \
-            --verbosity normal
+        run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory "./TestResults" --logger:"trx;LogFileName=test-results.trx" --verbosity normal
 
       - name: Generate coverage report (HTML + Markdown)
         if: success()
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          reportgenerator \
-            -reports:"**/coverage.cobertura.xml" \
-            -targetdir:"TestResults/CoverageReport" \
-            -reporttypes:"Html;MarkdownSummaryGithub"
+          reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;MarkdownSummaryGithub"
 
       - name: Upload coverage report
         if: success()
@@ -55,6 +47,8 @@ jobs:
         if: always()
         uses: dorny/test-reporter@v2
         with:
-          path: "**/test-results.trx"
+          name: "Tests ${{ matrix.os }}"
+          path: "TestResults/test-results.trx"
           reporter: dotnet-trx
           use-actions-summary: true
+          fail-on-error: false
