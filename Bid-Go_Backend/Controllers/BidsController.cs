@@ -94,13 +94,14 @@ namespace Bid_Go_Backend.Controllers
         public async Task<IActionResult> GetActiveBids([FromQuery] int transportRequestId, [FromQuery] string orderBy = "value", [FromQuery] bool descending = false)
         {
             var activeBids = await _service.GetActiveBidsAsync(transportRequestId, orderBy, descending);
-            return Ok(activeBids.Select(b => new
+            var list = activeBids.Select(b => new
             {
                 b.BidId,
                 b.Value,
                 b.DeliveryDeadline,
                 Driver = new { b.DriverId, b.Driver.Name, b.Driver.Email }
-            }));
+            }).ToList<object>();
+            return Ok(list);
         }
     }
 }

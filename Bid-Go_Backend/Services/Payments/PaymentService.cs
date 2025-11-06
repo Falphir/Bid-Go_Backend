@@ -117,7 +117,8 @@ namespace Bid_Go_Backend.Services
             if (payment.PaymentStatus == EPaymentStatus.Confirmed)
                 return (false, "This payment has already been completed.", ToDto(payment));
             
-            if (payment.DeadlineToPay < DateTime.UtcNow)
+            // Only enforce deadline for pending payments; allow retry on failed ones regardless of deadline
+            if (payment.PaymentStatus == EPaymentStatus.Pending && payment.DeadlineToPay < DateTime.UtcNow)
             {
                 payment.PaymentStatus = EPaymentStatus.Pending;
                 payment.FailureReason = "The payment deadline has passed. Please create a new payment.";

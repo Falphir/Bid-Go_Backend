@@ -12,49 +12,104 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
- public class TransportRequestsPageControllerTests
- {
- private static (TransportRequestsPageController controller, BidGoDbContext db) Build()
- {
- var options = new DbContextOptionsBuilder<BidGoDbContext>()
- .UseInMemoryDatabase(Guid.NewGuid().ToString())
- .Options;
- var db = new BidGoDbContext(options);
- var repo = new TransportRequestsPageRepository(db);
- var logger = LoggerFactory.Create(b => b.AddDebug()).CreateLogger<TransportRequestsPageService>();
- var service = new TransportRequestsPageService(repo, logger);
- var controller = new TransportRequestsPageController(service);
- return (controller, db);
- }
+    public class TransportRequestsPageControllerTests
+    {
+        private static (TransportRequestsPageController controller, BidGoDbContext db) Build()
+        {
+            var options = new DbContextOptionsBuilder<BidGoDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
- [Fact]
- public async Task GetActive_ReturnsList_FilteredAndOrdered()
- {
- var (controller, db) = Build();
- db.TransportRequests.AddRange(
- new TransportRequest { Origin = "Lisboa", Destination = "Porto", Package = "P1", PickupDate = DateTime.UtcNow.AddDays(1), DeliveryDate = DateTime.UtcNow.AddDays(2), Image = "i1", MaxPrice =100, Status = ERequestStatus.Active },
- new TransportRequest { Origin = "Lisboa", Destination = "Faro", Package = "P2", PickupDate = DateTime.UtcNow.AddDays(1), DeliveryDate = DateTime.UtcNow.AddDays(2), Image = "i2", MaxPrice =50, Status = ERequestStatus.Active },
- new TransportRequest { Origin = "Braga", Destination = "Porto", Package = "P3", PickupDate = DateTime.UtcNow.AddDays(1), DeliveryDate = DateTime.UtcNow.AddDays(2), Image = "i3", MaxPrice =75, Status = ERequestStatus.Active }
- );
- await db.SaveChangesAsync();
- var result = await controller.GetActive(origin: "Lisboa", destination: null, deliveryDate: null, priceOrder: "asc");
- var ok = Assert.IsType<OkObjectResult>(result.Result);
- // controller devolve IEnumerable<TransportRequestsPageDTO> ou { message }
- var list = Assert.IsAssignableFrom<IEnumerable<object>>(ok.Value).ToList();
- Assert.Equal(2, list.Count);
- }
+            var db = new BidGoDbContext(options);
+            var repo = new TransportRequestsPageRepository(db);
+            var logger = LoggerFactory.Create(b => b.AddDebug()).CreateLogger<TransportRequestsPageService>();
+            var service = new TransportRequestsPageService(repo, logger);
+            var controller = new TransportRequestsPageController(service);
 
- [Fact]
- public async Task GetById_ReturnsOk_WhenActiveRequestExists()
- {
- var (controller, db) = Build();
- var tr = new TransportRequest { Origin = "A", Destination = "B", Package = "P", PickupDate = DateTime.UtcNow.AddDays(1), DeliveryDate = DateTime.UtcNow.AddDays(2), Image = "img", MaxPrice =120, Status = ERequestStatus.Active, Weight =1, Volume =1, Length =1, Width =1, Height =1 };
- db.TransportRequests.Add(tr);
- await db.SaveChangesAsync();
- var result = await controller.GetById(tr.TransportRequestId);
- var ok = Assert.IsType<OkObjectResult>(result.Result);
- var dto = Assert.IsType<TransportRequestResponseDTO>(ok.Value);
- Assert.Equal(tr.MaxPrice, dto.MaxPrice);
- }
- }
+            return (controller, db);
+        }
+
+        [Fact]
+        public async Task GetActive_ReturnsList_FilteredAndOrdered()
+        {
+            var (controller, db) = Build();
+
+            db.TransportRequests.AddRange(
+                new TransportRequest
+                {
+                    Origin = "Lisboa",
+                    Destination = "Porto",
+                    Package = "P1",
+                    PickupDate = DateTime.UtcNow.AddDays(1),
+                    DeliveryDate = DateTime.UtcNow.AddDays(2),
+                    Image = "i1",
+                    MaxPrice = 100,
+                    Status = ERequestStatus.Active
+                },
+                new TransportRequest
+                {
+                    Origin = "Lisboa",
+                    Destination = "Faro",
+                    Package = "P2",
+                    PickupDate = DateTime.UtcNow.AddDays(1),
+                    DeliveryDate = DateTime.UtcNow.AddDays(2),
+                    Image = "i2",
+                    MaxPrice = 50,
+                    Status = ERequestStatus.Active
+                },
+                new TransportRequest
+                {
+                    Origin = "Braga",
+                    Destination = "Porto",
+                    Package = "P3",
+                    PickupDate = DateTime.UtcNow.AddDays(1),
+                    DeliveryDate = DateTime.UtcNow.AddDays(2),
+                    Image = "i3",
+                    MaxPrice = 75,
+                    Status = ERequestStatus.Active
+                }
+            );
+
+            await db.SaveChangesAsync();
+
+            var result = await controller.GetActive(origin: "Lisboa", destination: null, deliveryDate: null, priceOrder: "asc");
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+
+            // controller devolve IEnumerable<TransportRequestsPageDTO> ou { message }
+            var list = Assert.IsAssignableFrom<IEnumerable<object>>(ok.Value).ToList();
+            Assert.Equal(2, list.Count);
+        }
+
+        [Fact]
+        public async Task GetById_ReturnsOk_WhenActiveRequestExists()
+        {
+            var (controller, db) = Build();
+
+            var tr = new TransportRequest
+            {
+                Origin = "A",
+                Destination = "B",
+                Package = "P",
+                PickupDate = DateTime.UtcNow.AddDays(1),
+                DeliveryDate = DateTime.UtcNow.AddDays(2),
+                Image = "img",
+                MaxPrice = 120,
+                Status = ERequestStatus.Active,
+                Weight = 1,
+                Volume = 1,
+                Length = 1,
+                Width = 1,
+                Height = 1
+            };
+
+            db.TransportRequests.Add(tr);
+            await db.SaveChangesAsync();
+
+            var result = await controller.GetById(tr.TransportRequestId);
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var dto = Assert.IsType<TransportRequestResponseDTO>(ok.Value);
+
+            Assert.Equal(tr.MaxPrice, dto.MaxPrice);
+        }
+    }
 }
