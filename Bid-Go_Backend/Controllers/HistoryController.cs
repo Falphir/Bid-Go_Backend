@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/history")]
     public class HistoryController : ControllerBase
     {
         private readonly IHistoryService _service;

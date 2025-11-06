@@ -8,7 +8,7 @@ using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationS
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/bids")]
     public class BidsController : ControllerBase
     {
         private readonly IAuthorizationService _authorizationService;
@@ -21,7 +21,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "DriverOnly")]
-        [HttpPost]
+        [HttpPost("createbid")]
         public async Task<IActionResult> AddBid([FromBody] AddBidDTO dto)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
@@ -39,7 +39,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "DriverOnly")]
-        [HttpPut("{id}")]
+        [HttpPut("updatebid/{id}")]
         public async Task<IActionResult> UpdateBid(int id, [FromBody] BidUpdateDTO dto)
         {
 
@@ -58,7 +58,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "DriverOnly")]
-        [HttpPatch("{id}/cancel")]
+        [HttpPatch("cancel/{id}")]
         public async Task<IActionResult> CancelBid(int id)
         {
 
@@ -87,7 +87,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("by-request/{transportRequestId}")]
+        [HttpGet("byrequest/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
             var bids = await _service.GetBidsByTransportRequestAsync(transportRequestId);
@@ -97,7 +97,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("active")]
+        [HttpGet("bidsActive")]
         public async Task<IActionResult> GetActiveBids([FromQuery] int transportRequestId, [FromQuery] string orderBy = "value", [FromQuery] bool descending = false)
         {
             var activeBids = await _service.GetActiveBidsAsync(transportRequestId, orderBy, descending);

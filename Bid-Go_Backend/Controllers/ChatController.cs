@@ -9,7 +9,7 @@ using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationS
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/chats")]
     [Authorize]
     public class ChatController : ControllerBase
     {
