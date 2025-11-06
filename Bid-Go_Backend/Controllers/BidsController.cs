@@ -22,13 +22,20 @@ namespace Bid_Go_Backend.Controllers
 
         [Authorize(Policy = "DriverOnly")]
         [HttpPost]
-        public async Task<IActionResult> AddBid([FromBody] AddBidDTO bidDto)
+        public async Task<IActionResult> AddBid([FromBody] AddBidDTO dto)
         {
-            var result = await _service.AddBidAsync(bidDto);
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { message = "Invalid token: missing userId." });
+
+            int driverId = int.Parse(userIdClaim);
+
+            var result = await _service.AddBidAsync(driverId, dto);
+
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return CreatedAtAction(nameof(AddBid), new { id = result.Bid!.BidId }, result.Bid);
+            return Ok(result.Bid);
         }
 
         [Authorize(Policy = "DriverOnly")]
