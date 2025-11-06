@@ -87,22 +87,21 @@ namespace Bid_Go.Tests.Integration.Controllers
         }
 
         [Fact]
-        public async Task AddBid_CreatesBid_ReturnsCreated()
+        public async Task AddBid_CreatesBid_ReturnsOk()
         {
             var (controller, db) = BuildWithDriver(driverId: 10);
             var tr = SeedTransportRequest(db);
 
             var dto = new AddBidDTO
             {
-                DriverId = 10,
                 TransportRequestId = tr.TransportRequestId,
                 Value = 50,
                 DeliveryDeadline = DateTime.UtcNow.AddDays(2)
             };
 
             var result = await controller.AddBid(dto);
-            var created = Assert.IsType<CreatedAtActionResult>(result);
-            var bid = Assert.IsType<Bid>(created.Value);
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var bid = Assert.IsType<Bid>(ok.Value);
 
             Assert.True(bid.BidId > 0);
             var fromDb = await db.Bids.FindAsync(bid.BidId);
