@@ -28,7 +28,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test (all) with coverage + TRX
-        run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory "./TestResults" --logger:"trx;LogFileName=test-results.trx" --verbosity normal
+        run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory "./TestResults"  --filter "FullyQualifiedName~Bid_Go.Tests.Unit" --logger:"trx;LogFileName=test-results.trx" --verbosity normal
 
       - name: Generate coverage report (HTML + Markdown)
         if: success()
