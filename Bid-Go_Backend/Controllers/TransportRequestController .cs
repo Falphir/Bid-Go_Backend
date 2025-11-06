@@ -9,7 +9,7 @@ using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationS
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/transport")]
+    [Route("api/transports")]
     public class TransportRequestsController : ControllerBase
     {
         private readonly ITransportRequestService _service;
@@ -22,7 +22,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "CompanyOnly")]
-        [HttpPost]
+        [HttpPost("createTransport")]
         public async Task<IActionResult> Create([FromForm] CreateTransportRequestDTO dto, IFormFile image)
         {
 
@@ -38,11 +38,10 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "CompanyOnly")]
-        [HttpPut("{id}")]
+        [HttpPut("updateTransport/{id}")]
+     
         public async Task<IActionResult> Update(int id, [FromForm] UpdateTransportRequestDTO dto, IFormFile? image)
         {
-
-
             var companyId = int.Parse(User.FindFirst("userId")!.Value);
 
             var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, id);
@@ -62,7 +61,7 @@ namespace Bid_Go_Backend.Controllers
 
 
         [Authorize(Policy = "CompanyOnly")]
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
 

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/register")]
     public class RegisterCompanyController : ControllerBase
     {
         private readonly IRegisterCompanyService _companyService;
@@ -17,7 +17,7 @@ namespace Bid_Go_Backend.Controllers
             _companyService = companyService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("company")]
         public async Task<IActionResult> Register([FromBody] RegisterCompanyDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

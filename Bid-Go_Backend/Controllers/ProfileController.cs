@@ -61,7 +61,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "DriverOnly")]
-        [HttpPut("driver/{id}")]
+        [HttpPut("updateDriver/{id}")]
         public async Task<IActionResult> UpdateDriverProfile(int id, [FromForm] DriverProfileUpdateDTO dto)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -84,7 +84,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "CompanyOnly")]
-        [HttpPut("company/{id}")]
+        [HttpPut("updateCompany/{id}")]
         public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -105,7 +105,7 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
-        [HttpPut("{id}/ChangePassword")]
+        [HttpPut("{id}/changePassword")]
         public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDTO dto)
         {
 
@@ -124,7 +124,7 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
-        [HttpPut("{id}/deactivate")]
+        [HttpPut("{id}/deactivateAccount")]
         public async Task<IActionResult> DeactivateUser(int id)
         {
 

@@ -9,7 +9,7 @@ namespace Bid_Go_Backend.Controllers
 {
    
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/reviewRequest")]
     [Authorize]
     public class ReviewRequestController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
-        [HttpPost("submit-review")]
+        [HttpPost("submitReview")]
         public async Task<IActionResult> SubmitReview([FromBody] ReviewRequestServiceDTO reviewDTO)
         {
             try
@@ -50,7 +50,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
 
-        [HttpGet("avaliacoes/{request_id}")]
+        [HttpGet("reviews/{request_id}")]
         public async Task<IActionResult> GetReviewsByService(int request_id)
         {
             try

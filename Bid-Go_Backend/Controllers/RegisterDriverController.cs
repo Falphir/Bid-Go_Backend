@@ -7,7 +7,7 @@ using Bid_Go_Backend.Services.Interfaces;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/register")]
     public class RegisterDriverController : ControllerBase
     {
         private readonly IRegisterDriverService _driverService;
@@ -17,7 +17,7 @@ namespace Bid_Go_Backend.Controllers
             _driverService = driverService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("driver")]
         public async Task<IActionResult> Register([FromForm] RegisterDriverDTO dto)
         {
             if (!ModelState.IsValid)

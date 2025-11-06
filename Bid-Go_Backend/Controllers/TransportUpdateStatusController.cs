@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/transports")]
     public class TransportUpdateStatusController : ControllerBase
     {
         private readonly ITransportUpdateStatusService _service;
@@ -19,7 +19,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
 
-        [HttpPut("{requestId}/status")]
+        [HttpPut("updateStatus/{requestId}")]
         public async Task<IActionResult> UpdateRequestStatus(int requestId, [FromBody] RequestStatusDTO dto)
         {
             var result = await _service.UpdateRequestStatusAsync(requestId, User, dto.Status);
@@ -28,13 +28,13 @@ namespace Bid_Go_Backend.Controllers
 
 
 
-        [HttpPut("{requestID}/canceled")]
-        public async Task<IActionResult> CancelRequestStatus(int requestID)
+        [HttpPut("canceled/{requestId}")]
+        public async Task<IActionResult> CancelRequestStatus(int requestId)
         {
             try
             {
                 var dto = new RequestStatusDTO { Status = Data.Models.Enums.ERequestStatus.Canceled };
-                var result = await _service.UpdateRequestStatusAsync(requestID, User, dto.Status);
+                var result = await _service.UpdateRequestStatusAsync(requestId, User, dto.Status);
 
                 if (result.StatusCode !=200)
                     return StatusCode(result.StatusCode, result.Body);

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/PageRequests")]
+    [Route("api/pageTransports")]
     public class TransportRequestsPageController : ControllerBase
     {
         private readonly ITransportRequestsPageService _service;
@@ -16,7 +16,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         // GET: api/PageRequests
-        [HttpGet]
+        [HttpGet("filters")]
         public async Task<ActionResult<IEnumerable<TransportRequestsPageDTO>>> GetActive(
             [FromQuery] string? origin,
             [FromQuery] string? destination,
