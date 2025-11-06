@@ -22,7 +22,7 @@ namespace Bid_Go_Backend.Controllers
 
 
         [Authorize(Policy = "CompanyOnly")]
-        [HttpGet("by-request/{transportRequestId}")]
+        [HttpGet("byrequest/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
             var companyId = int.Parse(User.FindFirst("userId")!.Value);
@@ -39,7 +39,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         [Authorize(Policy = "CompanyOnly")]
-        [HttpGet("by-request/{transportRequestId}/status/{status}")]
+        [HttpGet("byrequest/{transportRequestId}/{status}")]
         public async Task<IActionResult> GetBidsByTransportRequestAndStatus(int transportRequestId, EBidStatus status)
         {
             var companyId = int.Parse(User.FindFirst("userId")!.Value);

@@ -29,7 +29,7 @@ namespace Bid_Go_Backend.Controllers
 
 
         [HttpPut("{requestID}/canceled")]
-        public async Task<IActionResult> CancelRequestStatus(int requestID, int userID)
+        public async Task<IActionResult> CancelRequestStatus(int requestID)
         {
             try
             {

@@ -59,7 +59,7 @@ namespace Bid_Go_Backend.Services.Transport_Request
                 Image = imageUrl,
                 MaxPrice = dto.MaxPrice,
                 CompanyId = dto.CompanyId,
-                Status = ERequestStatus.Draft
+                Status = ERequestStatus.Active
             };
 
             return await _repository.CreateAsync(request);
