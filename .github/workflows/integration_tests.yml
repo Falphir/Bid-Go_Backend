@@ -6,7 +6,10 @@ on:
 
 jobs:
   integration-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -49,10 +52,12 @@ jobs:
             TestResultsIntegration/test-results-integration.trx
             TestResultsIntegration/CoverageReport
 
-      - name: Publish test summary in job
+      - name: Publish test summary (GitHub Job Summary)
         if: always()
         uses: dorny/test-reporter@v2
         with:
-          path: "**/test-results-integration.trx"
+          name: "Tests ${{ matrix.os }}"
+          path: "TestResults/test-results.trx"
           reporter: dotnet-trx
           use-actions-summary: true
+          fail-on-error: false
