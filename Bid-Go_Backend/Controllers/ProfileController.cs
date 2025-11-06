@@ -1,17 +1,8 @@
-﻿using Bid_Go_Backend.Data;
-using Bid_Go_Backend.Data.Models;
+﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Repositories.Interface;
-using Bid_Go_Backend.Repositories.ProfileRepo;
 using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -30,7 +21,6 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProfile(int id)
         {
-
             var userIdClaim = User.FindFirst("userId")?.Value;
             if (userIdClaim == null || int.Parse(userIdClaim) != id)
                 return Forbid();

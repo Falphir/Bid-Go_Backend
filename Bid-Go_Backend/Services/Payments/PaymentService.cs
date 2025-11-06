@@ -1,10 +1,8 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
-using Stripe.Forwarding;
 
 namespace Bid_Go_Backend.Services
 {
@@ -32,9 +30,9 @@ namespace Bid_Go_Backend.Services
 
         public async Task<PaymentResultDTO> ProcessPaymentAsync(CreatePaymentRequestDTO request)
         {
-            // 1) Buscar TR + Bid
+            //1) Buscar TR + Bid
             var tr = await _transportReqs.GetByIdAsync(request.TransportRequestId)
-                     ?? throw new InvalidOperationException("Transport request was not found.");
+             ?? throw new InvalidOperationException("Transport request was not found.");
 
             if (tr.SelectedBidId is null)
                 throw new InvalidOperationException("No selected bid for this transport request.");
@@ -45,13 +43,13 @@ namespace Bid_Go_Backend.Services
             if (bid.TransportRequestId != tr.TransportRequestId)
                 throw new InvalidOperationException("Selected bid does not belong to the given transport request.");
 
-            // 2) Cálculos
+            //2) Cálculos
             var bidValue = bid.Value;
-            var tax = Math.Round(bidValue * 0.05m, 2);
+            var tax = Math.Round(bidValue *0.05m,2);
             var gross = bidValue;
             var netForDriver = bidValue - tax;
 
-            // 3) Criar pagamento pendente
+            //3) Criar pagamento pendente
             var payment = new Payment
             {
                 CompanyId = tr.CompanyId,
@@ -69,9 +67,9 @@ namespace Bid_Go_Backend.Services
             await _payments.AddAsync(payment);
             await _payments.SaveChangesAsync();
 
-            // 4) Cobrança via gateway
+            //4) Cobrança via gateway
             var charge = await _gateway.ChargeAsync(
-                amountCents: (long)(payment.GrossValue * 100),
+                amountCents: (long)(payment.GrossValue *100),
                 currency: "eur",
                 sourceToken: request.StripeToken,
                 description: $"Payment for transport request {payment.TransportRequestId}",
@@ -113,16 +111,12 @@ namespace Bid_Go_Backend.Services
 
         public async Task<(bool Ok, string? Error, PaymentResultDTO? Result)> RetryPaymentAsync(int paymentId, string stripeToken)
         {
-
-
-           var payment = await _payments.GetByIdForUpdateAsync(paymentId)
+            var payment = await _payments.GetByIdForUpdateAsync(paymentId)
                           ?? throw new InvalidOperationException("Payment was not found.");
-
-           
 
             if (payment.PaymentStatus == EPaymentStatus.Confirmed)
                 return (false, "This payment has already been completed.", ToDto(payment));
-           
+            
             if (payment.DeadlineToPay < DateTime.UtcNow)
             {
                 payment.PaymentStatus = EPaymentStatus.Pending;
@@ -132,11 +126,10 @@ namespace Bid_Go_Backend.Services
             }
 
             var tr = await _transportReqs.GetByIdAsync(payment.TransportRequestId)
-         ?? throw new InvalidOperationException("Transport request was not found.");
-
+             ?? throw new InvalidOperationException("Transport request was not found.");
 
             var charge = await _gateway.ChargeAsync(
-                amountCents: (long)(payment.GrossValue * 100),
+                amountCents: (long)(payment.GrossValue *100),
                 currency: "eur",
                 sourceToken: stripeToken,
                 description: $"Retry payment {payment.PaymentId}",

@@ -1,4 +1,4 @@
-﻿using Bid_Go_Backend.Data.Repositories.Interfaces;
+﻿using Bid_Go_Backend.Repositories.Interfaces;
 using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
 namespace Bid_Go_Backend.Services

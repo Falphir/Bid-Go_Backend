@@ -1,7 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Transport_Request;
 using Moq;
 using Stripe;
@@ -15,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Services.Transport_Request;
+using Bid_Go_Backend.Repositories.Interfaces;
 
 namespace Bid_Go.Tests.Services
 {

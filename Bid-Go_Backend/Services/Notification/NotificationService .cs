@@ -1,6 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;

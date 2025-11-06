@@ -1,6 +1,6 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs.CompanyDTOs;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Register;
 using Moq;
 using System;

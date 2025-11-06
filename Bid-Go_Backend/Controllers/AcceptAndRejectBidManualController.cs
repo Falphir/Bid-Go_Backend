@@ -1,15 +1,8 @@
-﻿using Bid_Go_Backend.Data;
-using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Models.DTOs;
+﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
-using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design;
-using System.Security.Cryptography;
 using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
 namespace Bid_Go_Backend.Controllers
@@ -32,8 +25,6 @@ namespace Bid_Go_Backend.Controllers
         [HttpGet("by-request/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
-
-
             var companyId = int.Parse(User.FindFirst("userId")!.Value);
 
             var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, transportRequestId);
@@ -70,7 +61,6 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-
                 var companyId = int.Parse(User.FindFirst("userId")!.Value);
 
                 var bid = await _service.GetBidByIdAsync(id);
@@ -96,7 +86,7 @@ namespace Bid_Go_Backend.Controllers
         {
             try
             {
-                var companyId = int.Parse(User.FindFirst("nameid")!.Value);
+                var companyId = int.Parse(User.FindFirst("userId")!.Value);
 
                 var bid = await _service.GetBidByIdAsync(id);
                 if (bid == null)

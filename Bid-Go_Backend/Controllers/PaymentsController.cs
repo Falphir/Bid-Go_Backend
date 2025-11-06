@@ -1,14 +1,8 @@
-﻿using Bid_Go_Backend.Data;
-using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Models.DTOs;
+﻿using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
-using Bid_Go_Backend.Repositories.BidRepo;
-using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Interfaces;
-using Castle.Components.DictionaryAdapter.Xml;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
 namespace Bid_Go_Backend.Controllers

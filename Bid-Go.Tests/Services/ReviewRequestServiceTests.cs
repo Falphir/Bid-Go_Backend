@@ -9,10 +9,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Review;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using Bid_Go_Backend.Repositories.Interfaces;
 
 namespace Bid_Go_Backend.Tests.Services
 {

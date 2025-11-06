@@ -1,5 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services;
 using Moq;
 using System;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bid_Go_Backend.Data.Models;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Transport_Request;
 using Microsoft.Extensions.Logging;
 using Moq;

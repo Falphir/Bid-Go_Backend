@@ -1,6 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Repositories.Interface;
 using Bid_Go_Backend.Services.Profile;
 using Moq;
 using System;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 using Bid_Go_Backend.Services.Interfaces;
+using Bid_Go_Backend.Repositories.Interfaces;
 
 namespace Bid_Go.Tests.Services
 {

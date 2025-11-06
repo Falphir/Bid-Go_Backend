@@ -1,7 +1,7 @@
 ﻿using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Repositories.Interface;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;

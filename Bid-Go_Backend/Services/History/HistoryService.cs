@@ -1,5 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
-using Bid_Go_Backend.Data.Repositories.Interfaces;
+using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
