@@ -7,12 +7,12 @@ namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CompanyController : ControllerBase
+    public class RegisterCompanyController : ControllerBase
     {
         private readonly IRegisterCompanyService _companyService;
         
 
-        public CompanyController(IRegisterCompanyService companyService)
+        public RegisterCompanyController(IRegisterCompanyService companyService)
         {
             _companyService = companyService;
         }
