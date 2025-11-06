@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 using Bid_Go_Backend.Repositories.Interfaces;
 
-namespace Bid_Go_Backend.Tests.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     public class ReviewRequestServiceTests
     {
@@ -184,14 +184,14 @@ namespace Bid_Go_Backend.Tests.Services
         {
             var dto = CreateBaseDto("Company");
             var transport = CreateTransport("Completed");
-            Bid_Go_Backend.Data.Models.Review? saved = null;
+            Review? saved = null;
 
             _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
                 .ReturnsAsync(transport);
             _mockRepo.Setup(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId))
                 .ReturnsAsync(false);
-            _mockRepo.Setup(r => r.AddReviewAsync(It.IsAny<Bid_Go_Backend.Data.Models.Review>()))
-                .Callback<Bid_Go_Backend.Data.Models.Review>(r => saved = r)
+            _mockRepo.Setup(r => r.AddReviewAsync(It.IsAny<Review>()))
+                .Callback<Review>(r => saved = r)
                 .Returns(Task.CompletedTask);
 
             var result = await _service.SubmitReviewAsync(dto);
@@ -209,7 +209,7 @@ namespace Bid_Go_Backend.Tests.Services
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
             _mockRepo.Verify(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId), Times.Once);
-            _mockRepo.Verify(r => r.AddReviewAsync(It.IsAny<Bid_Go_Backend.Data.Models.Review>()), Times.Once);
+            _mockRepo.Verify(r => r.AddReviewAsync(It.IsAny<Review>()), Times.Once);
             _mockRepo.VerifyNoOtherCalls();
         }
 
@@ -218,14 +218,14 @@ namespace Bid_Go_Backend.Tests.Services
         {
             var dto = CreateBaseDto("Driver");
             var transport = CreateTransport("Completed");
-            Bid_Go_Backend.Data.Models.Review? saved = null;
+            Review? saved = null;
 
             _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
                 .ReturnsAsync(transport);
             _mockRepo.Setup(r => r.DriverReviewExistsAsync(dto.TransportRequestId, dto.DriverId))
                 .ReturnsAsync(false);
-            _mockRepo.Setup(r => r.AddReviewAsync(It.IsAny<Bid_Go_Backend.Data.Models.Review>()))
-                .Callback<Bid_Go_Backend.Data.Models.Review>(r => saved = r)
+            _mockRepo.Setup(r => r.AddReviewAsync(It.IsAny<Review>()))
+                .Callback<Review>(r => saved = r)
                 .Returns(Task.CompletedTask);
 
             var result = await _service.SubmitReviewAsync(dto);
@@ -243,7 +243,7 @@ namespace Bid_Go_Backend.Tests.Services
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
             _mockRepo.Verify(r => r.DriverReviewExistsAsync(dto.TransportRequestId, dto.DriverId), Times.Once);
-            _mockRepo.Verify(r => r.AddReviewAsync(It.IsAny<Bid_Go_Backend.Data.Models.Review>()), Times.Once);
+            _mockRepo.Verify(r => r.AddReviewAsync(It.IsAny<Review>()), Times.Once);
             _mockRepo.VerifyNoOtherCalls();
         }
 

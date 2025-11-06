@@ -19,7 +19,7 @@ namespace Bid_Go_Backend.Services
             _ctx = ctx;
         }
 
-        public async Task<(bool Success, string Message, Bid? Bid)> AddBidAsync(AddBidDTO bidDto)
+        public async Task<(bool Success, string Message, Bid? Bid)> AddBidAsync(int driverId, AddBidDTO bidDto)
         {
             var request = await _ctx.TransportRequests.AsNoTracking()
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == bidDto.TransportRequestId);
@@ -43,12 +43,12 @@ namespace Bid_Go_Backend.Services
                 return (false, "The bid's delivery deadline cannot be later than the delivery date.", null);
 
             var existingBids = await _repo.GetByTransportRequestAsync(bidDto.TransportRequestId);
-            if (existingBids.Any(b => b.DriverId == bidDto.DriverId && b.Status != EBidStatus.Canceled && b.Status != EBidStatus.Rejected))
+            if (existingBids.Any(b => b.DriverId == driverId && b.Status != EBidStatus.Canceled && b.Status != EBidStatus.Rejected))
                 return (false, "Driver already has an active bid for this transport request.", null);
 
             var bid = new Bid
             {
-                DriverId = bidDto.DriverId,
+                DriverId = driverId,
                 TransportRequestId = bidDto.TransportRequestId,
                 Value = bidDto.Value,
                 DeliveryDeadline = bidDto.DeliveryDeadline,
@@ -58,6 +58,7 @@ namespace Bid_Go_Backend.Services
             var created = await _repo.CreateAsync(bid);
             return (true, string.Empty, created);
         }
+
 
         public async Task<(bool Success, string Message, Bid? Bid)> UpdateBidAsync(int id, BidUpdateDTO updateDto)
         {

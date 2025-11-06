@@ -22,13 +22,20 @@ namespace Bid_Go_Backend.Controllers
 
         [Authorize(Policy = "DriverOnly")]
         [HttpPost]
-        public async Task<IActionResult> AddBid([FromBody] AddBidDTO bidDto)
+        public async Task<IActionResult> AddBid([FromBody] AddBidDTO dto)
         {
-            var result = await _service.AddBidAsync(bidDto);
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { message = "Invalid token: missing userId." });
+
+            int driverId = int.Parse(userIdClaim);
+
+            var result = await _service.AddBidAsync(driverId, dto);
+
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return CreatedAtAction(nameof(AddBid), new { id = result.Bid!.BidId }, result.Bid);
+            return Ok(result.Bid);
         }
 
         [Authorize(Policy = "DriverOnly")]
@@ -94,13 +101,14 @@ namespace Bid_Go_Backend.Controllers
         public async Task<IActionResult> GetActiveBids([FromQuery] int transportRequestId, [FromQuery] string orderBy = "value", [FromQuery] bool descending = false)
         {
             var activeBids = await _service.GetActiveBidsAsync(transportRequestId, orderBy, descending);
-            return Ok(activeBids.Select(b => new
+            var list = activeBids.Select(b => new
             {
                 b.BidId,
                 b.Value,
                 b.DeliveryDeadline,
                 Driver = new { b.DriverId, b.Driver.Name, b.Driver.Email }
-            }));
+            }).ToList<object>();
+            return Ok(list);
         }
     }
 }

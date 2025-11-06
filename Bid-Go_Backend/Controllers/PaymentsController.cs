@@ -44,14 +44,15 @@ namespace Bid_Go_Backend.Controllers
 
             if (result.Status == EPaymentStatus.Failed)
             {
-                return BadRequest(new
+                var payload = new ApiMessageResponse<PaymentResultDTO>
                 {
                     message = "Payment was declined by the payment gateway.",
                     payment = result
-                });
+                };
+                return BadRequest(payload);
             }
 
-            return Ok(new
+            return Ok(new ApiMessageResponse<PaymentResultDTO>
             {
                 message = "Payment successfully processed.",
                 payment = result
@@ -82,12 +83,12 @@ namespace Bid_Go_Backend.Controllers
             var (ok, error, result) = await _payments.RetryPaymentAsync(paymentId, dto.StripeToken);
 
             if (ok)
-                return Ok(new { message = "Payment completed on retry.", payment = result });
+                return Ok(new ApiMessageResponse<PaymentResultDTO> { message = "Payment completed on retry.", payment = result! });
 
-            return BadRequest(new
+            return BadRequest(new ApiMessageResponse<PaymentResultDTO>
             {
                 message = error ?? "Retry was executed, but the payment was not completed.",
-                payment = result
+                payment = result!
             });
         }
 

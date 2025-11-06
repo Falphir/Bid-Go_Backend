@@ -6,7 +6,7 @@ using Bid_Go_Backend.Services.Interfaces;
 using Moq;
 using Xunit;
 
-namespace Bid_Go.Tests.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     public class AcceptAndRejectBidManualServiceTests
     {

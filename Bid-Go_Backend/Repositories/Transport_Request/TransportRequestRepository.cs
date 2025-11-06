@@ -17,7 +17,7 @@ namespace Bid_Go_Backend.Repositories.Transport_Request
 
         public async Task<TransportRequest> CreateAsync(TransportRequest request)
         {
-            request.Status = ERequestStatus.Active;
+            // Do not override status here; keep what the service decided (e.g., Draft)
             _context.TransportRequests.Add(request);
             await _context.SaveChangesAsync();
             return request;

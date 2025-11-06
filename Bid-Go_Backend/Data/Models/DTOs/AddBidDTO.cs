@@ -18,7 +18,6 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         [Required]
         public DateTime DeliveryDeadline { get; set; }
 
-        public int DriverId { get; set; }
 
         public int TransportRequestId { get; set; }
 

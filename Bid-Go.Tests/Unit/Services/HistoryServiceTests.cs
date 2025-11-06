@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bid_Go_Backend.Tests.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     public class HistoryServiceTests
     {

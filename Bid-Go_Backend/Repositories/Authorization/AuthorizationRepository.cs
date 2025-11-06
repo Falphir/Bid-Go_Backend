@@ -37,5 +37,13 @@ namespace Bid_Go_Backend.Repositories.Authorization
                     .ThenInclude(tr => tr.SelectedBid)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.ChatId == chatId);
+
+        public async Task<TransportRequest?> GetTransportRequestWithSelectedBidAsync(int id)
+        {
+            return await _context.TransportRequests
+                .Include(tr => tr.SelectedBid) 
+                .AsNoTracking()
+                .FirstOrDefaultAsync(tr => tr.TransportRequestId == id);
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace Bid_Go_Backend.Services.Interfaces
 {
     public interface IBidsService
     {
-        Task<(bool Success, string Message, Bid? Bid)> AddBidAsync(AddBidDTO bidDto);
+        Task<(bool Success, string Message, Bid? Bid)> AddBidAsync(int id,AddBidDTO bidDto);
         Task<(bool Success, string Message, Bid? Bid)> UpdateBidAsync(int id, BidUpdateDTO updateDto);
         Task<(bool Success, string Message)> CancelBidAsync(int id);
         Task<Bid?> GetBidByIdAsync(int id);

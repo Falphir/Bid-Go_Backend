@@ -13,5 +13,6 @@ namespace Bid_Go_Backend.Repositories.Interfaces
         Task<Bid?> GetBidAsync(int bidId);
         Task<Payment?> GetPaymentAsync(int paymentId);
         Task<Chats?> GetChatWithRelationsAsync(int chatId);
+        Task<TransportRequest?> GetTransportRequestWithSelectedBidAsync(int id);
     }
 }
