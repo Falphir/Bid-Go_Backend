@@ -1,6 +1,7 @@
 ﻿using Bid_Go_Backend.Data.Models.DTOs;
-using Microsoft.AspNetCore.Mvc;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Bid_Go_Backend.Controllers
 {
@@ -9,48 +10,40 @@ namespace Bid_Go_Backend.Controllers
     public class TransportUpdateStatusController : ControllerBase
     {
         private readonly ITransportUpdateStatusService _service;
+        private readonly IAuthorizationService _authorizationService;
 
-        public TransportUpdateStatusController(ITransportUpdateStatusService service)
+        public TransportUpdateStatusController(ITransportUpdateStatusService service, IAuthorizationService authorizationService)
         {
             _service = service;
+            _authorizationService = authorizationService;
         }
 
-        [HttpPut("{requestID}/status")]
-        public async Task<IActionResult> UpdateRequestStatus(int requestID, int userID, [FromBody] RequestStatusDTO dto)
+
+        [HttpPut("{requestId}/status")]
+        public async Task<IActionResult> UpdateRequestStatus(int requestId, [FromBody] RequestStatusDTO dto)
         {
-            try
-            {
-                var updatedRequest = await _service.UpdateRequestStatusAsync(requestID, userID, dto.Status);
-
-                if (updatedRequest == null)
-                    return NotFound(new { message = $"Pedido com ID {requestID} não encontrado." });
-
-                return Ok(new
-                {
-                    message = $"Estado do pedido atualizado com sucesso para '{dto.Status}'.",
-                    data = updatedRequest
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro ao atualizar o estado do pedido.", error = ex.Message });
-            }
+            var result = await _service.UpdateRequestStatusAsync(requestId, User, dto.Status);
+            return StatusCode(result.StatusCode, result.Body);
         }
+
+
 
         [HttpPut("{requestID}/canceled")]
         public async Task<IActionResult> CancelRequestStatus(int requestID, int userID)
         {
+
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            var roleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            string role = roleClaim;
+
             try
             {
                 var dto = new RequestStatusDTO { Status = Data.Models.Enums.ERequestStatus.Canceled };
-                var updatedRequest = await _service.UpdateRequestStatusAsync(requestID, userID, dto.Status);
+                var updatedRequest = await _service.UpdateRequestStatusAsync (requestID, User, dto.Status);
 
-                if (updatedRequest == null)
-                    return NotFound(new { message = $"Pedido com ID {requestID} não encontrado." });
+               // if (updatedRequest == null)
+                 // return NotFound(new { message = $"Pedido com ID {requestID} não encontrado." });
 
                 return Ok(new
                 {

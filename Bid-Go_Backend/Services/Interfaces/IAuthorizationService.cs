@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bid_Go_Backend.Data.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,6 @@ namespace Bid_Go_Backend.Services.Interfaces
         Task<bool> DriverOwnsBidAsync(int driverId, int bidId);
         Task<bool> CompanyOwnsPaymentAsync(int companyId, int paymentId);
         Task<bool> UserOwnsChatAsync(int userId, int chatId);
+        Task<bool> DriverRelatedToTransportRequestAsync(int driverId, int transportRequestId);
     }
 }

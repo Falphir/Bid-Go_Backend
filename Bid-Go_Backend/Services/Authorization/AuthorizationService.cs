@@ -46,5 +46,16 @@ namespace Bid_Go_Backend.Services
 
             return userId == companyId || userId == driverId;
         }
+
+
+        public async Task<bool> DriverRelatedToTransportRequestAsync(int driverId, int transportRequestId)
+        {
+            var request = await _repo.GetTransportRequestWithSelectedBidAsync(transportRequestId);
+
+            if (request == null || request.SelectedBid == null)
+                return false;
+
+            return request.SelectedBid.DriverId == driverId;
+        }
     }
 }
