@@ -182,7 +182,7 @@ namespace Bid_Go.Tests.Integration.Controllers
                 new Claim("userType", "Company")
             }, "TestAuth"));
 
-            var dto = new MessageDTO { Context = "Mensagem para o driver" };
+            var dto = new MessageSentDTO { Context = "Mensagem para o driver" };
 
             var result = await controller.SendMessage(chat.ChatId, dto);
             var ok = Assert.IsType<ObjectResult>(result);

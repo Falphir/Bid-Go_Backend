@@ -85,7 +85,7 @@ namespace Bid_Go.Tests.Integration.Controllers
             var fromDb = await db.TransportRequests.FindAsync(tr.TransportRequestId);
 
             Assert.NotNull(fromDb);
-            Assert.Equal(ERequestStatus.Draft, fromDb!.Status);
+            Assert.Equal(ERequestStatus.Active, fromDb!.Status);
             Assert.Equal("https://r2/r.png", fromDb.Image);
         }
 

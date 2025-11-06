@@ -192,7 +192,7 @@ namespace Bid_Go.Tests.Integration.Controllers
  var (company, driver, tr, p1, p2) = SeedActiveWithBids(db);
  SetUser(controller, company.Id, "Company");
 
- var result = await controller.CancelRequestStatus(tr.TransportRequestId, userID: company.Id);
+ var result = await controller.CancelRequestStatus(tr.TransportRequestId);
  var ok = Assert.IsType<OkObjectResult>(result);
 
  var json = JsonSerializer.Serialize(ok.Value);

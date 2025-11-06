@@ -62,7 +62,7 @@ namespace Bid_Go_Backend.Services
             return (200, messages);
         }
 
-        public async Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageDTO dto, ClaimsPrincipal user)
+        public async Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageSentDTO dto, ClaimsPrincipal user)
         {
             try
             {
@@ -130,12 +130,10 @@ namespace Bid_Go_Backend.Services
                     chat.TransportRequestId
                 );
 
-                var messageDto = new MessageDTO
+                var messageDto = new MessageSentDTO
                 {
                     Context = result.Context,
-                    TimeStamp = result.TimeStamp,
-                    DriverId = result.DriverId,
-                    CompanyId = result.CompanyId
+                    TimeStamp = result.TimeStamp
                 };
 
                 return (200, messageDto);

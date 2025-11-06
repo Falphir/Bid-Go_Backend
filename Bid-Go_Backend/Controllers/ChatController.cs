@@ -31,7 +31,7 @@ namespace Bid_Go_Backend.Controllers
 
         [Authorize]
         [HttpPost("{chatId}/messages")]
-        public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageDTO dto)
+        public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageSentDTO dto)
         {
 
             var userId = int.Parse(User.FindFirst("userId")?.Value);

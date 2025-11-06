@@ -83,7 +83,7 @@ public class ChatServiceTests
                             Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 3 } }
                         });
 
-        var result = await _service.SendMessage(1, new MessageDTO { Context = "Hi" }, CreateUser(99, "Driver"));
+        var result = await _service.SendMessage(1, new MessageSentDTO { Context = "Hi" }, CreateUser(99, "Driver"));
 
         Assert.Equal(403, result.StatusCode);
         Assert.Contains("Acesso negado", result.Body.ToString());
@@ -154,14 +154,13 @@ public class ChatServiceTests
         var user = CreateUser(10, "Company");
 
         // Act
-        var result = await _service.SendMessage(1, new MessageDTO { Context = "Olá driver" }, user);
+        var result = await _service.SendMessage(1, new MessageSentDTO { Context = "Olá driver" }, user);
 
         // Assert
         Assert.Equal(200, result.StatusCode);
-        var dto = Assert.IsType<MessageDTO>(result.Body);
+        var dto = Assert.IsType<MessageSentDTO>(result.Body);
         Assert.Equal("Olá driver", dto.Context);
-        Assert.Equal(2, dto.DriverId);
-        Assert.Equal(10, dto.CompanyId);
+  
     }
 
 
@@ -184,7 +183,7 @@ public class ChatServiceTests
         var user = CreateUser(10, "Company");
 
         // Act
-        var result = await _service.SendMessage(1, new MessageDTO { Context = "Oi" }, user);
+        var result = await _service.SendMessage(1, new MessageSentDTO { Context = "Oi" }, user);
 
         // Assert
         // Na prática, como não há bid aceita, o acesso falha → 403

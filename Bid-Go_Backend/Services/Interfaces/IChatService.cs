@@ -12,7 +12,7 @@ namespace Bid_Go_Backend.Services.Interfaces
     {
         Task<(int StatusCode, object Body)> GetChat(int requestId, ClaimsPrincipal user);
         Task<(int StatusCode, object Body)> GetMessages(int chatId, ClaimsPrincipal user);
-        Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageDTO dto, ClaimsPrincipal user);
+        Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageSentDTO dto, ClaimsPrincipal user);
         Task<(int StatusCode, object Body)> CreateChatFromAcceptedBid(int transportRequestId);
     }
 }
