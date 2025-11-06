@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Bid_Go_Backend.Services.Interfaces;
 using Bid_Go_Backend.Repositories.Interfaces;
 
-namespace Bid_Go.Tests.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     public class RegisterDriverServiceTests
     {

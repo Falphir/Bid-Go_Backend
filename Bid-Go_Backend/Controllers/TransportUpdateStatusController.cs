@@ -31,24 +31,18 @@ namespace Bid_Go_Backend.Controllers
         [HttpPut("{requestID}/canceled")]
         public async Task<IActionResult> CancelRequestStatus(int requestID, int userID)
         {
-
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            var roleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-            string role = roleClaim;
-
             try
             {
                 var dto = new RequestStatusDTO { Status = Data.Models.Enums.ERequestStatus.Canceled };
-                var updatedRequest = await _service.UpdateRequestStatusAsync (requestID, User, dto.Status);
+                var result = await _service.UpdateRequestStatusAsync(requestID, User, dto.Status);
 
-               // if (updatedRequest == null)
-                 // return NotFound(new { message = $"Pedido com ID {requestID} não encontrado." });
+                if (result.StatusCode !=200)
+                    return StatusCode(result.StatusCode, result.Body);
 
                 return Ok(new
                 {
                     message = "Pedido cancelado com sucesso.",
-                    data = updatedRequest
+                    data = result.Body
                 });
             }
             catch (InvalidOperationException ex)

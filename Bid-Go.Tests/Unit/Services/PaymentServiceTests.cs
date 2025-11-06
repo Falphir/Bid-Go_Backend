@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bid_Go.Tests.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     public class PaymentServiceTests
     {
