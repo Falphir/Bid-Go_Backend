@@ -34,10 +34,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore
-        run: dotnet restore ${{ env.DOTNET_ROOT }}
+        run: dotnet restore
       
       - name: Build
-        run: dotnet build ${{ env.DOTNET_ROOT }} --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore
 
       - name: Publish
         run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore --no-build --property:PublishDir=${{ env.PUBLISH_DIR }}
