@@ -78,14 +78,14 @@ namespace Bid_Go.Tests.Unit.Services
 
     [Fact]
      public async Task UpdateRequestStatusAsync_Returns404_WhenRequestNotFound()
-    {
-           // Arrange
+     {
+           // Arrange (AAA)
            _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync((TransportRequest?)null);
 
-           // Act
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(100, "Company"), ERequestStatus.Pending);
 
-           // Assert
+           // Assert (AAA)
            Assert.Equal(404, result.StatusCode);
            _mockRepo.Verify(r => r.GetTransportRequestWithBidsAsync(1), Times.Once);
            _mockRepo.VerifyNoOtherCalls();
@@ -95,11 +95,15 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task UpdateRequestStatusAsync_Returns401_WhenTokenInvalid()
     {
+           // Arrange (AAA)
            // user without required claims
            var invalidUser = new ClaimsPrincipal(new ClaimsIdentity());
+
+           // Act (AAA)
            // service should return401 before consulting repo
            var result = await _service.UpdateRequestStatusAsync(1, invalidUser, ERequestStatus.Pending);
 
+           // Assert (AAA)
            Assert.Equal(401, result.StatusCode);
            _mockRepo.Verify(r => r.GetTransportRequestWithBidsAsync(It.IsAny<int>()), Times.Never);
            _mockRepo.VerifyNoOtherCalls();
@@ -109,6 +113,7 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Company_ActiveToPending_UpdatesStatus_NoNotifications()
     {
+           // Arrange (AAA)
            var bids = new List<Bid>
            {
             new Bid { BidId =1, DriverId =10, TransportRequestId =1, Status = EBidStatus.Pendent, DeliveryDeadline = DateTime.UtcNow.AddDays(1), Value =10 },
@@ -120,8 +125,10 @@ namespace Bid_Go.Tests.Unit.Services
            _mockRepo.Setup(r => r.UpdateTransportRequest(It.IsAny<TransportRequest>()));
            _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(100, "Company"), ERequestStatus.Pending);
 
+           // Assert (AAA)
            Assert.Equal(200, result.StatusCode);
            _mockRepo.Verify(r => r.UpdateTransportRequest(It.Is<TransportRequest>(t => t.Status == ERequestStatus.Pending)), Times.Once);
            _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
@@ -133,6 +140,7 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Company_ActiveToCanceled_CancelsPendingBids_SendsNotifications_UpdatesBids()
     {
+           // Arrange (AAA)
            var bids = new List<Bid>
            {
             new Bid { BidId =1, DriverId =10, TransportRequestId =1, Status = EBidStatus.Pendent, DeliveryDeadline = DateTime.UtcNow.AddDays(1), Value =10 },
@@ -154,8 +162,10 @@ namespace Bid_Go.Tests.Unit.Services
                 It.IsAny<int?>()))
             .ReturnsAsync(new Notification());
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(100, "Company"), ERequestStatus.Canceled);
 
+           // Assert (AAA)
            Assert.Equal(200, result.StatusCode);
 
            var pendingCanceled = bids.Where(b => b.BidId ==1 || b.BidId ==3).ToList();
@@ -171,11 +181,14 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Company_InvalidTransition_Returns400()
     {
+           // Arrange (AAA)
             var req = MakeRequest(ERequestStatus.Active);
            _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(req);
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(100, "Company"), ERequestStatus.InTransit);
 
+           // Assert (AAA)
            Assert.Equal(400, result.StatusCode);
            _mockRepo.Verify(r => r.GetTransportRequestWithBidsAsync(1), Times.Once);
            _mockRepo.VerifyNoOtherCalls();
@@ -185,6 +198,7 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Driver_WaitingPickupToInTransit_UpdatesStatus()
     {
+           // Arrange (AAA)
            var req = MakeRequest(ERequestStatus.WaitingPickup);
            req.SelectedBid = new Bid { BidId =99, DriverId =200, TransportRequestId =1, Status = EBidStatus.Accepted };
 
@@ -192,8 +206,10 @@ namespace Bid_Go.Tests.Unit.Services
            _mockRepo.Setup(r => r.UpdateTransportRequest(It.IsAny<TransportRequest>()));
            _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(200, "Driver"), ERequestStatus.InTransit);
 
+           // Assert (AAA)
            Assert.Equal(200, result.StatusCode);
            _mockRepo.Verify(r => r.UpdateTransportRequest(It.Is<TransportRequest>(t => t.Status == ERequestStatus.InTransit)), Times.Once);
            _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
@@ -205,6 +221,7 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Driver_InTransitToCompleted_UpdatesStatus()
     {
+           // Arrange (AAA)
            var req = MakeRequest(ERequestStatus.InTransit);
            req.SelectedBid = new Bid { BidId =100, DriverId =200, TransportRequestId =1, Status = EBidStatus.Accepted };
 
@@ -212,8 +229,10 @@ namespace Bid_Go.Tests.Unit.Services
            _mockRepo.Setup(r => r.UpdateTransportRequest(It.IsAny<TransportRequest>()));
            _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(200, "Driver"), ERequestStatus.Completed);
 
+           // Assert (AAA)
            Assert.Equal(200, result.StatusCode);
            _mockRepo.Verify(r => r.UpdateTransportRequest(It.Is<TransportRequest>(t => t.Status == ERequestStatus.Completed)), Times.Once);
            _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
@@ -225,12 +244,15 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Driver_InvalidTransition_Returns400()
         {
+           // Arrange (AAA)
            var req = MakeRequest(ERequestStatus.Pending);
            req.SelectedBid = new Bid { BidId =101, DriverId =200, TransportRequestId =1, Status = EBidStatus.Accepted };
            _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(req);
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(200, "Driver"), ERequestStatus.WaitingPickup);
 
+           // Assert (AAA)
            Assert.Equal(400, result.StatusCode);
            _mockRepo.Verify(r => r.GetTransportRequestWithBidsAsync(1), Times.Once);
            _mockRepo.VerifyNoOtherCalls();
@@ -240,6 +262,7 @@ namespace Bid_Go.Tests.Unit.Services
     [Fact]
     public async Task Driver_InTransitToCanceled_NoNotifications()
         {
+           // Arrange (AAA)
            var req = MakeRequest(ERequestStatus.InTransit, new List<Bid>
            {
             new Bid { BidId =1, DriverId =10, TransportRequestId =1, Status = EBidStatus.Pendent, DeliveryDeadline = DateTime.UtcNow.AddDays(1), Value =10 },
@@ -250,8 +273,10 @@ namespace Bid_Go.Tests.Unit.Services
                _mockRepo.Setup(r => r.UpdateTransportRequest(It.IsAny<TransportRequest>()));
                _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
+           // Act (AAA)
            var result = await _service.UpdateRequestStatusAsync(1, MakeUser(200, "Driver"), ERequestStatus.Canceled);
 
+           // Assert (AAA)
            Assert.Equal(200, result.StatusCode);
                _mockRepo.Verify(r => r.UpdateTransportRequest(It.Is<TransportRequest>(t => t.Status == ERequestStatus.Canceled)), Times.Once);
                _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);

@@ -90,7 +90,8 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
                 .ReturnsAsync((TransportRequest?)null);
 
-            // Act + Assert
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -100,12 +101,15 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldThrow_WhenTransportNotCompleted()
         {
+            // Arrange
             var dto = CreateBaseDto("Company");
             var transport = CreateTransport("Pending");
 
             _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
                 .ReturnsAsync(transport);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -115,12 +119,15 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldThrow_WhenDiscriminatorInvalid_OnExistsCheck()
         {
+            // Arrange
             var dto = CreateBaseDto("Unknown");
             var transport = CreateTransport("Completed");
 
             _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
                 .ReturnsAsync(transport);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -130,6 +137,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldThrow_WhenCompanyReviewAlreadyExists()
         {
+            // Arrange
             var dto = CreateBaseDto("Company");
             var transport = CreateTransport("Completed");
 
@@ -138,6 +146,8 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId))
                 .ReturnsAsync(true);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -148,6 +158,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldThrow_WhenDriverReviewAlreadyExists()
         {
+            // Arrange
             var dto = CreateBaseDto("Driver");
             var transport = CreateTransport("Completed");
 
@@ -156,6 +167,8 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.DriverReviewExistsAsync(dto.TransportRequestId, dto.DriverId))
                 .ReturnsAsync(true);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -168,6 +181,7 @@ namespace Bid_Go.Tests.Unit.Services
         [InlineData(6)]
         public async Task SubmitReviewAsync_ShouldThrow_WhenClassificationOutOfRange(decimal classification)
         {
+            // Arrange
             var dto = CreateBaseDto("Company");
             dto.Classification = classification;
             var transport = CreateTransport("Completed");
@@ -177,6 +191,8 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId))
                 .ReturnsAsync(false);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -187,6 +203,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldAddCompanyReview_WhenValid()
         {
+            // Arrange
             var dto = CreateBaseDto("Company");
             var transport = CreateTransport("Completed");
             Review? saved = null;
@@ -223,6 +240,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldAddDriverReview_WhenValid()
         {
+            // Arrange
             var dto = CreateBaseDto("Driver");
             var transport = CreateTransport("Completed");
             Review? saved = null;
@@ -235,8 +253,10 @@ namespace Bid_Go.Tests.Unit.Services
                 .Callback<Review>(r => saved = r)
                 .Returns(Task.CompletedTask);
 
+            // Act
             var result = await _service.SubmitReviewAsync(dto);
 
+            // Assert
             Assert.True(result);
             Assert.NotNull(saved);
             Assert.IsType<ReviewDriver>(saved);
@@ -257,6 +277,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetReviewByServiceIdAsync_ShouldReturnData_FromRepository()
         {
+            // Arrange
             var list = new List<ReviewByServiceDTO>
             {
                 new ReviewByServiceDTO
@@ -284,8 +305,10 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.GetReviewByServiceIdAsync(100))
                 .ReturnsAsync(list);
 
+            // Act
             var result = await _service.GetReviewByServiceIdAsync(100);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Collection(result,
                 item => Assert.Equal("Alice", item.Name),

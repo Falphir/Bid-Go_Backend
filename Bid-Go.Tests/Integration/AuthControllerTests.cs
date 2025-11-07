@@ -63,6 +63,7 @@ namespace Bid_Go.Tests.Integration
         [Fact]
         public async Task Login_ReturnsOk_WhenCredentialsAreValid_ForCompany()
         {
+            // Arrange
             var (controller, db, _, _) = Build();
             var pwd = BCrypt.Net.BCrypt.HashPassword("123456");
             var company = new Company
@@ -78,7 +79,11 @@ namespace Bid_Go.Tests.Integration
             await db.SaveChangesAsync();
 
             var loginDto = new Bid_Go_Backend.Data.Models.DTOs.LoginDTOs.LoginRequestDto { Email = "company_login@test.com", Password = "123456" };
+
+            // Act
             var result = await controller.Login(loginDto);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
         }
@@ -86,13 +91,18 @@ namespace Bid_Go.Tests.Integration
         [Fact]
         public async Task Login_ReturnsUnauthorized_WhenPasswordIsWrong()
         {
+            // Arrange
             var (controller, db, _, _) = Build();
             var pwd = BCrypt.Net.BCrypt.HashPassword("123456");
             db.Users.Add(new Driver { Email = "user@test.com", Password = pwd });
             await db.SaveChangesAsync();
 
             var loginDto = new Bid_Go_Backend.Data.Models.DTOs.LoginDTOs.LoginRequestDto { Email = "user@test.com", Password = "wrong" };
+
+            // Act
             var result = await controller.Login(loginDto);
+
+            // Assert
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal(401, unauthorized.StatusCode);
         }
@@ -100,12 +110,17 @@ namespace Bid_Go.Tests.Integration
         [Fact]
         public async Task RecoverPassword_SendsEmail_AndStoresToken()
         {
+            // Arrange
             var (controller, db, cache, email) = Build();
             db.Users.Add(new Driver { Email = "user@test.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") });
             await db.SaveChangesAsync();
 
             var request = new RecoverPasswordRequestDTO { Email = "user@test.com" };
+
+            // Act
             var result = await controller.RecoverPassword(request);
+
+            // Assert
             var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
             Assert.Single(email.Sent);
@@ -114,6 +129,7 @@ namespace Bid_Go.Tests.Integration
         [Fact]
         public async Task ResetPassword_Works_WhenTokenValid()
         {
+            // Arrange
             var (controller, db, cache, email) = Build();
             db.Users.Add(new Driver { Email = "user@test.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") });
             await db.SaveChangesAsync();
@@ -123,7 +139,11 @@ namespace Bid_Go.Tests.Integration
             var token = email.Sent.First().body.Split('\'')[1];
 
             var resetDto = new ResetPasswordRequestDTO { Token = token, NewPassword = "nova123" };
+
+            // Act
             var result = await controller.ResetPassword(resetDto);
+
+            // Assert
             var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
         }

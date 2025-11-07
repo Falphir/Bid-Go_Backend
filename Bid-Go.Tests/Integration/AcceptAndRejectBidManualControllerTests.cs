@@ -51,6 +51,96 @@ namespace Bid_Go.Tests.Integration
             return (controller, db, notifications);
         }
 
+
+        [Fact]
+        public async Task GetBidsByRequest_ReturnsOk_WithList()
+        {
+            // Arrange
+            var (controller, db, _) = BuildController(companyId: 10);
+            var (tr, b1, b2, b3) = SeedRequestWithBids(db, 10);
+
+            // Act
+            var result = await controller.GetBidsByTransportRequest(tr.TransportRequestId);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var list = Assert.IsType<List<Bid>>(ok.Value);
+            Assert.Equal(3, list.Count);
+        }
+
+        [Fact]
+        public async Task GetBidsByRequestAndStatus_ReturnsOk_WithFilteredList()
+        {
+            // Arrange
+            var (controller, db, _) = BuildController(companyId: 10);
+            var (tr, b1, b2, b3) = SeedRequestWithBids(db, 10);
+
+            // set one to Accepted to test filter
+            var bidToAccept = db.Bids.First(b => b.BidId == b2.BidId);
+            bidToAccept.Status = EBidStatus.Accepted;
+            await db.SaveChangesAsync();
+
+            // Act
+            var result = await controller.GetBidsByTransportRequestAndStatus(tr.TransportRequestId, EBidStatus.Accepted);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var list = Assert.IsType<List<Bid>>(ok.Value);
+
+            Assert.Single(list);
+            Assert.Equal(b2.BidId, list[0].BidId);
+        }
+
+        [Fact]
+        public async Task AcceptBid_ChangesStatuses_SendsNotifications()
+        {
+            // Arrange
+            var (controller, db, notifications) = BuildController(companyId: 10);
+            var (tr, target, other1, other2) = SeedRequestWithBids(db, 10);
+
+            // Act
+            var result = await controller.AcceptBid(target.BidId);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+
+            Assert.Equal(200, ok.StatusCode);
+
+            var req = await db.TransportRequests.FindAsync(tr.TransportRequestId);
+            Assert.Equal(ERequestStatus.Pending, req!.Status);
+            Assert.Equal(target.BidId, req.SelectedBidId);
+
+            var bids = await db.Bids.Where(b => b.TransportRequestId == tr.TransportRequestId).ToListAsync();
+            Assert.Contains(bids, b => b.BidId == target.BidId && b.Status == EBidStatus.Accepted);
+            Assert.Equal(2, bids.Count(b => b.Status == EBidStatus.Rejected));
+
+            Assert.Contains(notifications.Created, n => n.Type == ENotificationType.Accepted && n.BidId == target.BidId);
+            Assert.Equal(2, notifications.Created.Count(n => n.Type == ENotificationType.Rejected && n.TransportRequestId == tr.TransportRequestId));
+        }
+
+        [Fact]
+        public async Task RejectBid_ChangesStatus_SendsNotification()
+        {
+            // Arrange
+            var (controller, db, notifications) = BuildController(companyId: 10);
+            var (tr, target, other1, other2) = SeedRequestWithBids(db, 10);
+
+            // Act
+            var result = await controller.RejectBid(target.BidId);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+
+            Assert.Equal(200, ok.StatusCode);
+
+            var b = await db.Bids.FindAsync(target.BidId);
+            Assert.Equal(EBidStatus.Rejected, b!.Status);
+
+            Assert.Contains(notifications.Created, n => n.Type == ENotificationType.Rejected && n.BidId == target.BidId);
+        }
+
+
+
         private static (TransportRequest req, Bid b1, Bid b2, Bid b3) SeedRequestWithBids(BidGoDbContext db, int companyId)
         {
             var tr = new TransportRequest
@@ -87,80 +177,6 @@ namespace Bid_Go.Tests.Integration
             return (tr, b1, b2, b3);
         }
 
-        [Fact]
-        public async Task GetBidsByRequest_ReturnsOk_WithList()
-        {
-            // Arrange
-            var (controller, db, _) = BuildController(companyId: 10);
-            var (tr, b1, b2, b3) = SeedRequestWithBids(db, 10);
-
-            // Act
-            var result = await controller.GetBidsByTransportRequest(tr.TransportRequestId);
-
-            // Assert
-            var ok = Assert.IsType<OkObjectResult>(result);
-            var list = Assert.IsType<List<Bid>>(ok.Value);
-            Assert.Equal(3, list.Count);
-        }
-
-        [Fact]
-        public async Task GetBidsByRequestAndStatus_ReturnsOk_WithFilteredList()
-        {
-            var (controller, db, _) = BuildController(companyId: 10);
-            var (tr, b1, b2, b3) = SeedRequestWithBids(db, 10);
-
-            // set one to Accepted to test filter
-            var bidToAccept = db.Bids.First(b => b.BidId == b2.BidId);
-            bidToAccept.Status = EBidStatus.Accepted;
-            await db.SaveChangesAsync();
-
-            var result = await controller.GetBidsByTransportRequestAndStatus(tr.TransportRequestId, EBidStatus.Accepted);
-            var ok = Assert.IsType<OkObjectResult>(result);
-            var list = Assert.IsType<List<Bid>>(ok.Value);
-
-            Assert.Single(list);
-            Assert.Equal(b2.BidId, list[0].BidId);
-        }
-
-        [Fact]
-        public async Task AcceptBid_ChangesStatuses_SendsNotifications()
-        {
-            var (controller, db, notifications) = BuildController(companyId: 10);
-            var (tr, target, other1, other2) = SeedRequestWithBids(db, 10);
-
-            var result = await controller.AcceptBid(target.BidId);
-            var ok = Assert.IsType<OkObjectResult>(result);
-
-            Assert.Equal(200, ok.StatusCode);
-
-            var req = await db.TransportRequests.FindAsync(tr.TransportRequestId);
-            Assert.Equal(ERequestStatus.Pending, req!.Status);
-            Assert.Equal(target.BidId, req.SelectedBidId);
-
-            var bids = await db.Bids.Where(b => b.TransportRequestId == tr.TransportRequestId).ToListAsync();
-            Assert.Contains(bids, b => b.BidId == target.BidId && b.Status == EBidStatus.Accepted);
-            Assert.Equal(2, bids.Count(b => b.Status == EBidStatus.Rejected));
-
-            Assert.Contains(notifications.Created, n => n.Type == ENotificationType.Accepted && n.BidId == target.BidId);
-            Assert.Equal(2, notifications.Created.Count(n => n.Type == ENotificationType.Rejected && n.TransportRequestId == tr.TransportRequestId));
-        }
-
-        [Fact]
-        public async Task RejectBid_ChangesStatus_SendsNotification()
-        {
-            var (controller, db, notifications) = BuildController(companyId: 10);
-            var (tr, target, other1, other2) = SeedRequestWithBids(db, 10);
-
-            var result = await controller.RejectBid(target.BidId);
-            var ok = Assert.IsType<OkObjectResult>(result);
-
-            Assert.Equal(200, ok.StatusCode);
-
-            var b = await db.Bids.FindAsync(target.BidId);
-            Assert.Equal(EBidStatus.Rejected, b!.Status);
-
-            Assert.Contains(notifications.Created, n => n.Type == ENotificationType.Rejected && n.BidId == target.BidId);
-        }
 
         // Test double inside the test file (no external utils)
         private sealed class TestNotificationService : INotificationService

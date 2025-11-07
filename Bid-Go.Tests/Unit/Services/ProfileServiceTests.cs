@@ -47,19 +47,25 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetProfileAsync_ReturnsNull_WhenNotFound()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync((User?)null);
 
+            // Act
             var result = await _service.GetProfileAsync(1);
 
+            // Assert
             Assert.Null(result);
         }
 
         [Fact]
         public async Task GetProfileAsync_ThrowsException_WhenInactive()
         {
+            // Arrange
             var user = new Driver { Id = 1, IsActive = false };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.GetProfileAsync(1));
         }
 
@@ -67,6 +73,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task UpdateDriverProfileAsync_UpdatesDriverSuccessfully()
         {
+            // Arrange
             var driver = new Driver
             {
                 Id = 1,
@@ -86,8 +93,10 @@ namespace Bid_Go.Tests.Unit.Services
                 .Setup(r => r.UpdateDriverAsync(It.IsAny<Driver>()))
                 .ReturnsAsync(true);
 
+            // Act
             var result = await _service.UpdateDriverProfileAsync(1, dto);
 
+            // Assert
             Assert.True(result);
             _mockRepo.Verify(r => r.UpdateDriverAsync(It.IsAny<Driver>()), Times.Once);
         }
@@ -95,21 +104,26 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task UpdateDriverProfileAsync_Throws_WhenDriverHasNoChanges()
         {
+            // Arrange
             var driver = new Driver { Id = 1, IsActive = true, Name = "Same" };
             var dto = new DriverProfileUpdateDTO { Name = "Same" };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.UpdateDriverProfileAsync(1, dto));
         }
 
         [Fact]
         public async Task UpdateDriverProfileAsync_Throws_WhenInvalidDriverDto()
         {
+            // Arrange
             var driver = new Driver { Id = 1, IsActive = true };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
 
-            // Passing a CompanyProfileDTO to the driver update should cause an exception in the service
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.UpdateDriverProfileAsync(1, new DriverProfileUpdateDTO()));
         }
 
@@ -117,6 +131,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task UpdateCompanyProfileAsync_UpdatesCompanySuccessfully()
         {
+            // Arrange
             var company = new Company
             {
                 Id = 1,
@@ -137,8 +152,10 @@ namespace Bid_Go.Tests.Unit.Services
                 .ReturnsAsync(true);
 
 
+            // Act
             var result = await _service.UpdateCompanyProfileAsync(1, dto);
 
+            // Assert
             Assert.True(result);
             _mockRepo.Verify(r => r.UpdateCompanyAsync(It.IsAny<Company>()), Times.Once);
         }
@@ -146,18 +163,24 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task UpdateCompanyProfileAsync_Throws_WhenInvalidCompanyDto()
         {
+            // Arrange
             var company = new Company { Id = 1, IsActive = true };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(company);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
         }
 
         [Fact]
         public async Task UpdateCompanyProfileAsync_Throws_WhenUserInactive()
         {
+            // Arrange
             var user = new Company { Id = 1, IsActive = false };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
         }
 
@@ -165,14 +188,17 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ChangePasswordAsync_UpdatesPassword_WhenValid()
         {
+            // Arrange
             var hashed = BCrypt.Net.BCrypt.HashPassword("oldpass");
             var user = new Driver { Id = 1, IsActive = true, Password = hashed };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
             _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
+            // Act
             var result = await _service.ChangePasswordAsync(1, "oldpass", "newpass");
 
+            // Assert
             Assert.True(result);
             _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
         }
@@ -180,42 +206,54 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ChangePasswordAsync_Throws_WhenCurrentPasswordIncorrect()
         {
+            // Arrange
             var hashed = BCrypt.Net.BCrypt.HashPassword("correct");
             var user = new Company { Id = 1, IsActive = true, Password = hashed };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.ChangePasswordAsync(1, "wrong", "new"));
         }
 
         [Fact]
         public async Task DeactivateUserAsync_Throws_WhenUserNotFound()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync((User?)null);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.DeactivateUserAsync(1));
         }
 
         [Fact]
         public async Task DeactivateUserAsync_Throws_WhenAlreadyInactive()
         {
+            // Arrange
             var user = new Company { Id = 1, IsActive = false };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.DeactivateUserAsync(1));
         }
 
         [Fact]
         public async Task DeactivateUserAsync_DeactivatesDriver_WhenNoActiveBids()
         {
+            // Arrange
             var driver = new Driver { Id = 1, IsActive = true };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
             _mockRepo.Setup(r => r.HasActiveBidsAsync(1)).ReturnsAsync(false);
             _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
+            // Act
             var result = await _service.DeactivateUserAsync(1);
 
+            // Assert
             Assert.True(result);
             Assert.False(driver.IsActive);
         }
@@ -223,22 +261,28 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task DeactivateUserAsync_Throws_WhenDriverHasActiveBids()
         {
+            // Arrange
             var driver = new Driver { Id = 1, IsActive = true };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(driver);
             _mockRepo.Setup(r => r.HasActiveBidsAsync(1)).ReturnsAsync(true);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.DeactivateUserAsync(1));
         }
 
         [Fact]
         public async Task DeactivateUserAsync_Throws_WhenCompanyHasActiveRequests()
         {
+            // Arrange
             var company = new Company { Id = 1, IsActive = true };
 
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(company);
             _mockRepo.Setup(r => r.HasActiveTransportRequestsAsync(1)).ReturnsAsync(true);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.DeactivateUserAsync(1));
         }
     }

@@ -57,6 +57,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AddBidAsync_Should_Fail_When_Request_Not_Active()
         {
+            // Arrange
             _ctx.TransportRequests.Add(new TransportRequest
             {
                 TransportRequestId = 1,
@@ -71,8 +72,10 @@ namespace Bid_Go.Tests.Unit.Services
                 DeliveryDeadline = DateTime.Now.AddDays(3)
             };
 
+            // Act
             var result = await _service.AddBidAsync(1, dto);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("Cannot place a bid on a transport request that is not open.", result.Message);
         }
@@ -80,6 +83,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AddBidAsync_Should_Fail_When_Value_Invalid()
         {
+            // Arrange
             _ctx.TransportRequests.Add(new TransportRequest
             {
                 TransportRequestId = 2,
@@ -97,8 +101,10 @@ namespace Bid_Go.Tests.Unit.Services
                 DeliveryDeadline = DateTime.Now.AddDays(3)
             };
 
+            // Act
             var result = await _service.AddBidAsync(1, dto);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("Bid value must be greater than zero.", result.Message);
         }
@@ -106,6 +112,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AddBidAsync_Should_Fail_When_Deadline_Invalid()
         {
+            // Arrange
             var request = new TransportRequest
             {
                 TransportRequestId = 3,
@@ -124,8 +131,10 @@ namespace Bid_Go.Tests.Unit.Services
                 DeliveryDeadline = request.PickupDate.AddHours(-1)
             };
 
+            // Act
             var result = await _service.AddBidAsync(1, dto);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("The bid's delivery deadline must be later than the pickup date.", result.Message);
         }
@@ -133,6 +142,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AddBidAsync_Should_Fail_When_Driver_Already_Has_Bid()
         {
+            // Arrange
             var request = new TransportRequest
             {
                 TransportRequestId = 4,
@@ -159,8 +169,10 @@ namespace Bid_Go.Tests.Unit.Services
                 DeliveryDeadline = DateTime.Now.AddDays(3)
             };
 
+            // Act
             var result = await _service.AddBidAsync(1, dto);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("Driver already has an active bid for this transport request.", result.Message);
         }
@@ -168,6 +180,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AddBidAsync_Should_Succeed_When_Valid()
         {
+            // Arrange
             var request = new TransportRequest
             {
                 TransportRequestId = 5,
@@ -191,8 +204,10 @@ namespace Bid_Go.Tests.Unit.Services
                 DeliveryDeadline = DateTime.Now.AddDays(2)
             };
 
+            // Act
             var result = await _service.AddBidAsync(1, dto);
 
+            // Assert
             Assert.True(result.Success);
             Assert.Equal(EBidStatus.Pendent, result.Bid.Status);
             Assert.Equal(1, result.Bid.DriverId);

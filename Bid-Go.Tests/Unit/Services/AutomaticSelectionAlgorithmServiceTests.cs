@@ -75,11 +75,14 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenAutomaticSelectionDisabled()
         {
+            // Arrange
             var tr = MakeRequest(autoEnabled: false);
             _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(tr);
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("Automatic selection is not enabled.", message);
             Assert.Null(bid);
@@ -88,11 +91,14 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenBiddingNotFinished()
         {
+            // Arrange
             var tr = MakeRequest(biddingEnd: DateTime.UtcNow.AddHours(1));
             _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(tr);
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("Bidding has not finished yet.", message);
             Assert.Null(bid);
@@ -101,11 +107,14 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenTransportRequestNotActive()
         {
+            // Arrange
             var tr = MakeRequest(status: ERequestStatus.Canceled);
             _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(tr);
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("The transport request is not active.", message);
             Assert.Null(bid);
@@ -114,12 +123,15 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenBidAlreadyAccepted()
         {
+            // Arrange
             var bids = new List<Bid> { MakeBid(1, 10, 100, EBidStatus.Accepted) };
             var tr = MakeRequest(bids: bids);
             _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(tr);
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("There is already an accepted bid for this request.", message);
             Assert.Null(bid);
@@ -128,11 +140,14 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenNoBids()
         {
+            // Arrange
             var tr = MakeRequest();
             _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1)).ReturnsAsync(tr);
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("No bids submitted.", message);
             Assert.Null(bid);
@@ -141,6 +156,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenNoEligibleBids()
         {
+            // Arrange
             var bids = new List<Bid> { MakeBid(1, 10, 100) };
             var tr = MakeRequest(bids: bids);
 
@@ -148,8 +164,10 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.GetDriverReputationsAsync(It.IsAny<IEnumerable<int>>()))
                      .ReturnsAsync(new Dictionary<int, decimal> { { 10, 2 } });
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("No eligible bids.", message);
             Assert.Null(bid);
@@ -158,6 +176,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldSelectBidAndRejectOthers()
         {
+            // Arrange
             var bids = new List<Bid>
             {
                 MakeBid(1, 10, 100),
@@ -181,8 +200,10 @@ namespace Bid_Go.Tests.Unit.Services
         .ReturnsAsync(new Notification());
 
 
+            // Act
             var (success, message, selectedBid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.True(success);
             Assert.Null(message);
             Assert.NotNull(selectedBid);
@@ -200,6 +221,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ExecuteAsync_ShouldFail_WhenSelectedBidNotPending()
         {
+            // Arrange
             var bids = new List<Bid>
             {
                 MakeBid(1, 10, 100, EBidStatus.Accepted)
@@ -210,8 +232,10 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.GetDriverReputationsAsync(It.IsAny<IEnumerable<int>>()))
                      .ReturnsAsync(new Dictionary<int, decimal> { { 10, 5 } });
 
+            // Act
             var (success, message, selectedBid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("There is already an accepted bid for this request.", message);
             Assert.Null(selectedBid);
