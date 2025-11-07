@@ -26,28 +26,25 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run integration tests (namespace filter) + coverage + TRX
-        run: |
-          dotnet test ./Bid-Go.Tests/Bid-Go.Tests.csproj \
-            --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory "./TestResultsIntegration" \
-            --logger:"trx;LogFileName=test-results-integration.trx" \
-            --filter "FullyQualifiedName~Bid_Go.Tests.Integration"
+        run: >
+          dotnet test ./Bid-Go.Tests/Bid-Go.Tests.csproj
+          --configuration Release
+          --collect:"XPlat Code Coverage"
+          --results-directory "./TestResultsIntegration"
+          --logger:"trx;LogFileName=test-results-integration.trx"
+          --filter "FullyQualifiedName~Bid_Go.Tests.Integration"
 
       - name: Generate coverage report (HTML + MD)
         if: success()
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          reportgenerator \
-            -reports:"**/TestResultsIntegration/**/coverage.cobertura.xml" \
-            -targetdir:"TestResultsIntegration/CoverageReport" \
-            -reporttypes:"Html;MarkdownSummaryGithub"
+          reportgenerator -reports:"**/TestResultsIntegration/**/coverage.cobertura.xml" -targetdir:"TestResultsIntegration/CoverageReport" -reporttypes:"Html;MarkdownSummaryGithub"
 
       - name: Upload artifacts (TRX + Coverage)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-tests-${{ github.run_id }}
+          name: integration-tests-${{ matrix.os }}-${{ github.run_id }}
           path: |
             TestResultsIntegration/test-results-integration.trx
             TestResultsIntegration/CoverageReport
@@ -56,8 +53,8 @@ jobs:
         if: always()
         uses: dorny/test-reporter@v2
         with:
-          name: "Tests ${{ matrix.os }}"
-          path: "TestResults/test-results.trx"
+          name: "Integration tests ${{ matrix.os }}"
+          path: "TestResultsIntegration/test-results-integration.trx"
           reporter: dotnet-trx
           use-actions-summary: true
           fail-on-error: false
