@@ -10,8 +10,8 @@ namespace Bid_Go_Backend.Repositories.Authorization
     /// Repository that provides read-only authorization related queries.
     /// </summary>
     /// <remarks>
-    /// This repository encapsulates low-level EF Core queries used to verify ownership and related authorization checks.
-    /// Keep business rules in services; the repository should only return data needed to make authorization decisions.
+    /// Encapsulates low-level EF Core queries used to verify ownership and related authorization checks.
+    /// Business rules stay in services; only data retrieval lives here.
     /// </remarks>
     public class AuthorizationRepository : IAuthorizationRepository
     {
@@ -23,7 +23,7 @@ namespace Bid_Go_Backend.Repositories.Authorization
         }
 
         /// <summary>
-        /// Get a transport request by id (no tracking).
+        /// Get a transport request by id (no tracking) for ownership validation.
         /// </summary>
         /// <param name="transportRequestId">Transport request identifier.</param>
         /// <returns>TransportRequest or null if not found.</returns>
@@ -33,7 +33,7 @@ namespace Bid_Go_Backend.Repositories.Authorization
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == transportRequestId);
 
         /// <summary>
-        /// Get a bid by id (no tracking).
+        /// Get a bid by id (no tracking) for ownership validation.
         /// </summary>
         /// <param name="bidId">Bid identifier.</param>
         /// <returns>Bid or null if not found.</returns>
@@ -43,7 +43,7 @@ namespace Bid_Go_Backend.Repositories.Authorization
                 .FirstOrDefaultAsync(b => b.BidId == bidId);
 
         /// <summary>
-        /// Get a payment with its related transport request for authorization checks.
+        /// Get a payment including its related transport request.
         /// </summary>
         /// <param name="paymentId">Payment identifier.</param>
         /// <returns>Payment or null if not found.</returns>
@@ -54,7 +54,7 @@ namespace Bid_Go_Backend.Repositories.Authorization
                 .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
 
         /// <summary>
-        /// Get a chat including its transport request and that request's selected bid.
+        /// Get a chat including its transport request and selected bid.
         /// </summary>
         /// <param name="chatId">Chat identifier.</param>
         /// <returns>Chats entity or null if not found.</returns>
@@ -66,7 +66,7 @@ namespace Bid_Go_Backend.Repositories.Authorization
                 .FirstOrDefaultAsync(c => c.ChatId == chatId);
 
         /// <summary>
-        /// Get a transport request including the selected bid. Useful for ownership checks where the selected bid matters.
+        /// Get a transport request including its selected bid.
         /// </summary>
         /// <param name="id">Transport request identifier.</param>
         /// <returns>TransportRequest or null if not found.</returns>

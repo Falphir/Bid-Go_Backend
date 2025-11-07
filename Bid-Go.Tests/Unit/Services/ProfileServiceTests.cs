@@ -11,6 +11,9 @@ using Bid_Go_Backend.Repositories.Interfaces;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for ProfileService with driver/company operations and validations.
+    /// </summary>
     public class ProfileServiceTests
     {
         private readonly Mock<IProfileRepository> _mockRepo;
@@ -29,11 +32,14 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetProfileAsync_ReturnsUser_WhenActive()
         {
-            var user = new Driver { Id = 1, IsActive = true };
+            // Arrange
+            var user = new Driver { Id =1, IsActive = true };
             _mockRepo.Setup(r => r.GetUserByIdAsync(1)).ReturnsAsync(user);
 
+            // Act
             var result = await _service.GetProfileAsync(1);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
         }

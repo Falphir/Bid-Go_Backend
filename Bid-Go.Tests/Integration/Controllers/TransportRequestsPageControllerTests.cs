@@ -12,6 +12,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for public transport requests page endpoints (filters and single view).
+    /// </summary>
     public class TransportRequestsPageControllerTests
     {
         private static (TransportRequestsPageController controller, BidGoDbContext db) Build()
@@ -32,6 +35,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetActive_ReturnsList_FilteredAndOrdered()
         {
+            // Arrange
             var (controller, db) = Build();
 
             db.TransportRequests.AddRange(
@@ -72,10 +76,11 @@ namespace Bid_Go.Tests.Integration.Controllers
 
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetActive(origin: "Lisboa", destination: null, deliveryDate: null, priceOrder: "asc");
-            var ok = Assert.IsType<OkObjectResult>(result.Result);
 
-            // controller devolve IEnumerable<TransportRequestsPageDTO> ou { message }
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
             var list = Assert.IsAssignableFrom<IEnumerable<object>>(ok.Value).ToList();
             Assert.Equal(2, list.Count);
         }

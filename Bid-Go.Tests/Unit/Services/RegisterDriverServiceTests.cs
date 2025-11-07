@@ -13,9 +13,11 @@ using Bid_Go_Backend.Repositories.Interfaces;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for RegisterDriverService verifying uniqueness, password hashing and image upload calls.
+    /// </summary>
     public class RegisterDriverServiceTests
     {
-      
         private static IFormFile MakeFormFile(string fileName = "file.png")
         {
             var content = "fake image content";

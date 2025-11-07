@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Repositories.Notifications
 {
+    /// <summary>
+    /// Repository for creating and querying notifications.
+    /// </summary>
     public class NotificationRepository : INotificationRepository
     {
         private readonly BidGoDbContext _ctx;
@@ -19,6 +22,15 @@ namespace Bid_Go_Backend.Repositories.Notifications
             _ctx = ctx;
         }
 
+        /// <summary>
+        /// Create and persist a notification.
+        /// </summary>
+        /// <param name="userId">Target user identifier.</param>
+        /// <param name="context">Notification message/context.</param>
+        /// <param name="type">Notification type.</param>
+        /// <param name="bidId">Optional related bid identifier.</param>
+        /// <param name="transportRequestId">Optional related transport request identifier.</param>
+        /// <returns>The created notification.</returns>
         public async Task<Notification> CreateAsync(int userId, string context, ENotificationType type,
                                                     int? bidId = null, int? transportRequestId = null)
         {
@@ -37,6 +49,13 @@ namespace Bid_Go_Backend.Repositories.Notifications
             return notification;
         }
 
+        /// <summary>
+        /// Get notifications filtered by user and optionally by type and order.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <param name="type">Optional filter by type.</param>
+        /// <param name="order">Ordering: "asc" or "desc" (default).</param>
+        /// <returns>List of notifications.</returns>
         public async Task<List<Notification>> GetNotificationsAsync(int userId, ENotificationType? type = null, string order = "desc")
         {
             var query = _ctx.Notifications.AsQueryable()

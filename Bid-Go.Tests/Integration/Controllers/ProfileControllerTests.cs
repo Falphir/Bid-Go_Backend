@@ -14,6 +14,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for profile endpoints covering driver and company scenarios.
+    /// </summary>
     public class ProfileControllerTests
     {
         private static (ProfileController controller, BidGoDbContext db) BuildAs(string role, int userId)
@@ -51,33 +54,18 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetProfile_Driver_ReturnsDriverProfileDto()
         {
-            var (controller, db) = BuildAs("Driver", userId: 1);
+            // Arrange
+            var (controller, db) = BuildAs("Driver", userId:1);
+            var driver = new Driver { Name = "D", Email = "d@x.com", Password = BCrypt.Net.BCrypt.HashPassword("123456Ab!"), PhoneNumber =911111111, NIF =123456789, DriverLicense = "DL", Insurance = "INS", IsActive = true };
+            db.Users.Add(driver); await db.SaveChangesAsync();
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", driver.Id.ToString()), new Claim("userType", "Driver") }, "TestAuth"));
 
-            var driver = new Driver
-            {
-                Name = "D",
-                Email = "d@x.com",
-                Password = BCrypt.Net.BCrypt.HashPassword("123456Ab!"),
-                PhoneNumber = 911111111,
-                NIF = 123456789,
-                DriverLicense = "DL",
-                Insurance = "INS",
-                IsActive = true
-            };
-
-            db.Users.Add(driver);
-            await db.SaveChangesAsync();
-
-            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim("userId", driver.Id.ToString()),
-                new Claim("userType", "Driver")
-            }, "TestAuth"));
-
+            // Act
             var result = await controller.GetProfile(driver.Id);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var dto = Assert.IsType<DriverProfileDTO>(ok.Value);
-
             Assert.Equal(driver.Email, dto.Email);
         }
 

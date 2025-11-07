@@ -17,6 +17,9 @@ using Bid_Go_Backend.Services;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for CRUD endpoints in TransportRequestsController.
+    /// </summary>
     public class TransportRequestsControllerTests
     {
         private static (TransportRequestsController controller, BidGoDbContext db) BuildAsCompany(int companyId)
@@ -55,8 +58,8 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Create_ReturnsCreated_AndPersists()
         {
+            // Arrange
             var (controller, db) = BuildAsCompany(companyId: 1);
-
             var dto = new CreateTransportRequestDTO
             {
                 Origin = "O",
@@ -77,7 +80,11 @@ namespace Bid_Go.Tests.Integration.Controllers
             };
 
             var image = MakeFile("r.png");
+
+            // Act
             var result = await controller.Create(dto, image);
+
+            // Assert
             var created = Assert.IsType<CreatedAtActionResult>(result);
             var tr = Assert.IsType<TransportRequest>(created.Value);
 
@@ -92,6 +99,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Update_UpdatesDraft_WithNewImage()
         {
+            // Arrange
             var (controller, db) = BuildAsCompany(companyId: 2);
 
             var tr = new TransportRequest
@@ -126,7 +134,11 @@ namespace Bid_Go.Tests.Integration.Controllers
             };
 
             var image = MakeFile("new.png");
+
+            // Act
             var result = await controller.Update(tr.TransportRequestId, dto, image);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var updated = Assert.IsType<TransportRequest>(ok.Value);
 
@@ -140,6 +152,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Delete_ActiveRequest_ReturnsOk_AndRemoves()
         {
+            // Arrange
             var (controller, db) = BuildAsCompany(companyId: 3);
 
             var tr = new TransportRequest
@@ -165,7 +178,10 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.TransportRequests.Add(tr);
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.Delete(tr.TransportRequestId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var still = await db.TransportRequests.FindAsync(tr.TransportRequestId);
 
@@ -175,6 +191,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetById_ReturnsOk_WhenExists()
         {
+            // Arrange
             var (controller, db) = BuildAsCompany(companyId: 4);
 
             var tr = new TransportRequest
@@ -200,7 +217,10 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.TransportRequests.Add(tr);
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetById(tr.TransportRequestId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var body = Assert.IsType<TransportRequest>(ok.Value);
 
@@ -210,6 +230,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetByCompany_ReturnsList()
         {
+            // Arrange
             var (controller, db) = BuildAsCompany(companyId: 5);
 
             db.TransportRequests.AddRange(
@@ -255,7 +276,10 @@ namespace Bid_Go.Tests.Integration.Controllers
 
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetByCompany(5);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var list = Assert.IsType<List<TransportRequest>>(ok.Value);
 

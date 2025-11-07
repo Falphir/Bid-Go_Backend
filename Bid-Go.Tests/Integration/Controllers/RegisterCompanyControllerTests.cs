@@ -10,6 +10,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for company registration endpoint validating success and conflict cases.
+    /// </summary>
     public class RegisterCompanyControllerTests
     {
         private static (RegisterCompanyController controller, BidGoDbContext db) Build()
@@ -29,8 +32,8 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Register_ReturnsOk_WhenNewCompany()
         {
+            // Arrange
             var (controller, db) = Build();
-
             var dto = new RegisterCompanyDTO
             {
                 Name = "New Admin",
@@ -42,9 +45,11 @@ namespace Bid_Go.Tests.Integration.Controllers
                 NIF = 555666777
             };
 
+            // Act
             var result = await controller.Register(dto);
-            var ok = Assert.IsType<OkObjectResult>(result);
 
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
 
             var created = await db.Companies.FirstOrDefaultAsync(c => c.Email == dto.Email);
@@ -58,6 +63,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Register_ReturnsConflict_WhenEmailExists()
         {
+            // Arrange
             var (controller, db) = Build();
 
             db.Companies.Add(new Company
@@ -84,15 +90,18 @@ namespace Bid_Go.Tests.Integration.Controllers
                 NIF = 111222333
             };
 
+            // Act
             var result = await controller.Register(dto);
-            var conflict = Assert.IsType<ConflictObjectResult>(result);
 
+            // Assert
+            var conflict = Assert.IsType<ConflictObjectResult>(result);
             Assert.Equal(409, conflict.StatusCode);
         }
 
         [Fact]
         public async Task Register_ReturnsConflict_WhenPhoneExists()
         {
+            // Arrange
             var (controller, db) = Build();
 
             db.Companies.Add(new Company
@@ -119,15 +128,18 @@ namespace Bid_Go.Tests.Integration.Controllers
                 NIF = 111222333
             };
 
+            // Act
             var result = await controller.Register(dto);
-            var conflict = Assert.IsType<ConflictObjectResult>(result);
 
+            // Assert
+            var conflict = Assert.IsType<ConflictObjectResult>(result);
             Assert.Equal(409, conflict.StatusCode);
         }
 
         [Fact]
         public async Task Register_ReturnsConflict_WhenNifExists()
         {
+            // Arrange
             var (controller, db) = Build();
 
             db.Companies.Add(new Company
@@ -154,9 +166,11 @@ namespace Bid_Go.Tests.Integration.Controllers
                 NIF = 999888777
             };
 
+            // Act
             var result = await controller.Register(dto);
-            var conflict = Assert.IsType<ConflictObjectResult>(result);
 
+            // Assert
+            var conflict = Assert.IsType<ConflictObjectResult>(result);
             Assert.Equal(409, conflict.StatusCode);
         }
     }

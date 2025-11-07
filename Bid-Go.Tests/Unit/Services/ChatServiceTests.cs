@@ -12,6 +12,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
 
+/// <summary>
+/// Unit tests for ChatService verifying access control and message/chat flows.
+/// </summary>
 public class ChatServiceTests
 {
     private readonly Mock<IChatRepository> _chatRepoMock;
@@ -42,11 +45,13 @@ public class ChatServiceTests
     [Fact]
     public async Task GetChat_ShouldReturn404_WhenChatNotFound()
     {
-        _chatRepoMock.Setup(r => r.GetChatByRequestIdAsync(1))
-                     .ReturnsAsync((Chats)null);
+        // Arrange
+        _chatRepoMock.Setup(r => r.GetChatByRequestIdAsync(1)).ReturnsAsync((Chats)null);
 
+        // Act
         var result = await _service.GetChat(1, CreateUser(1, "Driver"));
 
+        // Assert
         Assert.Equal(404, result.StatusCode);
         Assert.Contains("Chat não encontrado", result.Body.ToString());
     }

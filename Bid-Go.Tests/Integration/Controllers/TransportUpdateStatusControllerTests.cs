@@ -11,14 +11,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Stripe.Forwarding;
 using System.Security.Claims;
 using System.Text.Json;
 using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+ /// <summary>
+ /// Integration tests for transport status transitions and cancellation logic.
+ /// </summary>
  public class TransportUpdateStatusControllerTests
  {
  private static (TransportUpdateStatusController controller, BidGoDbContext db, TestNotificationService notifications) Build()
@@ -126,15 +127,18 @@ namespace Bid_Go.Tests.Integration.Controllers
  [Fact]
  public async Task UpdateRequestStatus_Company_Cancels_Request_And_PendingBids()
  {
+ // Arrange
  var (controller, db, notifications) = Build();
  var (company, driver, tr, p1, p2) = SeedActiveWithBids(db);
  SetUser(controller, company.Id, "Company");
-
  var dto = new RequestStatusDTO { Status = ERequestStatus.Canceled };
+
+ // Act
  var result = await controller.UpdateRequestStatus(tr.TransportRequestId, dto);
+
+ // Assert
  var ok = Assert.IsType<ObjectResult>(result);
  Assert.Equal(200, ok.StatusCode);
-
  var fromDb = await db.TransportRequests.FindAsync(tr.TransportRequestId);
  Assert.Equal(ERequestStatus.Canceled, fromDb!.Status);
 
@@ -147,15 +151,18 @@ namespace Bid_Go.Tests.Integration.Controllers
  [Fact]
  public async Task UpdateRequestStatus_Company_Active_To_Pending()
  {
+ // Arrange
  var (controller, db, notifications) = Build();
  var (company, driver, tr, p1, p2) = SeedActiveWithBids(db);
  SetUser(controller, company.Id, "Company");
 
+ // Act
  var dto = new RequestStatusDTO { Status = ERequestStatus.Pending };
  var result = await controller.UpdateRequestStatus(tr.TransportRequestId, dto);
+
+ // Assert
  var ok = Assert.IsType<ObjectResult>(result);
  Assert.Equal(200, ok.StatusCode);
-
  var fromDb = await db.TransportRequests.FindAsync(tr.TransportRequestId);
  Assert.Equal(ERequestStatus.Pending, fromDb!.Status);
  }
@@ -163,10 +170,11 @@ namespace Bid_Go.Tests.Integration.Controllers
  [Fact]
  public async Task UpdateRequestStatus_Driver_WaitingPickup_To_InTransit()
  {
+ // Arrange
  var (controller, db, notifications) = Build();
  var (company, driver, tr, p1, p2) = SeedActiveWithBids(db);
 
- // preparar SelectedBid com o Driver correto
+ // prepare SelectedBid with correct Driver
  var accepted = new Bid { DriverId = driver.Id, TransportRequestId = tr.TransportRequestId, Status = EBidStatus.Accepted };
  db.Bids.Add(accepted);
  await db.SaveChangesAsync();
@@ -178,11 +186,13 @@ namespace Bid_Go.Tests.Integration.Controllers
  tr.Status = ERequestStatus.WaitingPickup;
  await db.SaveChangesAsync();
 
+ // Act
  var dto = new RequestStatusDTO { Status = ERequestStatus.InTransit };
  var result = await controller.UpdateRequestStatus(tr.TransportRequestId, dto);
+
+ // Assert
  var ok = Assert.IsType<ObjectResult>(result);
  Assert.Equal(200, ok.StatusCode);
-
  var fromDb = await db.TransportRequests.FindAsync(tr.TransportRequestId);
  Assert.Equal(ERequestStatus.InTransit, fromDb!.Status);
  }
@@ -190,11 +200,15 @@ namespace Bid_Go.Tests.Integration.Controllers
  [Fact]
  public async Task CancelRequestStatus_Company_Cancels_Request_And_PendingBids()
  {
+ // Arrange
  var (controller, db, notifications) = Build();
  var (company, driver, tr, p1, p2) = SeedActiveWithBids(db);
  SetUser(controller, company.Id, "Company");
 
+ // Act
  var result = await controller.CancelRequestStatus(tr.TransportRequestId);
+
+ // Assert
  var ok = Assert.IsType<OkObjectResult>(result);
 
  var json = JsonSerializer.Serialize(ok.Value);

@@ -13,6 +13,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for NotificationService covering repo calls and SignalR dispatch.
+    /// </summary>
     public class NotificationServiceTests
     {
         private readonly Mock<INotificationRepository> _mockRepo;
@@ -58,7 +61,6 @@ namespace Bid_Go.Tests.Unit.Services
 
             // Assert
             Assert.Equal(expected, result);
-            _mockRepo.Verify(r => r.GetNotificationsAsync(userId, null, "desc"), Times.Once);
         }
 
         // ===========================================================

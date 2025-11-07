@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace Bid_Go_Backend.Services
 {
+    /// <summary>
+    /// Service that validates status transitions for transport requests and emits notifications.
+    /// </summary>
     public class TransportUpdateStatusService : ITransportUpdateStatusService
     {
         private readonly ITransportUpdateStatus _repository;
@@ -27,8 +30,13 @@ namespace Bid_Go_Backend.Services
             _authrepo = authrepo;
         }
 
-
-
+        /// <summary>
+        /// Update transport request status based on caller role and current state.
+        /// </summary>
+        /// <param name="requestId">Transport request identifier.</param>
+        /// <param name="user">Caller principal with claims.</param>
+        /// <param name="newStatus">Target status.</param>
+        /// <returns>Tuple with HTTP-like status code and response body.</returns>
         public async Task<(int StatusCode, object Body)> UpdateRequestStatusAsync(
            int requestId,
            ClaimsPrincipal user,
@@ -48,7 +56,7 @@ namespace Bid_Go_Backend.Services
                 if (request == null)
                     return (404, new { message = "Pedido não encontrado." });
 
-                // Verifica se o utilizador tem acesso
+                // Access control
                 if (role == "Company" && request.CompanyId != userId)
                     return (403, new { message = "Acesso negado." });
 
@@ -63,11 +71,11 @@ namespace Bid_Go_Backend.Services
                 if (!isValidTransition)
                     return (400, new { message = $"Transição inválida de {request.Status} para {newStatus} para o papel {role}." });
 
-                // Atualiza o estado
+                // Update state
                 request.Status = newStatus;
                 _repository.UpdateTransportRequest(request);
 
-                // Cancelamento por empresa → cancela bids pendentes
+                // Company cancelation -> cancel pending bids and notify drivers
                 if (role == "Company" && newStatus == ERequestStatus.Canceled)
                 {
                     var pendingBids = request.Bids

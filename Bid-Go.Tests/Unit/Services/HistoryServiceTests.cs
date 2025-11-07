@@ -11,6 +11,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for HistoryService delegating to repository and logging.
+    /// </summary>
     public class HistoryServiceTests
     {
         private readonly Mock<IHistoryRepository> _mockRepo;
@@ -28,6 +31,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetDriverHistoryAsync_ShouldReturnList_WhenRepositoryReturnsData()
         {
+            // Arrange
             var expected = new List<BidHistoryDTO>
             {
                 new BidHistoryDTO
@@ -44,8 +48,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             _mockRepo.Setup(r => r.GetDriverHistoryAsync(1)).ReturnsAsync(expected);
 
+            // Act
             var result = await _service.GetDriverHistoryAsync(1);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("Co", result[0].CompanyName);

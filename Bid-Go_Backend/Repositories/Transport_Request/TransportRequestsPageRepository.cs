@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Repositories.Transport_Request
 {
+    /// <summary>
+    /// Repository for querying public transport requests displayed on the listing page.
+    /// </summary>
     public class TransportRequestsPageRepository : ITransportRequestsPageRepository
     {
         private readonly BidGoDbContext _context;
@@ -20,6 +23,14 @@ namespace Bid_Go_Backend.Repositories.Transport_Request
             _context = context;
         }
 
+        /// <summary>
+        /// Get active transport requests with optional filters and ordering.
+        /// </summary>
+        /// <param name="origin">Optional origin substring to filter by.</param>
+        /// <param name="destination">Optional destination substring to filter by.</param>
+        /// <param name="deliveryDate">Optional exact delivery date to filter by.</param>
+        /// <param name="priceOrder">Price ordering ("asc" or "desc"). Defaults to id ordering.</param>
+        /// <returns>Enumerable of matching transport requests.</returns>
         public async Task<IEnumerable<TransportRequest>> GetActiveAsync(
             string? origin = null,
             string? destination = null,
@@ -58,6 +69,11 @@ namespace Bid_Go_Backend.Repositories.Transport_Request
             return await query.ToListAsync();
         }
 
+        /// <summary>
+        /// Get a single active transport request by identifier.
+        /// </summary>
+        /// <param name="id">Transport request identifier.</param>
+        /// <returns>Transport request or null when not active or not found.</returns>
         public async Task<TransportRequest?> GetByIdAsync(int id)
         {
             return await _context.TransportRequests

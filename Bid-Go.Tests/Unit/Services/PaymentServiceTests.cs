@@ -15,6 +15,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for PaymentService covering process, retry, and queries with gateway and repository interactions.
+    /// </summary>
     public class PaymentServiceTests
     {
         private static CreatePaymentRequestDTO MakeCreateDto(int trId = 100, string token = "tok_test")
@@ -350,7 +353,7 @@ namespace Bid_Go.Tests.Unit.Services
                     It.IsAny<IDictionary<string, string>>()))
                    .ReturnsAsync(new ChargeResult(true, null));
 
-        
+
             var transportRequest = new TransportRequest { TransportRequestId = 100, Status = ERequestStatus.Pending };
             trs.Setup(r => r.GetByIdAsync(payment.TransportRequestId)).ReturnsAsync(transportRequest);
 

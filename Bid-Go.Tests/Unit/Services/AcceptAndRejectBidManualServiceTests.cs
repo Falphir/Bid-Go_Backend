@@ -8,6 +8,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for AcceptAndRejectBidManualService covering preconditions and state updates.
+    /// </summary>
     public class AcceptAndRejectBidManualServiceTests
     {
         private readonly Mock<IAcceptAndRejectBidManualRepository> _mockRepo;

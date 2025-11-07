@@ -14,6 +14,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for BidsService covering validation and creation logic for bids.
+    /// </summary>
     public class BidsServiceTests
     {
         private readonly Mock<IBidsRepository> _mockRepo;
@@ -35,6 +38,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AddBidAsync_Should_Fail_When_TransportRequest_NotFound()
         {
+            // Arrange
             var dto = new AddBidDTO
             {
                 TransportRequestId = 1,
@@ -42,8 +46,10 @@ namespace Bid_Go.Tests.Unit.Services
                 DeliveryDeadline = DateTime.Now.AddDays(1)
             };
 
+            // Act
             var result = await _service.AddBidAsync(1, dto);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("Transport request not found.", result.Message);
         }

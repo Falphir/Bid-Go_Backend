@@ -16,6 +16,9 @@ using Bid_Go_Backend.Repositories.Interfaces;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for ReviewRequestService ensuring validation of service completion and duplicate reviews.
+    /// </summary>
     public class ReviewRequestServiceTests
     {
         private readonly Mock<IReviewRequestRepository> _mockRepo;
@@ -81,11 +84,13 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task SubmitReviewAsync_ShouldThrow_WhenTransportNotFound()
         {
+            // Arrange
             var dto = CreateBaseDto("Company");
 
             _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
                 .ReturnsAsync((TransportRequest?)null);
 
+            // Act + Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SubmitReviewAsync(dto));
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
@@ -194,8 +199,10 @@ namespace Bid_Go.Tests.Unit.Services
                 .Callback<Review>(r => saved = r)
                 .Returns(Task.CompletedTask);
 
+            // Act
             var result = await _service.SubmitReviewAsync(dto);
 
+            // Assert
             Assert.True(result);
             Assert.NotNull(saved);
             Assert.IsType<ReviewCompany>(saved);

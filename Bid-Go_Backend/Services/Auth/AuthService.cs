@@ -10,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Bid_Go_Backend.Services.Auth
 {
+    /// <summary>
+    /// Authentication service responsible for login, password recovery and JWT token creation.
+    /// </summary>
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
@@ -29,7 +32,12 @@ namespace Bid_Go_Backend.Services.Auth
             _cache = cache;
         }
 
-
+        /// <summary>
+        /// Validate user credentials and return a JWT token on success.
+        /// </summary>
+        /// <param name="email">User email.</param>
+        /// <param name="password">User password (plain text input).</param>
+        /// <returns>Tuple indicating success, message, token and expiration timestamp.</returns>
         public async Task<(bool Success, string Message, string Token, DateTime? Expiration)> LoginAsync(string email, string password)
         {
             var user = await _userRepository.GetByEmailAsync(email);
@@ -45,7 +53,11 @@ namespace Bid_Go_Backend.Services.Auth
             return (true, "Login bem-sucedido", token, expiration);
         }
 
-
+        /// <summary>
+        /// Start password recovery flow by generating a token and sending an email.
+        /// </summary>
+        /// <param name="email">User email to recover.</param>
+        /// <returns>HTTP-like status code and message.</returns>
         public async Task<(int StatusCode, string Message)> RecoverPasswordAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);
@@ -64,6 +76,12 @@ namespace Bid_Go_Backend.Services.Auth
             return (200, "Instruções enviadas por email.");
         }
 
+        /// <summary>
+        /// Reset password using a previously generated recovery token.
+        /// </summary>
+        /// <param name="token">Password recovery token.</param>
+        /// <param name="newPassword">New password to set.</param>
+        /// <returns>HTTP-like status code and message.</returns>
         public async Task<(int StatusCode, string Message)> ResetPasswordAsync(string token, string newPassword)
         {
             if (!_cache.TryGetValue(token, out string email))
@@ -80,9 +98,17 @@ namespace Bid_Go_Backend.Services.Auth
             return (200, "Password alterada com sucesso.");
         }
 
+        /// <summary>
+        /// Generate a random token used for password reset.
+        /// </summary>
         private string GeneratePasswordResetToken() =>
             Guid.NewGuid().ToString("N");
 
+        /// <summary>
+        /// Build a signed JWT token with standard and custom claims.
+        /// </summary>
+        /// <param name="user">Authenticated user.</param>
+        /// <returns>Encoded JWT string.</returns>
         public string GenerateJwtToken(User user)
         {
             var claims = new[]

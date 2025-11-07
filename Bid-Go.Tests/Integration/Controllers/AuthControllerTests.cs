@@ -15,6 +15,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for authentication controller: login, recover and reset password flows.
+    /// </summary>
     public class AuthControllerTests
     {
         private static (AuthController controller, BidGoDbContext db, IMemoryCache cache, TestEmailService email) Build()
@@ -42,21 +45,17 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task Login_ReturnsOk_WhenCredentialsAreValid_ForDriver()
         {
+            // Arrange
             var (controller, db, _, _) = Build();
             var pwd = BCrypt.Net.BCrypt.HashPassword("123456");
-            var driver = new Driver
-            {
-                Email = "driver_login@test.com",
-                Password = pwd,
-                Name = "Test Driver",
-                PhoneNumber =912345678,
-                NIF =123456789
-            };
-            db.Users.Add(driver);
+            db.Users.Add(new Driver { Email = "driver_login@test.com", Password = pwd, Name = "Test Driver", PhoneNumber =912345678, NIF =123456789 });
             await db.SaveChangesAsync();
-
             var loginDto = new Bid_Go_Backend.Data.Models.DTOs.LoginDTOs.LoginRequestDto { Email = "driver_login@test.com", Password = "123456" };
+
+            // Act
             var result = await controller.Login(loginDto);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
         }

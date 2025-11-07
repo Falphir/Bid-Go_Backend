@@ -15,6 +15,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for notification retrieval and broadcast behavior.
+    /// </summary>
     public class NotificationControllerTests
     {
         private static (NotificationController controller, BidGoDbContext db) BuildAs(int userId)
@@ -53,20 +56,21 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetNotifications_ReturnsOk_WithItems_FilteredAndOrdered()
         {
+            // Arrange
             var (controller, db) = BuildAs(userId: 5);
-
             db.Notifications.AddRange(
                 new Notification { UserId = 5, Context = "A", Type = ENotificationType.Accepted, TimeStamp = DateTime.UtcNow.AddMinutes(-2) },
                 new Notification { UserId = 5, Context = "B", Type = ENotificationType.Rejected, TimeStamp = DateTime.UtcNow.AddMinutes(-1) },
                 new Notification { UserId = 5, Context = "C", Type = ENotificationType.New_message, TimeStamp = DateTime.UtcNow }
             );
-
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetNotifications(userId: 5, type: null, order: "desc");
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var list = Assert.IsType<List<Notification>>(ok.Value);
-
             Assert.Equal(3, list.Count);
             Assert.True(list[0].TimeStamp >= list[1].TimeStamp);
         }

@@ -8,6 +8,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+/// <summary>
+/// Unit tests for AuthorizationService verifying ownership checks of entities.
+/// </summary>
     public class AuthorizationServiceTests
     {
         private readonly Mock<IAuthorizationRepository> _repoMock;
@@ -23,11 +26,14 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task CompanyOwnsTransportRequestAsync_ShouldReturnTrue_WhenCompanyOwnsRequest()
         {
+            // Arrange
             var request = new TransportRequest { TransportRequestId = 1, CompanyId = 5 };
             _repoMock.Setup(r => r.GetTransportRequestAsync(1)).ReturnsAsync(request);
 
+            // Act
             var result = await _service.CompanyOwnsTransportRequestAsync(5, 1);
 
+            // Assert
             Assert.True(result);
         }
 

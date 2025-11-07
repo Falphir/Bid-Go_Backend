@@ -28,6 +28,7 @@ namespace Bid_Go_Backend.Repositories.History
         /// <summary>
         /// Get bidding history entries for a driver.
         /// </summary>
+        /// <param name="driverId">Driver identifier.</param>
         /// <remarks>
         /// Date is currently returned as a placeholder (2024-01-01) — consider storing event timestamps to provide accurate history.
         /// </remarks>
@@ -65,6 +66,7 @@ namespace Bid_Go_Backend.Repositories.History
         /// <summary>
         /// Get transport history entries for a company.
         /// </summary>
+        /// <param name="companyId">Company identifier.</param>
         /// <remarks>
         /// Date is currently a placeholder — replace with actual event timestamps when available.
         /// </remarks>

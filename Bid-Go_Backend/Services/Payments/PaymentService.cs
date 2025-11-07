@@ -35,14 +35,13 @@ namespace Bid_Go_Backend.Services
         /// Process a payment for the selected bid of a transport request.
         /// </summary>
         /// <remarks>
-        /// The method creates a pending payment record, attempts charge via the payment gateway and updates state accordingly.
-        /// It is important that this method remains idempotent from the controller side — retries are handled explicitly by RetryPaymentAsync.
+        /// Creates a pending payment, attempts Stripe charge and updates state accordingly. Retries handled by <see cref="RetryPaymentAsync"/>.
         /// </remarks>
-        /// <param name="request">CreatePaymentRequestDTO containing TransportRequestId and StripeToken.</param>
-        /// <returns>PaymentResultDTO with final payment state and timestamps.</returns>
+        /// <param name="request">DTO containing transport request identifier and Stripe token.</param>
+        /// <returns>Result DTO mapping the persisted payment state.</returns>
         public async Task<PaymentResultDTO> ProcessPaymentAsync(CreatePaymentRequestDTO request)
         {
-            //1) Buscar TR + Bid
+            //1) Load request and selected bid
             var tr = await _transportReqs.GetByIdAsync(request.TransportRequestId)
              ?? throw new InvalidOperationException("Transport request was not found.");
 
@@ -55,13 +54,13 @@ namespace Bid_Go_Backend.Services
             if (bid.TransportRequestId != tr.TransportRequestId)
                 throw new InvalidOperationException("Selected bid does not belong to the given transport request.");
 
-            //2) Cálculos
+            //2) Pricing calculations
             var bidValue = bid.Value;
             var tax = Math.Round(bidValue *0.05m,2);
             var gross = bidValue;
             var netForDriver = bidValue - tax;
 
-            //3) Criar pagamento pendente
+            //3) Create payment pending
             var payment = new Payment
             {
                 CompanyId = tr.CompanyId,
@@ -79,7 +78,7 @@ namespace Bid_Go_Backend.Services
             await _payments.AddAsync(payment);
             await _payments.SaveChangesAsync();
 
-            //4) Cobrança via gateway
+            //4) Charge via gateway
             var charge = await _gateway.ChargeAsync(
                 amountCents: (long)(payment.GrossValue *100),
                 currency: "eur",
@@ -116,10 +115,8 @@ namespace Bid_Go_Backend.Services
         }
 
         /// <summary>
-        /// Lists payments for a given user (company or driver).
+        /// List payments for a user (company or driver).
         /// </summary>
-        /// <param name="userId">User identifier to filter payments.</param>
-        /// <returns>List of PaymentResultDTO for the user.</returns>
         public async Task<List<PaymentResultDTO>> GetPaymentsByUserAsync(int userId)
         {
             var items = await _payments.ListByUserAsync(userId);
@@ -127,11 +124,11 @@ namespace Bid_Go_Backend.Services
         }
 
         /// <summary>
-        /// Attempt to retry a payment using a new payment token.
+        /// Retry a failed or pending payment using a new Stripe token.
         /// </summary>
-        /// <remarks>
-        /// The method enforces business rules about deadlines and idempotency. It returns a tuple indicating success and the resulting DTO.
-        /// </remarks>
+        /// <param name="paymentId">Payment identifier.</param>
+        /// <param name="stripeToken">New Stripe token.</param>
+        /// <returns>Tuple with success flag, error message, and result DTO.</returns>
         public async Task<(bool Ok, string? Error, PaymentResultDTO? Result)> RetryPaymentAsync(int paymentId, string stripeToken)
         {
             var payment = await _payments.GetByIdForUpdateAsync(paymentId)
@@ -140,7 +137,7 @@ namespace Bid_Go_Backend.Services
             if (payment.PaymentStatus == EPaymentStatus.Confirmed)
                 return (false, "This payment has already been completed.", ToDto(payment));
             
-            // Only enforce deadline for pending payments; allow retry on failed ones regardless of deadline
+            // Enforce deadline only for pending payments
             if (payment.PaymentStatus == EPaymentStatus.Pending && payment.DeadlineToPay < DateTime.UtcNow)
             {
                 payment.PaymentStatus = EPaymentStatus.Pending;

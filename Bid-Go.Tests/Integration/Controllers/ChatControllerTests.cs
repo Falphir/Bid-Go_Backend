@@ -16,6 +16,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for ChatController validating access control, message flow and chat creation.
+    /// </summary>
     public class ChatControllerTests
     {
         private static (ChatController controller, BidGoDbContext db, TestNotificationService notifications) BuildAsRole(string role, int userId)
@@ -131,12 +134,15 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetChat_ReturnsChat_WhenUserHasAccess()
         {
+            // Arrange
             var (controller, db, _) = BuildAsRole("Company", userId: 1);
             var (tr, chat, driver, company, _) = SeedAccepted(db);
 
+            // Act
             var result = await controller.GetChat(tr.TransportRequestId);
-            var ok = Assert.IsType<ObjectResult>(result);
 
+            // Assert
+            var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
 
             var chatDto = Assert.IsType<ChatDTO>(ok.Value);
@@ -146,6 +152,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetMessages_ReturnsMessages_WhenUserHasAccess()
         {
+            // Arrange
             var (controller, db, _) = BuildAsRole("Driver", userId: 1);
             var (tr, chat, driver, company, _) = SeedAccepted(db);
 
@@ -161,9 +168,11 @@ namespace Bid_Go.Tests.Integration.Controllers
 
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetMessages(chat.ChatId);
-            var ok = Assert.IsType<ObjectResult>(result);
 
+            // Assert
+            var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
 
             var messages = Assert.IsAssignableFrom<IEnumerable<ChatMessageDTO>>(ok.Value);
@@ -173,6 +182,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task SendMessage_AsCompany_SendsAndNotifies()
         {
+            // Arrange
             var (controller, db, notifications) = BuildAsRole("Company", userId: 2);
             var (tr, chat, driver, company, _) = SeedAccepted(db);
 
@@ -184,9 +194,11 @@ namespace Bid_Go.Tests.Integration.Controllers
 
             var dto = new MessageSentDTO { Context = "Mensagem para o driver" };
 
+            // Act
             var result = await controller.SendMessage(chat.ChatId, dto);
-            var ok = Assert.IsType<ObjectResult>(result);
 
+            // Assert
+            var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
 
             var stored = await db.Messages.Where(m => m.ChatId == chat.ChatId).ToListAsync();
@@ -197,6 +209,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task CreateChatFromAcceptedBid_Creates_WhenNotExists()
         {
+            // Arrange
             var (controller, db, _) = BuildAsRole("Company", userId: 3);
             var (tr, chat, driver, company, acceptedBid) = SeedAccepted(db);
 
@@ -204,9 +217,11 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.Chats.Remove(chat);
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.CreateChatFromAcceptedBid(tr.TransportRequestId);
-            var ok = Assert.IsType<ObjectResult>(result);
 
+            // Assert
+            var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
 
             var view = Assert.IsType<ViewChatDTO>(ok.Value);

@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Repositories.Review
 {
+    /// <summary>
+    /// Repository for storing and querying reviews for drivers and companies.
+    /// </summary>
     public class ReviewRequestRepository : IReviewRequestRepository
     {
         private readonly BidGoDbContext _context;
@@ -21,12 +24,18 @@ namespace Bid_Go_Backend.Repositories.Review
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get a transport request by identifier.
+        /// </summary>
         public async Task<TransportRequest?> GetTransportRequestAsync(int transportRequestId)
         {
             return await _context.TransportRequests
                 .FirstOrDefaultAsync(t => t.TransportRequestId == transportRequestId);
         }
 
+        /// <summary>
+        /// Check whether a company review already exists for a given service.
+        /// </summary>
         public async Task<bool> CompanyReviewExistsAsync(int transportRequestId, int companyId)
         {
             return await _context.Reviews
@@ -34,6 +43,9 @@ namespace Bid_Go_Backend.Repositories.Review
                 .AnyAsync(r => r.TransportRequestId == transportRequestId && r.CompanyId == companyId);
         }
 
+        /// <summary>
+        /// Check whether a driver review already exists for a given service.
+        /// </summary>
         public async Task<bool> DriverReviewExistsAsync(int transportRequestId, int driverId)
         {
             return await _context.Reviews
@@ -41,12 +53,18 @@ namespace Bid_Go_Backend.Repositories.Review
                 .AnyAsync(r => r.TransportRequestId == transportRequestId && r.DriverId == driverId);
         }
 
+        /// <summary>
+        /// Add a review and persist it.
+        /// </summary>
         public async Task AddReviewAsync(Data.Models.Review review)
         {
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Get a unified list of reviews for a service composed of company and driver reviews joined with user names.
+        /// </summary>
         public async Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId)
         {
             var transport = await _context.TransportRequests

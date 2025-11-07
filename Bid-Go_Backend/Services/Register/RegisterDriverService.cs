@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Services.Register
 {
+    /// <summary>
+    /// Service for driver registration including document uploads.
+    /// </summary>
     public class RegisterDriverService : IRegisterDriverService
     {
         private readonly IRegisterDriverRepository _repo;
@@ -20,6 +23,9 @@ namespace Bid_Go_Backend.Services.Register
             _cloudflareR2Service = cloudflareR2Service;
         }
 
+        /// <summary>
+        /// Register a driver after validating uniqueness and uploading required documents.
+        /// </summary>
         public async Task<(bool Success, string? Error, Driver? Driver)> RegisterAsync(RegisterDriverDTO dto)
         {
             if (await _repo.GetByEmailAsync(dto.Email) is not null)

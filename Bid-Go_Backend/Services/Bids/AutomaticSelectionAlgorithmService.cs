@@ -6,6 +6,9 @@ using System.Security.Cryptography;
 
 namespace Bid_Go_Backend.Services.Bids
 {
+    /// <summary>
+    /// Service that runs the automatic bid selection algorithm based on price and reputation.
+    /// </summary>
     public class AutomaticSelectionAlgorithmService : IAutomaticSelectionAlgorithmService
     {
         private readonly IAutomaticSelectionAlgorithmRepository _repo;
@@ -19,6 +22,11 @@ namespace Bid_Go_Backend.Services.Bids
             _notificationService = notificationService;
         }
 
+        /// <summary>
+        /// Execute the algorithm and accept the best eligible bid, sending notifications accordingly.
+        /// </summary>
+        /// <param name="transportRequestId">Transport request identifier.</param>
+        /// <returns>Tuple with success flag, error message when any, and the selected bid.</returns>
         public async Task<(bool Success, string? Message, Bid? SelectedBid)> ExecuteAsync(int transportRequestId)
         {
             var transportRequest = await _repo.GetTransportRequestWithBidsAsync(transportRequestId);
@@ -31,23 +39,18 @@ namespace Bid_Go_Backend.Services.Bids
             if (transportRequest.BiddingEndDate > DateTime.UtcNow)
                 return (false, "Bidding has not finished yet.", null);
 
-           /// if (transportRequest.Status == ERequestStatus.Canceled)
-              ///  return (false, "The transport request is canceled.", null);
-
+            // Only active requests can proceed
             if (transportRequest.Status != ERequestStatus.Active)
                 return (false, "The transport request is not active.", null);
 
-
-
+            // Only when there is no accepted bid already
             if (transportRequest.Bids.Any(b => b.Status == EBidStatus.Accepted))
                 return (false, "There is already an accepted bid for this request.", null);
-
-
 
             if (!transportRequest.Bids.Any())
                 return (false, "No bids submitted.", null);
 
-            // Reputações
+            // Reputation filter (>=3)
             var driverIds = transportRequest.Bids.Select(b => b.DriverId).Distinct();
             var reputations = await _repo.GetDriverReputationsAsync(driverIds);
 
@@ -58,7 +61,7 @@ namespace Bid_Go_Backend.Services.Bids
             if (!eligibleBids.Any())
                 return (false, "No eligible bids.", null);
 
-            // Seleção de bid
+            // Lowest price, then highest reputation, then smallest id
             var minPrice = eligibleBids.Min(b => b.Value);
             var lowestBids = eligibleBids.Where(b => b.Value == minPrice).ToList();
             var maxReputation = lowestBids.Max(b => reputations.GetValueOrDefault(b.DriverId, 0));
@@ -68,7 +71,7 @@ namespace Bid_Go_Backend.Services.Bids
             if (selectedBid.Status != EBidStatus.Pendent)
                 return (false, "The selected bid is not pending and cannot be accepted.", null);
 
-            // Atualizar estado
+            // Update states
             transportRequest.SelectedBidId = selectedBid.BidId;
             selectedBid.Status = EBidStatus.Accepted;
             transportRequest.Status = ERequestStatus.Pending;

@@ -10,9 +10,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-
-
-public class AutomaticSelectionAlgorithmServiceTests
+namespace Bid_Go.Tests.Unit.Services
+{
+    /// <summary>
+    /// Unit tests for AutomaticSelectionAlgorithmService covering validation and selection logic.
+    /// </summary>
+    public class AutomaticSelectionAlgorithmServiceTests
     {
         private Mock<IAutomaticSelectionAlgorithmRepository> _mockRepo;
         private Mock<INotificationService> _mockNotif;
@@ -56,11 +59,14 @@ public class AutomaticSelectionAlgorithmServiceTests
         [Fact]
         public async Task ExecuteAsync_ShouldReturnFalse_WhenTransportRequestNotFound()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetTransportRequestWithBidsAsync(1))
                      .ReturnsAsync((TransportRequest?)null);
 
+            // Act
             var (success, message, bid) = await _service.ExecuteAsync(1);
 
+            // Assert
             Assert.False(success);
             Assert.Equal("Transport request not found.", message);
             Assert.Null(bid);
@@ -211,3 +217,4 @@ public class AutomaticSelectionAlgorithmServiceTests
         Assert.Null(selectedBid);
         }
     }
+}

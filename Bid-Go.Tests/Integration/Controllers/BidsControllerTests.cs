@@ -15,6 +15,10 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests covering the main bid lifecycle endpoints of BidsController.
+    /// Focus: create, update, cancel and retrieval scenarios under authenticated driver context.
+    /// </summary>
     public class BidsControllerTests
     {
         private static (BidsController controller, BidGoDbContext db) BuildWithDriver(int driverId)
@@ -89,9 +93,9 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task AddBid_CreatesBid_ReturnsOk()
         {
+            // Arrange: controller + active transport request + DTO
             var (controller, db) = BuildWithDriver(driverId: 10);
             var tr = SeedTransportRequest(db);
-
             var dto = new AddBidDTO
             {
                 TransportRequestId = tr.TransportRequestId,
@@ -99,7 +103,10 @@ namespace Bid_Go.Tests.Integration.Controllers
                 DeliveryDeadline = DateTime.UtcNow.AddDays(2)
             };
 
+            // Act: invoke endpoint
             var result = await controller.AddBid(dto);
+
+            // Assert: created bid persisted with pending status
             var ok = Assert.IsType<OkObjectResult>(result);
             var bid = Assert.IsType<Bid>(ok.Value);
 
@@ -112,6 +119,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task UpdateBid_UpdatesValue_AndDeadline_WhenPending()
         {
+            // Arrange: seed bid then detach to avoid tracking conflicts
             var (controller, db) = BuildWithDriver(driverId: 11);
             var tr = SeedTransportRequest(db);
 
@@ -136,7 +144,10 @@ namespace Bid_Go.Tests.Integration.Controllers
                 DeliveryDeadline = DateTime.UtcNow.AddDays(1)
             };
 
+            // Act
             var result = await controller.UpdateBid(bid.BidId, dto);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var updated = Assert.IsType<Bid>(ok.Value);
 
@@ -146,6 +157,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task CancelBid_SetsStatusCanceled_WhenPending_AndOwned()
         {
+            // Arrange
             var (controller, db) = BuildWithDriver(driverId: 12);
             var tr = SeedTransportRequest(db);
 
@@ -164,7 +176,10 @@ namespace Bid_Go.Tests.Integration.Controllers
             // evitar conflito de tracking no update interno
             db.Entry(bid).State = EntityState.Detached;
 
+            // Act
             var result = await controller.CancelBid(bid.BidId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var fromDb = await db.Bids.FindAsync(bid.BidId);
 
@@ -174,6 +189,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetBidById_ReturnsOk_WhenExists()
         {
+            // Arrange
             var (controller, db) = BuildWithDriver(driverId: 13);
             var tr = SeedTransportRequest(db);
 
@@ -189,7 +205,10 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.Bids.Add(bid);
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetBidById(bid.BidId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var got = Assert.IsType<Bid>(ok.Value);
 
@@ -199,6 +218,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetBidsByTransportRequest_ReturnsOk_List()
         {
+            // Arrange
             var (controller, db) = BuildWithDriver(driverId: 14);
             var tr = SeedTransportRequest(db);
 
@@ -223,7 +243,10 @@ namespace Bid_Go.Tests.Integration.Controllers
 
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetBidsByTransportRequest(tr.TransportRequestId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var list = Assert.IsType<List<Bid>>(ok.Value);
 
@@ -233,6 +256,7 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetActiveBids_ReturnsProjectedList()
         {
+            // Arrange
             var (controller, db) = BuildWithDriver(driverId: 16);
             var tr = SeedTransportRequest(db);
 
@@ -269,7 +293,10 @@ namespace Bid_Go.Tests.Integration.Controllers
 
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetActiveBids(tr.TransportRequestId, orderBy: "value", descending: false);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var enumerable = Assert.IsAssignableFrom<IEnumerable<object>>(ok.Value);
             var anonList = enumerable.ToList();

@@ -7,6 +7,9 @@ using System.Security.Claims;
 
 namespace Bid_Go_Backend.Services
 {
+    /// <summary>
+    /// Service that manages chats and messages between company and driver for a service.
+    /// </summary>
     public class ChatService : IChatService
     {
         private readonly IChatRepository _chatRepository;
@@ -23,6 +26,9 @@ namespace Bid_Go_Backend.Services
             _notificationService = notificationService;
         }
 
+        /// <summary>
+        /// Retrieve a chat by transport request id ensuring the caller has access.
+        /// </summary>
         public async Task<(int StatusCode, object Body)> GetChat(int requestId, ClaimsPrincipal user)
         {
             var chat = await _chatRepository.GetChatByRequestIdAsync(requestId);
@@ -49,6 +55,9 @@ namespace Bid_Go_Backend.Services
             return (200, dto);
         }
 
+        /// <summary>
+        /// Retrieve messages for a chat ensuring the caller has access.
+        /// </summary>
         public async Task<(int StatusCode, object Body)> GetMessages(int chatId, ClaimsPrincipal user)
         {
             if (!await UserHasAccessToChat(user, chatId))
@@ -62,6 +71,9 @@ namespace Bid_Go_Backend.Services
             return (200, messages);
         }
 
+        /// <summary>
+        /// Send a message to a chat and notify the recipient.
+        /// </summary>
         public async Task<(int StatusCode, object Body)> SendMessage(int chatId, MessageSentDTO dto, ClaimsPrincipal user)
         {
             try
@@ -121,7 +133,7 @@ namespace Bid_Go_Backend.Services
 
                 var result = await _chatRepository.AddMessageAsync(message);
 
-          
+
                 await _notificationService.CreateAndSendAsync(
                     destinatarioId,
                     "Nova mensagem no chat.",
@@ -144,6 +156,9 @@ namespace Bid_Go_Backend.Services
             }
         }
 
+        /// <summary>
+        /// Create a chat for a transport request that has an accepted bid.
+        /// </summary>
         public async Task<(int StatusCode, object Body)> CreateChatFromAcceptedBid(int transportRequestId)
         {
             try

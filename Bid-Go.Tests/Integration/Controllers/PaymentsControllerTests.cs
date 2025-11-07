@@ -18,6 +18,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for PaymentsController covering process, retry and listing flows.
+    /// </summary>
     public class PaymentsControllerTests
     {
         private static (PaymentsController controller, BidGoDbContext db, Mock<IPaymentGateway> gatewayMock, TestNotificationService notifications) BuildAsCompany(int companyId)
@@ -122,21 +125,18 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task ProcessPayment_Successfully_ConfirmsPayment_AndNotifies()
         {
+            // Arrange
             var (controller, db, gateway, notifications) = BuildAsCompany(companyId: 10);
             var (company, driver, tr, bid) = SeedSelectedBid(db);
-
-            // authorize as the company owner
-            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim("userId", company.Id.ToString()),
-                new Claim("userType", "Company")
-            }, "TestAuth"));
-
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", company.Id.ToString()), new Claim("userType", "Company") }, "TestAuth"));
             gateway.Setup(g => g.ChargeAsync(It.IsAny<long>(), "eur", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()))
                 .ReturnsAsync(new ChargeResult(true, null));
-
             var dto = new CreatePaymentRequestDTO { TransportRequestId = tr.TransportRequestId, StripeToken = "tok_test" };
+
+            // Act
             var result = await controller.ProcessPayment(dto);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var payload = ok.Value as dynamic;
 
@@ -151,20 +151,18 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task ProcessPayment_Failed_ReturnsBadRequest()
         {
+            // Arrange
             var (controller, db, gateway, notifications) = BuildAsCompany(companyId: 11);
             var (company, driver, tr, bid) = SeedSelectedBid(db);
-
-            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim("userId", company.Id.ToString()),
-                new Claim("userType", "Company")
-            }, "TestAuth"));
-
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", company.Id.ToString()), new Claim("userType", "Company") }, "TestAuth"));
             gateway.Setup(g => g.ChargeAsync(It.IsAny<long>(), "eur", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()))
                 .ReturnsAsync(new ChargeResult(false, "declined"));
-
             var dto = new CreatePaymentRequestDTO { TransportRequestId = tr.TransportRequestId, StripeToken = "tok_test" };
+
+            // Act
             var result = await controller.ProcessPayment(dto);
+
+            // Assert
             var bad = Assert.IsType<BadRequestObjectResult>(result);
             var payment = await db.Payments.FirstAsync();
 
@@ -174,73 +172,40 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetPaymentsByUser_ReturnsList()
         {
+            // Arrange
             var (controller, db, gateway, notifications) = BuildAsCompany(companyId: 12);
             var (company, driver, tr, bid) = SeedSelectedBid(db);
-
-            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim("userId", company.Id.ToString()),
-                new Claim("userType", "Company")
-            }, "TestAuth"));
-
-            // create a confirmed payment directly
-            db.Payments.Add(new Payment
-            {
-                CompanyId = company.Id,
-                DriverId = driver.Id,
-                TransportRequestId = tr.TransportRequestId,
-                GrossValue = bid.Value,
-                Tax = Math.Round(bid.Value * 0.05m, 2),
-                NetValue = bid.Value - Math.Round(bid.Value * 0.05m, 2),
-                PaymentMethod = EPaymentMethod.Stripe,
-                PaymentStatus = EPaymentStatus.Confirmed,
-                CreatedAt = DateTime.UtcNow.AddHours(-1),
-                CompletedAt = DateTime.UtcNow
-            });
-
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", company.Id.ToString()), new Claim("userType", "Company") }, "TestAuth"));
+            // seed a confirmed payment
+            db.Payments.Add(new Payment { CompanyId = company.Id, DriverId = driver.Id, TransportRequestId = tr.TransportRequestId, GrossValue = bid.Value, Tax = Math.Round(bid.Value *0.05m,2), NetValue = bid.Value - Math.Round(bid.Value *0.05m,2), PaymentMethod = EPaymentMethod.Stripe, PaymentStatus = EPaymentStatus.Confirmed, CreatedAt = DateTime.UtcNow.AddHours(-1), CompletedAt = DateTime.UtcNow });
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.GetPaymentsByUser(company.Id);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var list = Assert.IsType<List<PaymentResultDTO>>(ok.Value);
-
             Assert.Single(list);
         }
 
         [Fact]
         public async Task Retry_Succeeds_UpdatesState_AndNotifies()
         {
+            // Arrange
             var (controller, db, gateway, notifications) = BuildAsCompany(companyId: 13);
             var (company, driver, tr, bid) = SeedSelectedBid(db);
-
-            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim("userId", company.Id.ToString()),
-                new Claim("userType", "Company")
-            }, "TestAuth"));
-
-            // create failed payment
-            var failed = new Payment
-            {
-                CompanyId = company.Id,
-                DriverId = driver.Id,
-                TransportRequestId = tr.TransportRequestId,
-                GrossValue = bid.Value,
-                Tax = Math.Round(bid.Value * 0.05m, 2),
-                NetValue = bid.Value - Math.Round(bid.Value * 0.05m, 2),
-                PaymentMethod = EPaymentMethod.Stripe,
-                PaymentStatus = EPaymentStatus.Failed,
-                FailureReason = "declined",
-                CreatedAt = DateTime.UtcNow.AddHours(-1)
-            };
-
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", company.Id.ToString()), new Claim("userType", "Company") }, "TestAuth"));
+            var failed = new Payment { CompanyId = company.Id, DriverId = driver.Id, TransportRequestId = tr.TransportRequestId, GrossValue = bid.Value, Tax = Math.Round(bid.Value *0.05m,2), NetValue = bid.Value - Math.Round(bid.Value *0.05m,2), PaymentMethod = EPaymentMethod.Stripe, PaymentStatus = EPaymentStatus.Failed, FailureReason = "declined", CreatedAt = DateTime.UtcNow.AddHours(-1) };
             db.Payments.Add(failed);
             await db.SaveChangesAsync();
-
             gateway.Setup(g => g.ChargeAsync(It.IsAny<long>(), "eur", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()))
                 .ReturnsAsync(new ChargeResult(true, null));
 
+            // Act
             var result = await controller.Retry(failed.PaymentId, new RetryPaymentRequestDTO { StripeToken = "tok_retry" });
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var fromDb = await db.Payments.FindAsync(failed.PaymentId);
 

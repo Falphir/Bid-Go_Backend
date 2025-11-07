@@ -15,6 +15,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
+    /// <summary>
+    /// Integration tests for manual bid acceptance and rejection endpoints.
+    /// </summary>
     public class AcceptAndRejectBidManualControllerTests
     {
         private static (AcceptAndRejectBidManualController controller, BidGoDbContext db, TestNotificationService notifications) BuildController(int companyId)
@@ -87,13 +90,16 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetBidsByRequest_ReturnsOk_WithList()
         {
+            // Arrange
             var (controller, db, _) = BuildController(companyId: 10);
             var (tr, b1, b2, b3) = SeedRequestWithBids(db, 10);
 
+            // Act
             var result = await controller.GetBidsByTransportRequest(tr.TransportRequestId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var list = Assert.IsType<List<Bid>>(ok.Value);
-
             Assert.Equal(3, list.Count);
         }
 

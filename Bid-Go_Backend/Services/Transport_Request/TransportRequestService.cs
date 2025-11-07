@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Services.Transport_Request
 {
+    /// <summary>
+    /// Service for CRUD and validation logic around transport requests.
+    /// </summary>
     public class TransportRequestService : ITransportRequestService
     {
         private readonly ITransportRequestRepository _repository;
@@ -19,6 +22,11 @@ namespace Bid_Go_Backend.Services.Transport_Request
             
         }
 
+        /// <summary>
+        /// Create a new transport request with image upload and validation rules.
+        /// </summary>
+        /// <param name="dto">Creation DTO.</param>
+        /// <param name="imageFile">Image file for the request.</param>
         public async Task<TransportRequest> CreateAsync(CreateTransportRequestDTO dto, IFormFile imageFile)
         {
 
@@ -65,6 +73,9 @@ namespace Bid_Go_Backend.Services.Transport_Request
             return await _repository.CreateAsync(request);
         }
 
+        /// <summary>
+        /// Update a draft transport request applying provided fields and optionally replacing the image.
+        /// </summary>
         public async Task<TransportRequest?> UpdateAsync(int id, UpdateTransportRequestDTO dto, IFormFile? imageFile)
 
         {
@@ -127,7 +138,9 @@ namespace Bid_Go_Backend.Services.Transport_Request
             return await _repository.UpdateAsync(id, existing);
         }
 
-
+        /// <summary>
+        /// Delete an active transport request.
+        /// </summary>
         public async Task<bool> DeleteAsync(int id)
         {
             var existing = await _repository.GetByIdAsync(id);
@@ -140,17 +153,21 @@ namespace Bid_Go_Backend.Services.Transport_Request
             return await _repository.DeleteAsync(id);
         }
 
+        /// <summary>
+        /// Get a transport request by identifier.
+        /// </summary>
         public async Task<TransportRequest?> GetByIdAsync(int id)
         {
             return await _repository.GetByIdAsync(id);
         }
 
+        /// <summary>
+        /// List transport requests for a company.
+        /// </summary>
         public async Task<List<TransportRequest>> GetByCompanyAsync(int companyId)
         {
             return await _repository.GetAllByCompanyAsync(companyId);
         }
-
-
 
     }
 }
