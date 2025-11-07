@@ -9,7 +9,8 @@ on:
       - changerequest/*
 
 permissions:
-      contents: read
+  id-token: write
+  contents: read
     
 env:
   PROJECT_PATH: Bid-Go_Backend/Bid-Go_Backend/Bid-Go.csproj
