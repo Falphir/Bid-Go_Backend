@@ -15,11 +15,11 @@ permissions:
     
 env:
   AZURE_WEBAPP_NAME: BidGoWebAPI
-  AZURE_WEBAPP_PACKAGE_PATH: "./Bid-Go_Backend/publish"
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
   DOTNET_VERSION: "8.x"
   SOLUTION_PATH: "Bid-Go_Backend.sln"
   API_PROJECT_PATH: "./Bid-Go_Backend/Bid-Go.csproj"
-  PUBLISH_DIR: "./Bid-Go_Backend/publish"
+  PUBLISH_DIR: "${{ github.workspace }}/publish"
 
 jobs:
   build-and-test:
@@ -40,7 +40,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore --no-build --property:PublishDir=${{ env.PUBLISH_DIR }}
+        run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-restore --no-build --o:PublishDir=${{ env.PUBLISH_DIR }}
 
       - name: Publish Artifacts
         uses: actions/upload-artifact@v4
