@@ -1,0 +1,7 @@
+Data\BidGoDbContext.cs:59:                .HasDiscriminator<string>("UserType")
+Data\Repositories\History\HistoryRepository.cs:39:                    .Where(u => u.UserType == "0")
+Migrations\20251007174001_teste.cs:34:                    UserType = table.Column<string>(type: "varchar(8)", maxLength: 8, nullable: false)
+Migrations\20251007174001_teste.Designer.cs:326:                    b.Property<string>("UserType")
+Migrations\20251007174001_teste.Designer.cs:338:                    b.HasDiscriminator<string>("UserType").HasValue("User");
+Migrations\BidGoDbContextModelSnapshot.cs:323:                    b.Property<string>("UserType")
+Migrations\BidGoDbContextModelSnapshot.cs:335:                    b.HasDiscriminator<string>("UserType").HasValue("User");
