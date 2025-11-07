@@ -10,8 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
+    /// <summary>
+    /// Integration tests for review submission and retrieval endpoints.
+    /// </summary>
     public class ReviewRequestControllerTests
     {
         private static (ReviewRequestController controller, BidGoDbContext db) Build()
@@ -83,28 +86,19 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task SubmitReview_Company_Succeeds_Then_Driver_Fails_Duplicate()
         {
+            // Arrange
             var (controller, db) = Build();
             var (company, driver, tr) = SeedCompletedRequest(db);
+            var dtoCompany = new ReviewRequestServiceDTO { TimeStamp = DateTime.UtcNow, Classification =4.5m, DriverId = driver.Id, CompanyId = company.Id, TransportRequestId = tr.TransportRequestId, Discriminator = "Company", ServiceQuality =5, ClientSuport =4 };
 
-            // company review ok
-            var dtoCompany = new ReviewRequestServiceDTO
-            {
-                TimeStamp = DateTime.UtcNow,
-                Classification = 4.5m,
-                DriverId = driver.Id,
-                CompanyId = company.Id,
-                TransportRequestId = tr.TransportRequestId,
-                Discriminator = "Company",
-                ServiceQuality = 5,
-                ClientSuport = 4
-            };
-
+            // Act + Assert first (success)
             var result1 = await controller.SubmitReview(dtoCompany);
             var ok = Assert.IsType<OkObjectResult>(result1);
 
-            // driver tries same type company -> invalid later
-            var dtoDupCompany = dtoCompany; // same company review again
-            var resultDup = await controller.SubmitReview(dtoDupCompany);
+            // Act duplicate
+            var resultDup = await controller.SubmitReview(dtoCompany);
+
+            // Assert duplicate conflict
             var bad = Assert.IsType<BadRequestObjectResult>(resultDup);
         }
 

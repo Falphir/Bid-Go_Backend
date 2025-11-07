@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Repositories.Chat
 {
+    /// <summary>
+    /// Data access for chat and message entities.
+    /// </summary>
     public class ChatRepository : IChatRepository
     {
         private readonly BidGoDbContext _context;
@@ -16,6 +19,9 @@ namespace Bid_Go_Backend.Repositories.Chat
 
         }
 
+        /// <summary>
+        /// Load a chat by transport request id including messages and transport request.
+        /// </summary>
         public async Task<Chats> GetChatByRequestIdAsync(int requestId)
         {
             return await _context.Chats
@@ -25,6 +31,9 @@ namespace Bid_Go_Backend.Repositories.Chat
         }
 
 
+        /// <summary>
+        /// Load a chat by id including its transport request.
+        /// </summary>
         public async Task<Chats> GetChatByIdAsync(int chatId)
         {
             return await _context.Chats
@@ -33,6 +42,9 @@ namespace Bid_Go_Backend.Repositories.Chat
         }
 
 
+        /// <summary>
+        /// Get messages for a chat as DTOs ordered by timestamp.
+        /// </summary>
         public async Task<IEnumerable<ChatMessageDTO>> GetMessagesAsync(int chatId)
         {
             return await _context.Messages
@@ -56,6 +68,9 @@ namespace Bid_Go_Backend.Repositories.Chat
             return message;
         }
 
+        /// <summary>
+        /// Update the chat status and persist changes.
+        /// </summary>
         public async Task UpdateChatStatusAsync(Chats chat, EChatStatus status)
         {
             chat.Status = status;
@@ -95,7 +110,7 @@ namespace Bid_Go_Backend.Repositories.Chat
                 .FirstOrDefaultAsync(c => c.TransportRequestId == transportRequestId);
 
             if (chat == null)
-                throw new KeyNotFoundException("Chat não encontrado.");
+                throw new KeyNotFoundException("Chat not found.");
 
             chat.Status = EChatStatus.Archived;
             await _context.SaveChangesAsync();

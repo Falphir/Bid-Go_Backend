@@ -8,6 +8,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for AcceptAndRejectBidManualService covering preconditions and state updates.
+    /// </summary>
     public class AcceptAndRejectBidManualServiceTests
     {
         private readonly Mock<IAcceptAndRejectBidManualRepository> _mockRepo;
@@ -57,32 +60,42 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task AcceptBidAsync_Should_Throw_When_Bid_NotFound()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Bid)null);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.AcceptBidAsync(1));
         }
 
         [Fact]
         public async Task AcceptBidAsync_Should_Throw_When_Bid_Not_Pending()
         {
+            // Arrange
             var bid = new Bid { BidId = 1, Status = EBidStatus.Accepted };
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(bid);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.AcceptBidAsync(1));
         }
 
         [Fact]
         public async Task AcceptBidAsync_Should_Throw_When_TransportRequest_Null()
         {
+            // Arrange
             var bid = new Bid { BidId = 1, Status = EBidStatus.Pendent, TransportRequest = null };
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(bid);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.AcceptBidAsync(1));
         }
 
         [Fact]
         public async Task AcceptBidAsync_Should_Throw_When_TransportRequest_Not_Active()
         {
+            // Arrange
             var bid = new Bid
             {
                 BidId = 1,
@@ -91,12 +104,15 @@ namespace Bid_Go.Tests.Unit.Services
             };
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(bid);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.AcceptBidAsync(1));
         }
 
         [Fact]
         public async Task AcceptBidAsync_Should_Throw_When_Already_Accepted_Bid_Exists()
         {
+            // Arrange
             var bid = new Bid
             {
                 BidId = 1,
@@ -109,6 +125,8 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.Setup(r => r.GetByTransportRequestAndStatusAsync(10, EBidStatus.Accepted))
                      .ReturnsAsync(new List<Bid> { new Bid() });
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.AcceptBidAsync(1));
         }
 
@@ -163,15 +181,23 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task RejectBidAsync_Should_Throw_When_Bid_NotFound()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Bid)null);
+
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.RejectBidAsync(1));
         }
 
         [Fact]
         public async Task RejectBidAsync_Should_Throw_When_Bid_Not_Pending()
         {
+            // Arrange
             var bid = new Bid { BidId = 1, Status = EBidStatus.Accepted };
             _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(bid);
+
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.RejectBidAsync(1));
         }
 

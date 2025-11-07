@@ -20,9 +20,13 @@ namespace Bid_Go_Backend.Controllers
             _authorizationService = authorizationService;
         }
 
-
+        /// <summary>
+        /// Get all bids for a transport request. Restricted to the owning company.
+        /// </summary>
+        /// <param name="transportRequestId">Transport request identifier.</param>
+        /// <returns>List of bids or 404 when none found.</returns>
         [Authorize(Policy = "CompanyOnly")]
-        [HttpGet("by-request/{transportRequestId}")]
+        [HttpGet("byrequest/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
         {
             var companyId = int.Parse(User.FindFirst("userId")!.Value);
@@ -38,8 +42,11 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
+        /// <summary>
+        /// Get bids filtered by transport request and status. Restricted to the owning company.
+        /// </summary>
         [Authorize(Policy = "CompanyOnly")]
-        [HttpGet("by-request/{transportRequestId}/status/{status}")]
+        [HttpGet("byrequest/{transportRequestId}/{status}")]
         public async Task<IActionResult> GetBidsByTransportRequestAndStatus(int transportRequestId, EBidStatus status)
         {
             var companyId = int.Parse(User.FindFirst("userId")!.Value);
@@ -55,6 +62,9 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
+        /// <summary>
+        /// Accept a bid. The controller checks ownership and delegates acceptance logic to the service layer.
+        /// </summary>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPost("{id}/accept")]
         public async Task<IActionResult> AcceptBid(int id)
@@ -80,6 +90,9 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Reject a bid. The controller checks ownership and delegates rejection logic to the service layer.
+        /// </summary>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPost("{id}/reject")]
         public async Task<IActionResult> RejectBid(int id)

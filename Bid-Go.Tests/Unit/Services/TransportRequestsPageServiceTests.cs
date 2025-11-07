@@ -9,8 +9,11 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Bid_Go.Tests.Unit.Services
+namespace Bid_Go_Backend.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for TransportRequestsPageService validating filtering logic and repository delegation.
+    /// </summary>
     public class TransportRequestsPageServiceTests
     {
         private readonly Mock<ITransportRequestsPageRepository> _repositoryMock;
@@ -29,10 +32,10 @@ namespace Bid_Go.Tests.Unit.Services
         {
             // Arrange
             var list = new List<TransportRequest>
-        {
-            new TransportRequest { TransportRequestId = 1, Origin = "Lisboa", Destination = "Porto" },
-            new TransportRequest { TransportRequestId = 2, Origin = "Lisboa", Destination = "Braga" }
-        };
+            {
+                new TransportRequest { TransportRequestId = 1, Origin = "Lisboa", Destination = "Porto" },
+                new TransportRequest { TransportRequestId = 2, Origin = "Lisboa", Destination = "Braga" }
+            };
             _repositoryMock.Setup(r => r.GetActiveAsync("Lisboa", null, null, "asc"))
                            .ReturnsAsync(list);
 

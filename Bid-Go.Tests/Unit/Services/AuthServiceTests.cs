@@ -7,12 +7,15 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Bid_Go.Tests.Unit.Services
+namespace Bid_Go_Backend.Tests.Unit.Services
 {
-
+    /// <summary>
+    /// Unit tests for AuthService including login, recovery and JWT generation.
+    /// </summary>
     public class AuthServiceTests
     {
         private readonly Mock<IUserRepository> _userRepoMock;
@@ -41,10 +44,13 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task LoginAsync_ShouldReturnFalse_WhenUserNotFound()
         {
+            // Arrange
             _userRepoMock.Setup(r => r.GetByEmailAsync("teste@test.com")).ReturnsAsync((User)null);
 
+            // Act
             var result = await _service.LoginAsync("teste@test.com", "123");
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("Email inválido.", result.Message);
         }
@@ -52,7 +58,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task LoginAsync_ShouldReturnFalse_WhenPasswordIncorrect()
         {
-
+            // Arrange
             var user = new Driver
             {
                 Id = 1,
@@ -65,8 +71,10 @@ namespace Bid_Go.Tests.Unit.Services
             };
             _userRepoMock.Setup(r => r.GetByEmailAsync("teste@test.com")).ReturnsAsync(user);
 
+            // Act
             var result = await _service.LoginAsync("teste@test.com", "wrong");
 
+            // Assert
             Assert.False(result.Success);
             Assert.Equal("Password incorreta.", result.Message);
         }
@@ -75,6 +83,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task RecoverPasswordAsync_ShouldSendEmailAndCacheToken_WhenUserExists()
         {
+            // Arrange
             var user = new Driver
             {
                 Id = 1,
@@ -89,8 +98,10 @@ namespace Bid_Go.Tests.Unit.Services
             _emailMock.Setup(e => e.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                       .Returns(Task.CompletedTask);
 
+            // Act
             var result = await _service.RecoverPasswordAsync("teste@test.com");
 
+            // Assert
             Assert.Equal(200, result.StatusCode);
             Assert.Equal("Instruções enviadas por email.", result.Message);
         }
@@ -98,6 +109,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ResetPasswordAsync_ShouldUpdatePassword_WhenTokenValid()
         {
+            // Arrange
             var user = new Driver
             {
                 Id = 1,
@@ -113,8 +125,10 @@ namespace Bid_Go.Tests.Unit.Services
             _userRepoMock.Setup(r => r.GetByEmailAsync(user.Email)).ReturnsAsync(user);
             _userRepoMock.Setup(r => r.UpdateAsync(It.IsAny<User>())).ReturnsAsync(user);
 
+            // Act
             var result = await _service.ResetPasswordAsync(token, "newpassword");
 
+            // Assert
             Assert.Equal(200, result.StatusCode);
             Assert.Equal("Password alterada com sucesso.", result.Message);
             Assert.True(BCrypt.Net.BCrypt.Verify("newpassword", user.Password));

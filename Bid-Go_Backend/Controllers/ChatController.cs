@@ -9,7 +9,7 @@ using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationS
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/chats")]
     [Authorize]
     public class ChatController : ControllerBase
     {
@@ -22,6 +22,11 @@ namespace Bid_Go_Backend.Controllers
             _authorizationService = authorizationService;
         }
 
+        /// <summary>
+        /// Retrieve the chat associated with a transport request.
+        /// </summary>
+        /// <param name="requestId">Transport request identifier.</param>
+        /// <returns>Chat object or an appropriate error response.</returns>
         [HttpGet("{requestId}")]
         public async Task<IActionResult> GetChat(int requestId)
         {
@@ -29,9 +34,15 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, result.Body);
         }
 
+        /// <summary>
+        /// Send a message to a chat. User must own the chat.
+        /// </summary>
+        /// <param name="chatId">Chat identifier.</param>
+        /// <param name="dto">Message payload.</param>
+        /// <returns>Operation result and HTTP status.</returns>
         [Authorize]
         [HttpPost("{chatId}/messages")]
-        public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageDTO dto)
+        public async Task<IActionResult> SendMessage(int chatId, [FromBody] MessageSentDTO dto)
         {
 
             var userId = int.Parse(User.FindFirst("userId")?.Value);
@@ -45,6 +56,11 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, result.Body);
         }
 
+        /// <summary>
+        /// Get messages for a chat. User must own the chat.
+        /// </summary>
+        /// <param name="chatId">Chat identifier.</param>
+        /// <returns>List of messages or an error.</returns>
         [Authorize]
         [HttpGet("{chatId}/get_messages")]
         public async Task<IActionResult> GetMessages(int chatId)
@@ -60,6 +76,11 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, result.Body);
         }
 
+        /// <summary>
+        /// Create a chat after a bid is accepted for the given transport request.
+        /// </summary>
+        /// <param name="transportRequestId">Transport request identifier.</param>
+        /// <returns>Created chat info or an error.</returns>
         [Authorize]
         [HttpPost("create/{transportRequestId}")]
         public async Task<IActionResult> CreateChatFromAcceptedBid(int transportRequestId)

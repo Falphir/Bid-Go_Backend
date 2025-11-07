@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Services.Review
 {
+    /// <summary>
+    /// Service that validates and stores reviews for drivers and companies.
+    /// </summary>
     public class ReviewRequestService : IReviewRequestService
     {
         private readonly IReviewRequestRepository _repository;
@@ -21,6 +24,10 @@ namespace Bid_Go_Backend.Services.Review
             _logger = logger;
         }
 
+        /// <summary>
+        /// Submit a review for a completed transport service.
+        /// </summary>
+        /// <param name="reviewDto">DTO carrying review payload and discriminator.</param>
         public async Task<bool> SubmitReviewAsync(ReviewRequestServiceDTO reviewDto)
         {
             _logger.LogDebug("Submitting review for transport request {RequestId}", reviewDto.TransportRequestId);
@@ -93,6 +100,9 @@ namespace Bid_Go_Backend.Services.Review
             return true;
         }
 
+        /// <summary>
+        /// Get reviews by transport request identifier.
+        /// </summary>
         public async Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId)
         {
             _logger.LogDebug("Getting reviews for transport request {RequestId}", transportRequestId);

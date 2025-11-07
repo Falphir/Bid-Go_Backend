@@ -15,6 +15,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for PaymentService covering process, retry, and queries with gateway and repository interactions.
+    /// </summary>
     public class PaymentServiceTests
     {
         private static CreatePaymentRequestDTO MakeCreateDto(int trId = 100, string token = "tok_test")
@@ -69,6 +72,12 @@ namespace Bid_Go.Tests.Unit.Services
                     .Returns(Task.CompletedTask);
 
             payments.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+            gateway.Setup(g => g.ChargeAsync(
+                    It.IsAny<long>(), "eur", It.IsAny<string>(),
+                    It.Is<string>(d => d.Contains(tr.TransportRequestId.ToString())),
+                    It.IsAny<IDictionary<string, string>>()));
+
 
             gateway.Setup(g => g.ChargeAsync(
                     It.IsAny<long>(), "eur", It.IsAny<string>(),
@@ -137,7 +146,12 @@ namespace Bid_Go.Tests.Unit.Services
 
             gateway.Setup(g => g.ChargeAsync(
                     It.IsAny<long>(), "eur", It.IsAny<string>(),
-                    It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()))
+                    It.IsAny<string>(), It.IsAny<IDictionary<string, string>>()));
+
+
+            gateway.Setup(g => g.ChargeAsync(
+                    It.IsAny<long>(), "eur", It.IsAny<string>(),
+                    It.IsAny<string>(), It.IsAny<IDictionary<string, string>>() ))
                    .ReturnsAsync(new ChargeResult(false, "declined"));
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
@@ -160,6 +174,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task ProcessPayment_ShouldThrow_WhenTransportRequestNotFound()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -170,12 +185,15 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => sut.ProcessPaymentAsync(MakeCreateDto()));
         }
 
         [Fact]
         public async Task ProcessPayment_ShouldThrow_WhenNoSelectedBid()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -187,12 +205,15 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => sut.ProcessPaymentAsync(MakeCreateDto(tr.TransportRequestId)));
         }
 
         [Fact]
         public async Task ProcessPayment_ShouldThrow_WhenSelectedBidNotFound()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -205,12 +226,15 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => sut.ProcessPaymentAsync(MakeCreateDto(tr.TransportRequestId)));
         }
 
         [Fact]
         public async Task ProcessPayment_ShouldThrow_WhenSelectedBidDoesNotBelongToTR()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -225,12 +249,15 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => sut.ProcessPaymentAsync(MakeCreateDto(tr.TransportRequestId)));
         }
 
         [Fact]
         public async Task GetPaymentsByUserAsync_ShouldMapToDto()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -247,8 +274,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
             var result = await sut.GetPaymentsByUserAsync(777);
 
+            // Assert
             Assert.Equal(2, result.Count);
             Assert.Contains(result, p => p.PaymentId == 1 && p.GrossValue == 100m);
             Assert.Contains(result, p => p.PaymentId == 2 && p.GrossValue == 200m);
@@ -257,6 +286,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task RetryPayment_ShouldThrow_WhenPaymentNotFound()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -267,12 +297,15 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => sut.RetryPaymentAsync(999, "tok_retry"));
         }
 
         [Fact]
         public async Task RetryPayment_ShouldReturnFalse_WhenAlreadyConfirmed()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -286,8 +319,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
 
+            // Assert
             Assert.False(ok);
             Assert.Equal("This payment has already been completed.", error);
             Assert.Equal(EPaymentStatus.Confirmed, result!.Status);
@@ -300,6 +335,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task RetryPayment_ShouldReturnFalse_WhenDeadlinePassed()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -315,8 +351,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
 
+            // Assert
             Assert.False(ok);
             Assert.Equal("The payment deadline has passed. Please create a new payment.", error);
             Assert.Equal(EPaymentStatus.Pending, payment.PaymentStatus);
@@ -331,6 +369,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task RetryPayment_ShouldConfirm_AndNotify_OnGatewaySuccess()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -350,14 +389,16 @@ namespace Bid_Go.Tests.Unit.Services
                     It.IsAny<IDictionary<string, string>>()))
                    .ReturnsAsync(new ChargeResult(true, null));
 
-        
+
             var transportRequest = new TransportRequest { TransportRequestId = 100, Status = ERequestStatus.Pending };
             trs.Setup(r => r.GetByIdAsync(payment.TransportRequestId)).ReturnsAsync(transportRequest);
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
 
+            // Assert
             Assert.True(ok);
             Assert.Null(error);
             Assert.Equal(EPaymentStatus.Confirmed, payment.PaymentStatus);
@@ -378,6 +419,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task RetryPayment_ShouldFail_AndNotNotify_OnGatewayFailure()
         {
+            // Arrange
             var payments = new Mock<IPaymentRepository>();
             var bids = new Mock<IBidsService>();
             var trs = new Mock<ITransportRequestRepository>();
@@ -403,8 +445,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             var sut = new PaymentService(payments.Object, bids.Object, trs.Object, notifs.Object, gateway.Object);
 
+            // Act
             var (ok, error, result) = await sut.RetryPaymentAsync(payment.PaymentId, "tok_retry");
 
+            // Assert
             Assert.False(ok);
             Assert.Equal("declined", error);
             Assert.Equal(EPaymentStatus.Failed, payment.PaymentStatus);

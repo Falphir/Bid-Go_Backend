@@ -12,6 +12,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for RegisterCompanyService covering uniqueness and hashing rules.
+    /// </summary>
     public class RegisterCompanyServiceTests
     {
         private static RegisterCompanyDTO MakeDto() => new RegisterCompanyDTO

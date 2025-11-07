@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -20,6 +20,11 @@ namespace Bid_Go_Backend.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Initiates a password recovery flow by sending a recovery email to the provided address.
+        /// </summary>
+        /// <param name="request">Contains the email to recover the password for.</param>
+        /// <returns>HTTP result indicating success or failure of the recovery initiation.</returns>
         [HttpPost("recover-password")]
         public async Task<IActionResult> RecoverPassword([FromBody] RecoverPasswordRequestDTO request)
         {
@@ -27,6 +32,11 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
+        /// <summary>
+        /// Resets a user's password using a valid recovery token.
+        /// </summary>
+        /// <param name="request">Token and new password payload.</param>
+        /// <returns>HTTP result with operation message.</returns>
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
         {
@@ -34,6 +44,11 @@ namespace Bid_Go_Backend.Controllers
             return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
+        /// <summary>
+        /// Authenticates a user and returns a JWT token when credentials are valid.
+        /// </summary>
+        /// <param name="request">Login credentials (email and password).</param>
+        /// <returns>JWT token and expiration or 401 Unauthorized on failure.</returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
@@ -49,6 +64,13 @@ namespace Bid_Go_Backend.Controllers
             });
         }
 
+        /// <summary>
+        /// Returns the claims present in the authenticated user's token.
+        /// </summary>
+        /// <remarks>
+        /// Useful for debugging tokens from the client side; no business logic here.
+        /// </remarks>
+        /// <returns>List of claim type/value pairs.</returns>
         [HttpGet("me")]
         [Authorize]
         public IActionResult Me()
@@ -66,14 +88,20 @@ namespace Bid_Go_Backend.Controllers
             });
         }
 
+        /// <summary>
+        /// Sample endpoint restricted to company users. Kept for authorization testing.
+        /// </summary>
         [HttpGet("company-endpoint")]
         [Authorize(Policy = "CompanyOnly")]
         public IActionResult CompanyEndpoint() =>
-            Ok(new { message = "Apenas Companies conseguem ver isto!" });
+            Ok(new { message = "Only companies can access this endpoint." });
 
+        /// <summary>
+        /// Sample endpoint restricted to driver users. Kept for authorization testing.
+        /// </summary>
         [HttpGet("driver-endpoint")]
         [Authorize(Policy = "DriverOnly")]
         public IActionResult DriverEndpoint() =>
-            Ok(new { message = "Apenas Drivers conseguem ver isto!" });
+            Ok(new { message = "Only drivers can access this endpoint." });
     }
 }

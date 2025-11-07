@@ -22,20 +22,23 @@ namespace Bid_Go_Backend.Controllers
         }
 
         /// <summary>
-        /// Processa um pagamento para o TransportRequest (usa o SelectedBid do TR).
+        /// Process a payment for a transport request using the request's selected bid.
         /// </summary>
+        /// <remarks>
+        /// Permission checks are performed at the controller level; the payment gateway interaction happens in the payment service.
+        /// </remarks>
+        /// <param name="dto">Payment request payload</param>
+        /// <returns>Payment result or error information.</returns>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPost]
         public async Task<IActionResult> ProcessPayment([FromBody] CreatePaymentRequestDTO dto)
         {
-
 
             var companyId = int.Parse(User.FindFirst("userId")!.Value);
 
             var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, dto.TransportRequestId);
             if (!hasPermission)
                 return Forbid();
-
 
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -60,8 +63,10 @@ namespace Bid_Go_Backend.Controllers
         }
 
         /// <summary>
-        /// Lista pagamentos por utilizador (CompanyId ou DriverId).
+        /// Get payments associated with a user (company or driver).
         /// </summary>
+        /// <param name="userId">User identifier</param>
+        /// <returns>List of payments</returns>
         [Authorize(Policy = "CompanyOnly")]
         [HttpGet("user/{userId:int}")]
         public async Task<IActionResult> GetPaymentsByUser(int userId)
@@ -71,8 +76,11 @@ namespace Bid_Go_Backend.Controllers
         }
 
         /// <summary>
-        /// Faz retry de um pagamento existente.
+        /// Retry a failed payment using a new Stripe token.
         /// </summary>
+        /// <param name="paymentId">Payment identifier</param>
+        /// <param name="dto">Retry payload containing a Stripe token</param>
+        /// <returns>Result of retry attempt</returns>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPost("{paymentId:int}/retry")]
         public async Task<IActionResult> Retry(int paymentId, [FromBody] RetryPaymentRequestDTO dto)

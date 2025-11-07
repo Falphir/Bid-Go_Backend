@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Controllers
 {
-   
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/reviewRequest")]
     [Authorize]
     public class ReviewRequestController : ControllerBase
     {
@@ -20,7 +19,15 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
-        [HttpPost("submit-review")]
+        /// <summary>
+        /// Submit a review for a transport request or driver/company.
+        /// </summary>
+        /// <remarks>
+        /// Validation and business rules are handled in the service layer; controller translates exceptions into HTTP responses.
+        /// </remarks>
+        /// <param name="reviewDTO">Review payload</param>
+        /// <returns>Success message or error details</returns>
+        [HttpPost("submitReview")]
         public async Task<IActionResult> SubmitReview([FromBody] ReviewRequestServiceDTO reviewDTO)
         {
             try
@@ -28,11 +35,11 @@ namespace Bid_Go_Backend.Controllers
                 bool result = await _service.SubmitReviewAsync(reviewDTO);
                 if (result)
                 {
-                    return Ok(new { message = "Review submetida com Sucesso." });
+                    return Ok(new { message = "Review submitted successfully." });
                 }
                 else
                 {
-                    return BadRequest(new { message = "Erro ao submeter a Review." });
+                    return BadRequest(new { message = "Failed to submit review." });
                 }
             }
             catch (InvalidOperationException ex)
@@ -45,12 +52,16 @@ namespace Bid_Go_Backend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado.", detail = ex.Message });
+                return StatusCode(500, new { message = "An unexpected error occurred.", detail = ex.Message });
             }
         }
 
-
-        [HttpGet("avaliacoes/{request_id}")]
+        /// <summary>
+        /// Get reviews associated with a transport request.
+        /// </summary>
+        /// <param name="request_id">Transport request identifier</param>
+        /// <returns>List of reviews or an error</returns>
+        [HttpGet("reviews/{request_id}")]
         public async Task<IActionResult> GetReviewsByService(int request_id)
         {
             try
@@ -64,7 +75,7 @@ namespace Bid_Go_Backend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado.", detail = ex.Message });
+                return StatusCode(500, new { message = "An unexpected error occurred.", detail = ex.Message });
             }
         }
     }

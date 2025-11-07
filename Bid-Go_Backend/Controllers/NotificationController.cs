@@ -19,7 +19,16 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
-        // GET /api/notifications?userId=1&type=BidAccepted&order=desc
+        /// <summary>
+        /// Retrieve notifications for a user with optional filtering by type and ordering.
+        /// </summary>
+        /// <remarks>
+        /// The endpoint supports optional query parameters for notification type and ordering. Paging is recommended for large result sets but not implemented here.
+        /// </remarks>
+        /// <param name="userId">User identifier to retrieve notifications for.</param>
+        /// <param name="type">Optional notification type filter.</param>
+        /// <param name="order">Sort order ("asc" or "desc"). Default is "desc".</param>
+        /// <returns>List of notifications matching the filters.</returns>
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetNotifications(

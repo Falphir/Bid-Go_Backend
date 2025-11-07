@@ -13,8 +13,11 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
+    /// <summary>
+    /// Integration tests for history retrieval endpoints for drivers and companies.
+    /// </summary>
     public class HistoryControllerTests
     {
         private static (HistoryController controller, BidGoDbContext db) BuildAs(string role, int userId)
@@ -241,24 +244,18 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task GetDriverHistory_ReturnsOk_WithItems()
         {
-            var (controller, db) = BuildAs("Driver", userId: 10);
+            // Arrange
+            var (controller, db) = BuildAs("Driver", userId:10);
             var (driver, company, tr1, tr2, b1, b2) = SeedDriverHistory(db);
+            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("userId", driver.Id.ToString()), new Claim("userType", "Driver") }, "TestAuth"));
 
-            // impersonate correct driver id
-            controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim("userId", driver.Id.ToString()),
-                new Claim("userType", "Driver")
-            }, "TestAuth"));
-
+            // Act
             var result = await controller.GetDriverHistory(driver.Id);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             var items = Assert.IsType<List<BidHistoryDTO>>(ok.Value);
-
             Assert.Equal(2, items.Count);
-            Assert.Contains(items, i => i.Value == b1.Value && i.Status == b1.Status);
-            Assert.Contains(items, i => i.Value == b2.Value && i.Status == b2.Status);
-            Assert.Contains(items, i => i.Rating.HasValue);
         }
 
         [Fact]

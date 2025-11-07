@@ -11,6 +11,9 @@ using Xunit;
 
 namespace Bid_Go.Tests.Unit.Services
 {
+    /// <summary>
+    /// Unit tests for HistoryService delegating to repository and logging.
+    /// </summary>
     public class HistoryServiceTests
     {
         private readonly Mock<IHistoryRepository> _mockRepo;
@@ -28,6 +31,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetDriverHistoryAsync_ShouldReturnList_WhenRepositoryReturnsData()
         {
+            // Arrange
             var expected = new List<BidHistoryDTO>
             {
                 new BidHistoryDTO
@@ -44,8 +48,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             _mockRepo.Setup(r => r.GetDriverHistoryAsync(1)).ReturnsAsync(expected);
 
+            // Act
             var result = await _service.GetDriverHistoryAsync(1);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal("Co", result[0].CompanyName);
@@ -54,18 +60,24 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetDriverHistoryAsync_ShouldReturnNull_WhenRepositoryReturnsNull()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetDriverHistoryAsync(2)).ReturnsAsync((List<BidHistoryDTO>?)null);
 
+            // Act
             var result = await _service.GetDriverHistoryAsync(2);
 
+            // Assert
             Assert.Null(result);
         }
 
         [Fact]
         public async Task GetDriverHistoryAsync_ShouldPropagateException_WhenRepositoryThrows()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetDriverHistoryAsync(3)).ThrowsAsync(new Exception("fail"));
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.GetDriverHistoryAsync(3));
         }
 
@@ -73,6 +85,7 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetTransportHistoryAsync_ShouldReturnList_WhenRepositoryReturnsData()
         {
+            // Arrange
             var expected = new List<TransportHistoryDTO>
             {
                 new TransportHistoryDTO
@@ -89,8 +102,10 @@ namespace Bid_Go.Tests.Unit.Services
 
             _mockRepo.Setup(r => r.GetTransportHistoryAsync(10)).ReturnsAsync(expected);
 
+            // Act
             var result = await _service.GetTransportHistoryAsync(10);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Single(result);
             Assert.Equal(1, result[0].TransportRequestId);
@@ -99,10 +114,13 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetTransportHistoryAsync_ShouldReturnEmpty_WhenRepositoryReturnsEmptyList()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetTransportHistoryAsync(11)).ReturnsAsync(new List<TransportHistoryDTO>());
 
+            // Act
             var result = await _service.GetTransportHistoryAsync(11);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -110,8 +128,11 @@ namespace Bid_Go.Tests.Unit.Services
         [Fact]
         public async Task GetTransportHistoryAsync_ShouldPropagateException_WhenRepositoryThrows()
         {
+            // Arrange
             _mockRepo.Setup(r => r.GetTransportHistoryAsync(12)).ThrowsAsync(new Exception("fail"));
 
+            // Act
+            // Assert
             await Assert.ThrowsAsync<Exception>(() => _service.GetTransportHistoryAsync(12));
         }
     }

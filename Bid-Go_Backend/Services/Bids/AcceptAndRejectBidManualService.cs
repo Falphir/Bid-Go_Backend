@@ -5,6 +5,9 @@ using Bid_Go_Backend.Services.Interfaces;
 
 namespace Bid_Go_Backend.Services.Bids
 {
+    /// <summary>
+    /// Service allowing manual acceptance or rejection of bids by the company.
+    /// </summary>
     public class AcceptAndRejectBidManualService : IAcceptAndRejectBidManualService
     {
         private readonly IAcceptAndRejectBidManualRepository _repo;
@@ -16,14 +19,26 @@ namespace Bid_Go_Backend.Services.Bids
             _notificationService = notificationService;
         }
 
+        /// <summary>
+        /// Get a bid by identifier.
+        /// </summary>
         public Task<Bid?> GetBidByIdAsync(int id) => _repo.GetByIdAsync(id);
 
+        /// <summary>
+        /// List bids for a transport request.
+        /// </summary>
         public Task<List<Bid>> GetBidsByTransportRequestAsync(int transportRequestId) =>
             _repo.GetByTransportRequestAsync(transportRequestId);
 
+        /// <summary>
+        /// List bids for a transport request filtered by status.
+        /// </summary>
         public Task<List<Bid>> GetBidsByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status) =>
     _repo.GetByTransportRequestAndStatusAsync(transportRequestId, status);
 
+        /// <summary>
+        /// Accept a bid, reject other pending bids, and send notifications.
+        /// </summary>
         public async Task AcceptBidAsync(int id)
         {
             var bid = await _repo.GetByIdAsync(id);
@@ -39,19 +54,17 @@ namespace Bid_Go_Backend.Services.Bids
             if (bid.TransportRequest.Status != ERequestStatus.Active)
                 throw new Exception("The transport request is not active.");
 
-            // Verifica se já existe uma bid aceita
+            // Ensure there is no previously accepted bid
             bool alreadyAccepted = (await _repo.GetByTransportRequestAndStatusAsync(bid.TransportRequestId, EBidStatus.Accepted)).Any();
             if (alreadyAccepted)
                 throw new Exception("There is already an accepted bid for this request");
 
-            // Aceita a bid
+            // Accept the bid
             bid.Status = EBidStatus.Accepted;
-
             bid.TransportRequest.Status = ERequestStatus.Pending;
-
             bid.TransportRequest.SelectedBidId = bid.BidId;
 
-            // Rejeita outras bids pendentes
+            // Reject other pending bids
             var otherBids = (await _repo.GetByTransportRequestAsync(bid.TransportRequestId))
                             .Where(b => b.BidId != id && b.Status == EBidStatus.Pendent)
                             .ToList();
@@ -59,11 +72,9 @@ namespace Bid_Go_Backend.Services.Bids
             foreach (var other in otherBids)
                 other.Status = EBidStatus.Rejected;
 
-            
-
             await _repo.SaveChangesAsync();
 
-            // Notificações
+            // Notifications
             await _notificationService.CreateAndSendAsync(
             bid.DriverId,
             "Your bid was accepted.",
@@ -84,6 +95,9 @@ namespace Bid_Go_Backend.Services.Bids
             }
         }
 
+        /// <summary>
+        /// Reject a bid and notify the driver.
+        /// </summary>
         public async Task RejectBidAsync(int id)
         {
             var bid = await _repo.GetByIdAsync(id);

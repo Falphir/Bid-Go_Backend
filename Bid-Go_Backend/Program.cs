@@ -44,9 +44,7 @@ using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-// Adicionar controllers
+// Add controllers
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
@@ -57,10 +55,19 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "BidGo",
-        Version = "v1"
+        Version = "v1",
+        Description = "BidGo API - Transport bidding platform"
     });
 
-    // Configuração para usar JWT no Swagger UI
+    // Include XML comments (requires <GenerateDocumentationFile>true</GenerateDocumentationFile> in csproj)
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (System.IO.File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+
+    // Configuration to use JWT in Swagger UI
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -68,7 +75,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Insira 'Bearer {token}'"
+        Description = "Enter 'Bearer {token}'"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -113,24 +120,17 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
-
-
-
-
-
 // Authorization
 builder.Services.AddAuthorization(options =>
 {
-    // Política para Drivers
+    // Policy for Drivers
     options.AddPolicy("DriverOnly", policy =>
         policy.RequireClaim("userType", "Driver"));
 
-    // Política para Companies
+    // Policy for Companies
     options.AddPolicy("CompanyOnly", policy =>
         policy.RequireClaim("userType", "Company"));
 });
-
 
 
 
@@ -141,7 +141,7 @@ builder.Services.Configure<StripeSettings>(
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
 
-//Repositorios
+//Repositories
 builder.Services.AddScoped<IBidsService, BidsService>();
 builder.Services.AddScoped<IBidsRepository, BidsRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
@@ -216,7 +216,6 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "";
 });
 
-
 app.UseExceptionHandler(config =>
 {
     config.Run(async context =>
@@ -227,7 +226,7 @@ app.UseExceptionHandler(config =>
         if (feature?.Error is UnauthorizedAccessException)
         {
             context.Response.StatusCode = 401;
-            var result = JsonSerializer.Serialize(new { message = "Acesso negado. Você não tem permissão para acessar este recurso." });
+            var result = JsonSerializer.Serialize(new { message = "Access denied. You do not have permission to access this resource." });
             await context.Response.WriteAsync(result);
         }
         else
@@ -245,7 +244,7 @@ app.UseExceptionHandler(config =>
     });
 });
 
-// Autenticação e autorização
+// Authentication and authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

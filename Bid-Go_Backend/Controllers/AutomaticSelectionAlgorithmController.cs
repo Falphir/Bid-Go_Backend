@@ -17,17 +17,21 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Execute the automatic selection algorithm for a transport request.
+        /// </summary>
+        /// <remarks>
+        /// The endpoint is restricted to company users. Token validation is handled by the authentication middleware; controller performs basic presence checks.
+        /// </remarks>
+        /// <param name="transportRequestId">Transport request identifier.</param>
+        /// <returns>Selected bid details or an error message.</returns>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPost("execute/{transportRequestId:int}")]
         public async Task<IActionResult> ExecuteAlgorithm(int transportRequestId)
         {
-
-
             var companyIdClaim = User.FindFirst("userId")?.Value;
             if (companyIdClaim == null)
-                return Unauthorized(new { message = "Token inválido ou utilizador não autenticado." });
-
-
+                return Unauthorized(new { message = "Invalid token or unauthenticated user." });
 
             var (success, message, selectedBid) = await _service.ExecuteAsync(transportRequestId);
 

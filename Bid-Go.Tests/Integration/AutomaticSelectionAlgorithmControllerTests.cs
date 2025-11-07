@@ -11,10 +11,13 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
-    public class AutomaticSelectionAlgorithmControllerTests
-    {
+ /// <summary>
+ /// Integration tests for automatic bid selection endpoint: success and error paths.
+ /// </summary>
+ public class AutomaticSelectionAlgorithmControllerTests
+ {
         private static (AutomaticSelectionAlgorithmController controller, BidGoDbContext db, TestNotificationService notifications) Build()
         {
             var options = new DbContextOptionsBuilder<BidGoDbContext>()
@@ -105,10 +108,14 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task ExecuteAlgorithm_SelectsBestBid_UpdatesState_AndNotifies()
         {
+            // Arrange
             var (controller, db, notifications) = Build();
             var (tr, d1, d2, d3, b1, b2, b3) = SeedScenario(db);
 
+            // Act
             var result = await controller.ExecuteAlgorithm(tr.TransportRequestId);
+
+            // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
 
@@ -127,32 +134,41 @@ namespace Bid_Go.Tests.Integration.Controllers
         [Fact]
         public async Task ExecuteAlgorithm_ReturnsBadRequest_WhenNotEnabled()
         {
+            // Arrange
             var (controller, db, _) = Build();
             var (tr, d1, d2, d3, b1, b2, b3) = SeedScenario(db);
 
             tr.IsAutomaticSelectionEnabled = false;
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.ExecuteAlgorithm(tr.TransportRequestId);
+
+            // Assert
             var bad = Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
         public async Task ExecuteAlgorithm_ReturnsBadRequest_WhenBiddingNotFinished()
         {
+            // Arrange
             var (controller, db, _) = Build();
             var (tr, d1, d2, d3, b1, b2, b3) = SeedScenario(db);
 
             tr.BiddingEndDate = DateTime.UtcNow.AddHours(1);
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.ExecuteAlgorithm(tr.TransportRequestId);
+
+            // Assert
             var bad = Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
         public async Task ExecuteAlgorithm_ReturnsBadRequest_WhenNoEligibleBids()
         {
+            // Arrange
             var (controller, db, _) = Build();
             var (tr, d1, d2, d3, b1, b2, b3) = SeedScenario(db);
 
@@ -160,7 +176,10 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.Reviews.RemoveRange(db.Reviews);
             await db.SaveChangesAsync();
 
+            // Act
             var result = await controller.ExecuteAlgorithm(tr.TransportRequestId);
+
+            // Assert
             var bad = Assert.IsType<BadRequestObjectResult>(result);
         }
 

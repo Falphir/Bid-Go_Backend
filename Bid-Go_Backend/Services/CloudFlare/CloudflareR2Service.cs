@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Minio;
 using Minio.DataModel.Args;
 
+/// <summary>
+/// Cloudflare R2 storage service for uploading and deleting images using MinIO SDK.
+/// </summary>
 public class CloudflareR2Service : ICloudflareR2Service
 {
     private readonly IMinioClient _minioClient;
@@ -21,6 +24,11 @@ public class CloudflareR2Service : ICloudflareR2Service
             .Build();
     }
 
+    /// <summary>
+    /// Upload an image file and return a pre-signed URL valid for 7 days.
+    /// </summary>
+    /// <param name="file">Image file to upload.</param>
+    /// <returns>Pre-signed URL for accessing the uploaded image.</returns>
     public async Task<string> UploadImageAsync(IFormFile file)
     {
         var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
@@ -46,12 +54,15 @@ public class CloudflareR2Service : ICloudflareR2Service
         return url;
     }
 
-
+    /// <summary>
+    /// Delete an image by file name or URL.
+    /// </summary>
+    /// <param name="fileName">Name or URL of the image.</param>
     public async Task DeleteImageAsync(string fileName)
     {
         try
         {
-            // extraí apenas o nome do ficheiro, caso tenhas URL completa
+            // Extract file name in case a full URL is provided
             var name = Path.GetFileName(fileName);
 
             await _minioClient.RemoveObjectAsync(new RemoveObjectArgs()
@@ -63,5 +74,4 @@ public class CloudflareR2Service : ICloudflareR2Service
             Console.WriteLine($"Erro ao apagar imagem antiga: {ex.Message}");
         }
     }
-
 }

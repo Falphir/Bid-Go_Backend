@@ -4,14 +4,26 @@ using Microsoft.Extensions.Logging;
 
 namespace Bid_Go_Backend.Services.Transport_Request
 {
+    /// <summary>
+    /// Interface for transport request page service.
+    /// </summary>
     public interface ITransportRequestsPageService
     {
+        /// <summary>
+        /// Get active transport requests with optional filters and ordering.
+        /// </summary>
         Task<IEnumerable<TransportRequest>> GetActiveAsync(
             string? origin, string? destination, DateTime? deliveryDate, string? priceOrder);
 
+        /// <summary>
+        /// Get a public transport request by identifier.
+        /// </summary>
         Task<TransportRequest?> GetByIdAsync(int id);
     }
 
+    /// <summary>
+    /// Service that wraps page listing queries adding minor validation and logging.
+    /// </summary>
     public class TransportRequestsPageService : ITransportRequestsPageService
     {
         private readonly ITransportRequestsPageRepository _repository;
@@ -23,6 +35,9 @@ namespace Bid_Go_Backend.Services.Transport_Request
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get active transport requests with filters.
+        /// </summary>
         public async Task<IEnumerable<TransportRequest>> GetActiveAsync(
             string? origin = null,
             string? destination = null,
@@ -43,6 +58,9 @@ namespace Bid_Go_Backend.Services.Transport_Request
             return results;
         }
 
+        /// <summary>
+        /// Get a single active transport request by identifier.
+        /// </summary>
         public async Task<TransportRequest?> GetByIdAsync(int id)
         {
             if (id <= 0)

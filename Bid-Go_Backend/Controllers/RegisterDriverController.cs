@@ -7,7 +7,7 @@ using Bid_Go_Backend.Services.Interfaces;
 namespace Bid_Go_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/register")]
     public class RegisterDriverController : ControllerBase
     {
         private readonly IRegisterDriverService _driverService;
@@ -17,7 +17,16 @@ namespace Bid_Go_Backend.Controllers
             _driverService = driverService;
         }
 
-        [HttpPost("register")]
+        /// <summary>
+        /// Register a new driver account.
+        /// </summary>
+        /// <remarks>
+        /// Controller performs request validation and maps service error codes to HTTP responses.
+        /// Password hashing and storage are handled in the service/repository layers; the controller remains thin.
+        /// </remarks>
+        /// <param name="dto">Driver registration payload submitted as multipart/form-data (includes files).</param>
+        /// <returns>Created driver summary or conflict/error responses.</returns>
+        [HttpPost("driver")]
         public async Task<IActionResult> Register([FromForm] RegisterDriverDTO dto)
         {
             if (!ModelState.IsValid)
