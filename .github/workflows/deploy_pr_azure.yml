@@ -1,9 +1,9 @@
 name: Build and Deploy .NET API to Azure
 
 on:
-  push:
+  pull_request:
     branches:
-      - changerequest/*
+      - main
 
 permissions:
   id-token: write
