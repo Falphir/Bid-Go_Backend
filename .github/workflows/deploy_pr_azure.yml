@@ -65,6 +65,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'BidGoWebAPI'
-          slot-name: 'Production'
-          package: .
+          package: ./publish
           
