@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bid_Go_Backend.Services
 {
+    /// <summary>
+    /// Service implementing bid-related business logic.
+    /// </summary>
     public class BidsService : IBidsService
     {
         private readonly IBidsRepository _repo;
@@ -19,6 +22,12 @@ namespace Bid_Go_Backend.Services
             _ctx = ctx;
         }
 
+        /// <summary>
+        /// Add a new bid for the specified transport request on behalf of a driver.
+        /// </summary>
+        /// <remarks>
+        /// Validates request and bid constraints before delegating persistence to the repository.
+        /// </remarks>
         public async Task<(bool Success, string Message, Bid? Bid)> AddBidAsync(int driverId, AddBidDTO bidDto)
         {
             var request = await _ctx.TransportRequests.AsNoTracking()
@@ -59,7 +68,9 @@ namespace Bid_Go_Backend.Services
             return (true, string.Empty, created);
         }
 
-
+        /// <summary>
+        /// Update an existing bid.
+        /// </summary>
         public async Task<(bool Success, string Message, Bid? Bid)> UpdateBidAsync(int id, BidUpdateDTO updateDto)
         {
             var bid = await _repo.GetByIdAsync(id);
@@ -95,6 +106,9 @@ namespace Bid_Go_Backend.Services
             return (true, string.Empty, bid);
         }
 
+        /// <summary>
+        /// Cancel a pending bid.
+        /// </summary>
         public async Task<(bool Success, string Message)> CancelBidAsync(int id)
         {
             var bid = await _repo.GetByIdAsync(id);
@@ -109,14 +123,26 @@ namespace Bid_Go_Backend.Services
             return (true, "Bid canceled successfully.");
         }
 
+        /// <summary>
+        /// Get a bid by id.
+        /// </summary>
         public Task<Bid?> GetBidByIdAsync(int id) => _repo.GetByIdAsync(id);
 
+        /// <summary>
+        /// Get bids for a transport request.
+        /// </summary>
         public Task<List<Bid>> GetBidsByTransportRequestAsync(int transportRequestId) =>
             _repo.GetByTransportRequestAsync(transportRequestId);
 
+        /// <summary>
+        /// Get bids for a transport request filtered by status.
+        /// </summary>
         public Task<IEnumerable<Bid>> GetBidsByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status) =>
             _repo.GetByTransportRequestAndStatusAsync(transportRequestId, status);
 
+        /// <summary>
+        /// Get active (pending) bids with optional ordering.
+        /// </summary>
         public Task<List<Bid>> GetActiveBidsAsync(int transportRequestId, string? orderBy = "value", bool descending = false) =>
             _repo.GetActiveBidsAsync(transportRequestId, orderBy, descending);
     }

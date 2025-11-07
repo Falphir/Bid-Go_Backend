@@ -20,6 +20,14 @@ namespace Bid_Go_Backend.Controllers
             _authorizationService = authorizationService;
         }
 
+        /// <summary>
+        /// Create a new bid for a transport request.
+        /// </summary>
+        /// <remarks>
+        /// The driverId is taken from the JWT token. Controllers should remain thin: validation and business rules are implemented in the service layer.
+        /// </remarks>
+        /// <param name="dto">Bid creation DTO</param>
+        /// <returns>Created bid object or error message</returns>
         [Authorize(Policy = "DriverOnly")]
         [HttpPost("createbid")]
         public async Task<IActionResult> AddBid([FromBody] AddBidDTO dto)
@@ -38,6 +46,12 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Bid);
         }
 
+        /// <summary>
+        /// Update an existing bid owned by the authenticated driver.
+        /// </summary>
+        /// <param name="id">Bid identifier</param>
+        /// <param name="dto">Fields to update</param>
+        /// <returns>Updated bid or error</returns>
         [Authorize(Policy = "DriverOnly")]
         [HttpPut("updatebid/{id}")]
         public async Task<IActionResult> UpdateBid(int id, [FromBody] BidUpdateDTO dto)
@@ -57,6 +71,11 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Bid);
         }
 
+        /// <summary>
+        /// Cancel a bid owned by the authenticated driver.
+        /// </summary>
+        /// <param name="id">Bid identifier</param>
+        /// <returns>Success message or error</returns>
         [Authorize(Policy = "DriverOnly")]
         [HttpPatch("cancel/{id}")]
         public async Task<IActionResult> CancelBid(int id)
@@ -76,6 +95,11 @@ namespace Bid_Go_Backend.Controllers
             return Ok(result.Message);
         }
 
+        /// <summary>
+        /// Get a bid by its identifier.
+        /// </summary>
+        /// <param name="bidId">Bid identifier</param>
+        /// <returns>Bid details or 404</returns>
         [Authorize]
         [HttpGet("{bidId}")]
         public async Task<IActionResult> GetBidById(int bidId)
@@ -86,6 +110,11 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bid);
         }
 
+        /// <summary>
+        /// Get all bids for a transport request.
+        /// </summary>
+        /// <param name="transportRequestId">Transport request identifier</param>
+        /// <returns>List of bids or 404 when none found</returns>
         [Authorize]
         [HttpGet("byrequest/{transportRequestId}")]
         public async Task<IActionResult> GetBidsByTransportRequest(int transportRequestId)
@@ -96,6 +125,13 @@ namespace Bid_Go_Backend.Controllers
             return Ok(bids);
         }
 
+        /// <summary>
+        /// Get active bids for a transport request with optional ordering.
+        /// </summary>
+        /// <param name="transportRequestId">Transport request identifier</param>
+        /// <param name="orderBy">Field to order by (default: value)</param>
+        /// <param name="descending">Whether to sort descending</param>
+        /// <returns>List of active bids with driver summary</returns>
         [Authorize]
         [HttpGet("bidsActive")]
         public async Task<IActionResult> GetActiveBids([FromQuery] int transportRequestId, [FromQuery] string orderBy = "value", [FromQuery] bool descending = false)

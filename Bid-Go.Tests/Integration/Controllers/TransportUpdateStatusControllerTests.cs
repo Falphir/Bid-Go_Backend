@@ -11,9 +11,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Stripe.Forwarding;
 using System.Security.Claims;
-using Xunit;
 using System.Text.Json;
+using Xunit;
 
 namespace Bid_Go.Tests.Integration.Controllers
 {
@@ -200,7 +202,7 @@ namespace Bid_Go.Tests.Integration.Controllers
  var root = doc.RootElement;
 
  Assert.True(root.TryGetProperty("message", out var msgProp));
- Assert.Equal("Pedido cancelado com sucesso.", msgProp.GetString());
+ Assert.Equal("Transport request successfully canceled.", msgProp.GetString());
 
  var fromDb = await db.TransportRequests.FindAsync(tr.TransportRequestId);
  Assert.Equal(ERequestStatus.Canceled, fromDb!.Status);

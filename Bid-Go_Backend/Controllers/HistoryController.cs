@@ -21,6 +21,11 @@ namespace Bid_Go_Backend.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get the driving history for a driver.
+        /// </summary>
+        /// <param name="driverId">Driver identifier. Caller must be the same driver.</param>
+        /// <returns>Driver history entries or 404 when none found.</returns>
         [Authorize(Policy = "DriverOnly")]
         [HttpGet("driver/{driverId}")]
         public async Task<IActionResult> GetDriverHistory(int driverId)
@@ -40,7 +45,7 @@ namespace Bid_Go_Backend.Controllers
 
                 if (history == null || history.Count == 0)
                 {
-                    return NotFound(new { message = "Nenhum histórico encontrado para este motorista." });
+                    return NotFound(new { message = "No history found for this driver." });
                 }
 
                 return Ok(history);
@@ -48,10 +53,15 @@ namespace Bid_Go_Backend.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching driver history for {DriverId}", driverId);
-                return StatusCode(500, new { message = "Ocorreu um erro ao obter o histórico do motorista." });
+                return StatusCode(500, new { message = "An error occurred while fetching driver history." });
             }
         }
 
+        /// <summary>
+        /// Get the transport history for a company.
+        /// </summary>
+        /// <param name="companyId">Company identifier. Caller must be the same company.</param>
+        /// <returns>Transport history entries or 404 when none found.</returns>
         [Authorize(Policy = "CompanyOnly")]
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetCompanyHistory(int companyId)
@@ -72,7 +82,7 @@ namespace Bid_Go_Backend.Controllers
 
                 if (history == null || history.Count == 0)
                 {
-                    return NotFound(new { message = "Nenhum histórico encontrado para esta empresa." });
+                    return NotFound(new { message = "No history found for this company." });
                 }
 
                 return Ok(history);
@@ -80,7 +90,7 @@ namespace Bid_Go_Backend.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching company history for {CompanyId}", companyId);
-                return StatusCode(500, new { message = "Ocorreu um erro ao obter o histórico da empresa." });
+                return StatusCode(500, new { message = "An error occurred while fetching company history." });
             }
         }
     }

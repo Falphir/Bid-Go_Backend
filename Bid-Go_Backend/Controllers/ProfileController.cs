@@ -18,6 +18,11 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Get the profile for the authenticated user. Caller must match the requested user id.
+        /// </summary>
+        /// <param name="id">User identifier to fetch profile for.</param>
+        /// <returns>Driver or Company profile DTO.</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProfile(int id)
         {
@@ -60,6 +65,9 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Update driver profile fields. User must be the driver and own the profile.
+        /// </summary>
         [Authorize(Policy = "DriverOnly")]
         [HttpPut("updateDriver/{id}")]
         public async Task<IActionResult> UpdateDriverProfile(int id, [FromForm] DriverProfileUpdateDTO dto)
@@ -83,6 +91,9 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Update company profile fields. User must be the company and own the profile.
+        /// </summary>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPut("updateCompany/{id}")]
         public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
@@ -105,6 +116,9 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Change user password. Caller must be the same user.
+        /// </summary>
         [HttpPut("{id}/changePassword")]
         public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDTO dto)
         {
@@ -124,6 +138,9 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Deactivate a user account. Caller must be the same user.
+        /// </summary>
         [HttpPut("{id}/deactivateAccount")]
         public async Task<IActionResult> DeactivateUser(int id)
         {

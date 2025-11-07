@@ -6,6 +6,9 @@ using Bid_Go_Backend.Services.Interfaces;
 
 namespace Bid_Go_Backend.Services
 {
+    /// <summary>
+    /// Handles payment-related business rules and coordinates payment processing with the payment gateway and repositories.
+    /// </summary>
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepository _payments;
@@ -28,6 +31,15 @@ namespace Bid_Go_Backend.Services
             _gateway = gateway;
         }
 
+        /// <summary>
+        /// Process a payment for the selected bid of a transport request.
+        /// </summary>
+        /// <remarks>
+        /// The method creates a pending payment record, attempts charge via the payment gateway and updates state accordingly.
+        /// It is important that this method remains idempotent from the controller side — retries are handled explicitly by RetryPaymentAsync.
+        /// </remarks>
+        /// <param name="request">CreatePaymentRequestDTO containing TransportRequestId and StripeToken.</param>
+        /// <returns>PaymentResultDTO with final payment state and timestamps.</returns>
         public async Task<PaymentResultDTO> ProcessPaymentAsync(CreatePaymentRequestDTO request)
         {
             //1) Buscar TR + Bid
@@ -103,12 +115,23 @@ namespace Bid_Go_Backend.Services
             return ToDto(payment);
         }
 
+        /// <summary>
+        /// Lists payments for a given user (company or driver).
+        /// </summary>
+        /// <param name="userId">User identifier to filter payments.</param>
+        /// <returns>List of PaymentResultDTO for the user.</returns>
         public async Task<List<PaymentResultDTO>> GetPaymentsByUserAsync(int userId)
         {
             var items = await _payments.ListByUserAsync(userId);
             return items.Select(ToDto).ToList();
         }
 
+        /// <summary>
+        /// Attempt to retry a payment using a new payment token.
+        /// </summary>
+        /// <remarks>
+        /// The method enforces business rules about deadlines and idempotency. It returns a tuple indicating success and the resulting DTO.
+        /// </remarks>
         public async Task<(bool Ok, string? Error, PaymentResultDTO? Result)> RetryPaymentAsync(int paymentId, string stripeToken)
         {
             var payment = await _payments.GetByIdForUpdateAsync(paymentId)

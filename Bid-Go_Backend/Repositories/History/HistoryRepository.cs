@@ -14,6 +14,9 @@ using Xunit.Abstractions;
 
 namespace Bid_Go_Backend.Repositories.History
 {
+    /// <summary>
+    /// Repository responsible for assembling history DTOs for drivers and companies.
+    /// </summary>
     public class HistoryRepository : IHistoryRepository
     {
         private readonly BidGoDbContext _context;
@@ -22,6 +25,12 @@ namespace Bid_Go_Backend.Repositories.History
             _context = context;
         }
 
+        /// <summary>
+        /// Get bidding history entries for a driver.
+        /// </summary>
+        /// <remarks>
+        /// Date is currently returned as a placeholder (2024-01-01) — consider storing event timestamps to provide accurate history.
+        /// </remarks>
         public async Task<List<BidHistoryDTO>> GetDriverHistoryAsync(int driverId)
         {
             var bidHistory = await (
@@ -53,6 +62,12 @@ namespace Bid_Go_Backend.Repositories.History
 
 
 
+        /// <summary>
+        /// Get transport history entries for a company.
+        /// </summary>
+        /// <remarks>
+        /// Date is currently a placeholder — replace with actual event timestamps when available.
+        /// </remarks>
         public async Task<List<TransportHistoryDTO>> GetTransportHistoryAsync(int companyId)
         {
             var history = await (
@@ -73,7 +88,7 @@ namespace Bid_Go_Backend.Repositories.History
                 {
                     TransportRequestId = transport.TransportRequestId,
                     Package = transport.Package,
-                    Name = driver != null ? driver.Name : "Sem condutor atribuído",
+                    Name = driver != null ? driver.Name : "No assigned driver",
                     Date = new DateTime(2024, 1, 1), 
                     Destination = transport.Destination,
                     Price = bid != null ? bid.Value : 0,

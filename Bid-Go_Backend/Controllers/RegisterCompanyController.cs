@@ -17,6 +17,15 @@ namespace Bid_Go_Backend.Controllers
             _companyService = companyService;
         }
 
+        /// <summary>
+        /// Register a new company account.
+        /// </summary>
+        /// <remarks>
+        /// Model validation is enforced via ModelState. The service returns specific error codes for collision cases (email, phone, NIF).
+        /// Controllers map those service errors to appropriate HTTP responses.
+        /// </remarks>
+        /// <param name="dto">Company registration data transfer object.</param>
+        /// <returns>Created company summary or conflict information when data already exists.</returns>
         [HttpPost("company")]
         public async Task<IActionResult> Register([FromBody] RegisterCompanyDTO dto)
         {

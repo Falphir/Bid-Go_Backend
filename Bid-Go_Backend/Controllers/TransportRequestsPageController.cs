@@ -15,6 +15,13 @@ namespace Bid_Go_Backend.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Get active transport requests with optional filters.
+        /// </summary>
+        /// <remarks>
+        /// Supports filtering by origin, destination, delivery date and price ordering. Consider adding paging for large datasets.
+        /// </remarks>
+        /// <returns>List of transport requests or a message when none are available.</returns>
         // GET: api/PageRequests
         [HttpGet("filters")]
         public async Task<ActionResult<IEnumerable<TransportRequestsPageDTO>>> GetActive(
@@ -28,7 +35,7 @@ namespace Bid_Go_Backend.Controllers
                 var requests = await _service.GetActiveAsync(origin, destination, deliveryDate, priceOrder);
 
                 if (!requests.Any())
-                    return Ok(new { message = "Não existem pedidos ativos no momento." });
+                    return Ok(new { message = "No active transport requests at the moment." });
 
                 var dtoList = requests.Select(tr => new TransportRequestsPageDTO
                 {
@@ -49,35 +56,40 @@ namespace Bid_Go_Backend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+                return StatusCode(500, new { message = "Unexpected error: " + ex.Message });
             }
         }
 
+        /// <summary>
+        /// Get a single transport request by id for the public page view.
+        /// </summary>
+        /// <param name="id">Transport request identifier.</param>
+        /// <returns>Transport request details or 404.</returns>
         // GET: api/PageRequests/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<TransportRequestResponseDTO>> GetById(int id)
         {
             try
             {
-                var alvo = await _service.GetByIdAsync(id);
+                var target = await _service.GetByIdAsync(id);
 
-                if (alvo == null)
-                    return NotFound(new { message = "Pedido de transporte não existe." });
+                if (target == null)
+                    return NotFound(new { message = "Transport request does not exist." });
 
                 var responseDto = new TransportRequestResponseDTO
                 {
-                    Origin = alvo.Origin,
-                    Destination = alvo.Destination,
-                    Package = alvo.Package,
-                    PickupDate = alvo.PickupDate,
-                    DeliveryDate = alvo.DeliveryDate,
-                    Weight = alvo.Weight,
-                    Volume = alvo.Volume,
-                    Length = alvo.Length,
-                    Width = alvo.Width,
-                    Height = alvo.Height,
-                    MaxPrice = alvo.MaxPrice,
-                    Image = alvo.Image
+                    Origin = target.Origin,
+                    Destination = target.Destination,
+                    Package = target.Package,
+                    PickupDate = target.PickupDate,
+                    DeliveryDate = target.DeliveryDate,
+                    Weight = target.Weight,
+                    Volume = target.Volume,
+                    Length = target.Length,
+                    Width = target.Width,
+                    Height = target.Height,
+                    MaxPrice = target.MaxPrice,
+                    Image = target.Image
                 };
 
                 return Ok(responseDto);
@@ -88,7 +100,7 @@ namespace Bid_Go_Backend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro inesperado: " + ex.Message });
+                return StatusCode(500, new { message = "Unexpected error: " + ex.Message });
             }
         }
     }

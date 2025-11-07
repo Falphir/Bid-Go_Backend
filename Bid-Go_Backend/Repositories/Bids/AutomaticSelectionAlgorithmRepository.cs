@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Repositories.Bids
 {
+    /// <summary>
+    /// Repository support for the automatic selection algorithm. Provides read operations required by the algorithm.
+    /// </summary>
     internal class AutomaticSelectionAlgorithmRepository : IAutomaticSelectionAlgorithmRepository
     {
         private readonly BidGoDbContext _ctx;
@@ -21,6 +24,9 @@ namespace Bid_Go_Backend.Repositories.Bids
             _ctx = ctx;
         }
 
+        /// <summary>
+        /// Load a transport request including its bids and drivers.
+        /// </summary>
         public async Task<TransportRequest?> GetTransportRequestWithBidsAsync(int transportRequestId)
         {
             return await _ctx.TransportRequests
@@ -29,6 +35,9 @@ namespace Bid_Go_Backend.Repositories.Bids
                 .FirstOrDefaultAsync(tr => tr.TransportRequestId == transportRequestId);
         }
 
+        /// <summary>
+        /// Compute average reputation per driver from reviews.
+        /// </summary>
         public async Task<Dictionary<int, decimal>> GetDriverReputationsAsync(IEnumerable<int> driverIds)
         {
             return await _ctx.Reviews
@@ -38,6 +47,9 @@ namespace Bid_Go_Backend.Repositories.Bids
                 .ToDictionaryAsync(x => x.Key, x => x.Average);
         }
 
+        /// <summary>
+        /// Persist any pending changes to the context.
+        /// </summary>
         public async Task SaveChangesAsync() => await _ctx.SaveChangesAsync();
     }
 

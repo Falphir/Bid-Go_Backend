@@ -17,6 +17,15 @@ namespace Bid_Go_Backend.Controllers
             _driverService = driverService;
         }
 
+        /// <summary>
+        /// Register a new driver account.
+        /// </summary>
+        /// <remarks>
+        /// Controller performs request validation and maps service error codes to HTTP responses.
+        /// Password hashing and storage are handled in the service/repository layers; the controller remains thin.
+        /// </remarks>
+        /// <param name="dto">Driver registration payload submitted as multipart/form-data (includes files).</param>
+        /// <returns>Created driver summary or conflict/error responses.</returns>
         [HttpPost("driver")]
         public async Task<IActionResult> Register([FromForm] RegisterDriverDTO dto)
         {

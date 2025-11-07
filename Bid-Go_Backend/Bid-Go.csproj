@@ -7,6 +7,11 @@
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <OutputType>WinExe</OutputType>
+    <!-- Generate XML documentation file for API documentation and Swagger -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\net8.0\$(AssemblyName).xml</DocumentationFile>
+    <!-- Suppress warning for missing XML comments project-wide to avoid noisy builds while we progressively document -->
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
