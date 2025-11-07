@@ -18,7 +18,7 @@ env:
   AZURE_WEBAPP_PACKAGE_PATH: "./BidGo.Api/publish"
   DOTNET_VERSION: "8.x"
   SOLUTION_PATH: "Bid-Go_Backend.sln"
-  API_PROJECT_PATH: "Bid-Go"
+  API_PROJECT_PATH: "./Bid-Go/Bid-Go.csproj"
   PUBLISH_DIR: "./publish"
 
 jobs:
