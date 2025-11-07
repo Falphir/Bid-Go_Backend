@@ -171,17 +171,17 @@ namespace Bid_Go.Tests.Unit.Services
                      .ReturnsAsync(new Dictionary<int, decimal> { { 10, 5 }, { 11, 4 }, { 12, 4 } });
             _mockRepo.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
-        _mockNotif.Setup(n => n.CreateAndSendAsync(
-        It.IsAny<int>(),
-        It.IsAny<string>(),
-        It.IsAny<ENotificationType>(),
-        It.IsAny<int>(),
-        It.IsAny<int>()
-    ))
-    .ReturnsAsync(new Notification());
+            _mockNotif.Setup(n => n.CreateAndSendAsync(
+            It.IsAny<int>(),
+            It.IsAny<string>(),
+            It.IsAny<ENotificationType>(),
+            It.IsAny<int>(),
+            It.IsAny<int>()
+        ))
+        .ReturnsAsync(new Notification());
 
 
-        var (success, message, selectedBid) = await _service.ExecuteAsync(1);
+            var (success, message, selectedBid) = await _service.ExecuteAsync(1);
 
             Assert.True(success);
             Assert.Null(message);
@@ -213,8 +213,8 @@ namespace Bid_Go.Tests.Unit.Services
             var (success, message, selectedBid) = await _service.ExecuteAsync(1);
 
             Assert.False(success);
-        Assert.Equal("There is already an accepted bid for this request.", message);
-        Assert.Null(selectedBid);
+            Assert.Equal("There is already an accepted bid for this request.", message);
+            Assert.Null(selectedBid);
         }
     }
 }

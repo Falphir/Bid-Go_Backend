@@ -7,39 +7,62 @@ on:
     branches: [ "master", "develop", "feature/*", "changerequest/*", "hotfix/*" ]
 
 jobs:
-  build:
+  build-and-unit:
     runs-on: ${{ matrix.os }}
-    
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Install dependencies
-      run: dotnet restore
+      - name: Restore
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --configuration Release
+      - name: Build (Release)
+        run: dotnet build --configuration Release --no-restore
 
-    - name: Run tests with coverage
-      run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults --verbosity normal
+      - name: Test (all) with coverage + TRX
+        run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory "./TestResults"  --filter "FullyQualifiedName~Bid_Go.Tests.Unit" --logger:"trx;LogFileName=test-results.trx" --verbosity normal
 
+      - name: Generate coverage report (HTML + Markdown)
+        if: success()
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;MarkdownSummaryGithub"
 
-    - name: Generate coverage report
-      if: success()
-      run: dotnet tool install -g dotnet-reportgenerator-globaltool && reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:Html
+      - name: Convert TRX to Markdown (LiquidTestReports CLI)
+        if: success()
+        run: |
+          dotnet tool install -g LiquidTestReports.Cli --version 2.0.0-beta.2
+          # usa o ficheiro .trx gerado para criar um MD legível
+          liquid --inputs "File=./TestResults/test-results.trx;Format=Trx" --output-file ./TestResults/TestReport.md
 
+      - name: Upload coverage report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-${{ matrix.os }}
+          path: TestResults/CoverageReport
 
-    - name: Upload coverage report
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: code-coverage-report-${{ matrix.os }}
-        path: TestResults/CoverageReport
+      - name: Upload test report (Markdown)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.os }}
+          path: TestResults/TestReport.md
+
+      - name: Publish test summary (GitHub Job Summary)
+        if: always()
+        uses: dorny/test-reporter@v2
+        with:
+          name: "Tests ${{ matrix.os }}"
+          path: "TestResults/test-results.trx"
+          reporter: dotnet-trx
+          use-actions-summary: true
+          fail-on-error: false

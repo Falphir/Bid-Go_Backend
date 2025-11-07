@@ -17,24 +17,26 @@ using Xunit;
 /// </summary>
 public class ChatServiceTests
 {
-    private readonly Mock<IChatRepository> _chatRepoMock;
-    private readonly Mock<ITransportRequestRepository> _requestRepoMock;
-    private readonly Mock<INotificationService> _notificationServiceMock;
-    private readonly ChatService _service;
-
-
-    public ChatServiceTests()
+    public class ChatServiceTests
     {
-        _chatRepoMock = new Mock<IChatRepository>();
-        _requestRepoMock = new Mock<ITransportRequestRepository>();
-        _notificationServiceMock = new Mock<INotificationService>();
-        _service = new ChatService(_chatRepoMock.Object, _requestRepoMock.Object, _notificationServiceMock.Object);
-     ;
-    }
+        private readonly Mock<IChatRepository> _chatRepoMock;
+        private readonly Mock<ITransportRequestRepository> _requestRepoMock;
+        private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly ChatService _service;
 
-    private ClaimsPrincipal CreateUser(int userId, string role)
-    {
-        var claims = new List<Claim>
+
+        public ChatServiceTests()
+        {
+            _chatRepoMock = new Mock<IChatRepository>();
+            _requestRepoMock = new Mock<ITransportRequestRepository>();
+            _notificationServiceMock = new Mock<INotificationService>();
+            _service = new ChatService(_chatRepoMock.Object, _requestRepoMock.Object, _notificationServiceMock.Object);
+            ;
+        }
+
+        private ClaimsPrincipal CreateUser(int userId, string role)
+        {
+            var claims = new List<Claim>
         {
             new Claim("userId", userId.ToString()),
             new Claim("userType", role)
@@ -94,69 +96,84 @@ public class ChatServiceTests
         Assert.Contains("Acesso negado", result.Body.ToString());
     }
 
-
-
-    [Fact]
-    public async Task CreateChatFromAcceptedBid_ShouldReturn400_WhenNoAcceptedBid()
-    {
-        _chatRepoMock.Setup(r => r.GetChatByTransportRequestIdAsync(1))
-                     .ReturnsAsync((Chats)null);
-
-        _chatRepoMock.Setup(r => r.GetAcceptedBidByRequestIdAsync(1))
-                     .ReturnsAsync((Bid)null);
-
-        var result = await _service.CreateChatFromAcceptedBid(1);
-
-        Assert.Equal(400, result.StatusCode);
-        Assert.Contains("Nenhuma bid aceite encontrada", result.Body.ToString());
-    }
-
-    [Fact]
-    public async Task CreateChatFromAcceptedBid_ShouldReturn200_WhenChatCreated()
-    {
-        _chatRepoMock.Setup(r => r.GetChatByTransportRequestIdAsync(1))
-                     .ReturnsAsync((Chats)null);
-
-        _chatRepoMock.Setup(r => r.GetAcceptedBidByRequestIdAsync(1))
-                     .ReturnsAsync(new Bid { Status = EBidStatus.Accepted });
-
-        _chatRepoMock.Setup(r => r.GetTransportRequestByIdAsync(1))
-                     .ReturnsAsync(new TransportRequest { TransportRequestId = 1 });
-
-        _chatRepoMock.Setup(r => r.AddChatAsync(It.IsAny<Chats>()))
-                     .ReturnsAsync((Chats chat) =>
-                     {
-                         chat.ChatId = 123;
-                         return chat;
-                     });
-
-        var result = await _service.CreateChatFromAcceptedBid(1);
-
-        Assert.Equal(200, result.StatusCode);
-
-        var dto = Assert.IsType<ViewChatDTO>(result.Body);
-        Assert.Equal(123, dto.ChatId);
-    }
-
-    [Fact]
-    public async Task SendMessage_ShouldReturn200_WhenMessageSentByCompany_WithAcceptedBid()
-    {
-        // Arrange
-        var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
-        var request = new TransportRequest
+        [Fact]
+        public async Task GetChat_ShouldReturn404_WhenChatNotFound()
         {
-            TransportRequestId = 1,
-            Status = ERequestStatus.Active,
-            CompanyId = 10,
-            Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 2 } }
-        };
+            _chatRepoMock.Setup(r => r.GetChatByRequestIdAsync(1))
+                         .ReturnsAsync((Chats)null);
 
-        _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
-        _requestRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(request);
-        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request);
-        _chatRepoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>())).ReturnsAsync((Message m) => m);
+            var result = await _service.GetChat(1, CreateUser(1, "Driver"));
 
-        var user = CreateUser(10, "Company");
+            Assert.Equal(404, result.StatusCode);
+            Assert.Contains("Chat não encontrado", result.Body.ToString());
+        }
+
+        [Fact]
+        public async Task GetChat_ShouldReturn403_WhenUserNoAccess()
+        {
+            var chat = new Chats { ChatId = 1, TransportRequestId = 1 };
+            _chatRepoMock.Setup(r => r.GetChatByRequestIdAsync(1)).ReturnsAsync(chat);
+            _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1))
+                            .ReturnsAsync(new TransportRequest
+                            {
+                                TransportRequestId = 1,
+                                CompanyId = 2,
+                                Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 3 } }
+                            });
+
+            var result = await _service.GetChat(1, CreateUser(99, "Driver"));
+
+            Assert.Equal(403, result.StatusCode);
+            Assert.Contains("Acesso negado", result.Body.ToString());
+        }
+
+        [Fact]
+        public async Task SendMessage_ShouldReturn403_WhenUserNoAccess()
+        {
+            _chatRepoMock.Setup(r => r.GetChatByIdAsync(1))
+                         .ReturnsAsync(new Chats { ChatId = 1, TransportRequestId = 1 });
+            _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1))
+                            .ReturnsAsync(new TransportRequest
+                            {
+                                TransportRequestId = 1,
+                                CompanyId = 2,
+                                Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 3 } }
+                            });
+
+            var result = await _service.SendMessage(1, new MessageDTO { Context = "Hi" }, CreateUser(99, "Driver"));
+
+            Assert.Equal(403, result.StatusCode);
+            Assert.Contains("Acesso negado", result.Body.ToString());
+        }
+
+
+
+        [Fact]
+        public async Task CreateChatFromAcceptedBid_ShouldReturn400_WhenNoAcceptedBid()
+        {
+            _chatRepoMock.Setup(r => r.GetChatByTransportRequestIdAsync(1))
+                         .ReturnsAsync((Chats)null);
+
+            _chatRepoMock.Setup(r => r.GetAcceptedBidByRequestIdAsync(1))
+                         .ReturnsAsync((Bid)null);
+
+            var result = await _service.CreateChatFromAcceptedBid(1);
+
+            Assert.Equal(400, result.StatusCode);
+            Assert.Contains("Nenhuma bid aceite encontrada", result.Body.ToString());
+        }
+
+        [Fact]
+        public async Task CreateChatFromAcceptedBid_ShouldReturn200_WhenChatCreated()
+        {
+            _chatRepoMock.Setup(r => r.GetChatByTransportRequestIdAsync(1))
+                         .ReturnsAsync((Chats)null);
+
+            _chatRepoMock.Setup(r => r.GetAcceptedBidByRequestIdAsync(1))
+                         .ReturnsAsync(new Bid { Status = EBidStatus.Accepted });
+
+            _chatRepoMock.Setup(r => r.GetTransportRequestByIdAsync(1))
+                         .ReturnsAsync(new TransportRequest { TransportRequestId = 1 });
 
         // Act
         var result = await _service.SendMessage(1, new MessageSentDTO { Context = "Olá driver" }, user);
@@ -168,34 +185,72 @@ public class ChatServiceTests
   
     }
 
+            Assert.Equal(200, result.StatusCode);
 
-    [Fact]
-    public async Task SendMessage_ShouldReturn403_WhenCompanyHasNoAcceptedBid()
-    {
-        // Arrange
-        var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
-        var request = new TransportRequest
+            var dto = Assert.IsType<ViewChatDTO>(result.Body);
+            Assert.Equal(123, dto.ChatId);
+        }
+
+        [Fact]
+        public async Task SendMessage_ShouldReturn200_WhenMessageSentByCompany_WithAcceptedBid()
         {
-            TransportRequestId = 1,
-            Status = ERequestStatus.Active,
-            CompanyId = 10,
-            Bids = new List<Bid> { new Bid { Status = EBidStatus.Pendent, DriverId = 2 } } // nenhuma bid aceita
-        };
+            // Arrange
+            var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
+            var request = new TransportRequest
+            {
+                TransportRequestId = 1,
+                Status = ERequestStatus.Active,
+                CompanyId = 10,
+                Bids = new List<Bid> { new Bid { Status = EBidStatus.Accepted, DriverId = 2 } }
+            };
 
-        _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
-        _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request);
+            _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
+            _requestRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(request);
+            _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request);
+            _chatRepoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>())).ReturnsAsync((Message m) => m);
 
-        var user = CreateUser(10, "Company");
+            var user = CreateUser(10, "Company");
+
+            // Act
+            var result = await _service.SendMessage(1, new MessageDTO { Context = "Olá driver" }, user);
+
+            // Assert
+            Assert.Equal(200, result.StatusCode);
+            var dto = Assert.IsType<MessageDTO>(result.Body);
+            Assert.Equal("Olá driver", dto.Context);
+            Assert.Equal(2, dto.DriverId);
+            Assert.Equal(10, dto.CompanyId);
+        }
+
+
+        [Fact]
+        public async Task SendMessage_ShouldReturn403_WhenCompanyHasNoAcceptedBid()
+        {
+            // Arrange
+            var chat = new Chats { ChatId = 1, TransportRequestId = 1, Status = EChatStatus.Active };
+            var request = new TransportRequest
+            {
+                TransportRequestId = 1,
+                Status = ERequestStatus.Active,
+                CompanyId = 10,
+                Bids = new List<Bid> { new Bid { Status = EBidStatus.Pendent, DriverId = 2 } } // nenhuma bid aceita
+            };
+
+            _chatRepoMock.Setup(r => r.GetChatByIdAsync(1)).ReturnsAsync(chat);
+            _requestRepoMock.Setup(r => r.GetRequestWithBidsByIdAsync(1)).ReturnsAsync(request);
+
+            var user = CreateUser(10, "Company");
 
         // Act
         var result = await _service.SendMessage(1, new MessageSentDTO { Context = "Oi" }, user);
 
-        // Assert
-        // Na prática, como não há bid aceita, o acesso falha → 403
-        Assert.Equal(403, result.StatusCode);
-        Assert.Contains("Acesso negado", result.Body.ToString());
+            // Assert
+            // Na prática, como não há bid aceita, o acesso falha → 403
+            Assert.Equal(403, result.StatusCode);
+            Assert.Contains("Acesso negado", result.Body.ToString());
+        }
+
+
+
     }
-
-
-
 }
