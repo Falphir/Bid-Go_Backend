@@ -15,7 +15,7 @@ using System.Text;
 using Xunit;
 using Bid_Go_Backend.Services;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
     /// <summary>
     /// Integration tests for CRUD endpoints in TransportRequestsController.

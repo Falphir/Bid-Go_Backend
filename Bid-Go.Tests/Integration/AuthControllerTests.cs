@@ -13,7 +13,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Text;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
     /// <summary>
     /// Integration tests for authentication controller: login, recover and reset password flows.
@@ -104,7 +104,7 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.Users.Add(new Driver { Email = "user@test.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") });
             await db.SaveChangesAsync();
 
-            var request = new Bid_Go_Backend.Data.Models.DTOs.RecoverPasswordRequestDTO { Email = "user@test.com" };
+            var request = new RecoverPasswordRequestDTO { Email = "user@test.com" };
             var result = await controller.RecoverPassword(request);
             var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
@@ -118,18 +118,18 @@ namespace Bid_Go.Tests.Integration.Controllers
             db.Users.Add(new Driver { Email = "user@test.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") });
             await db.SaveChangesAsync();
 
-            var request = new Bid_Go_Backend.Data.Models.DTOs.RecoverPasswordRequestDTO { Email = "user@test.com" };
+            var request = new RecoverPasswordRequestDTO { Email = "user@test.com" };
             await controller.RecoverPassword(request);
             var token = email.Sent.First().body.Split('\'')[1];
 
-            var resetDto = new Bid_Go_Backend.Data.Models.DTOs.ResetPasswordRequestDTO { Token = token, NewPassword = "nova123" };
+            var resetDto = new ResetPasswordRequestDTO { Token = token, NewPassword = "nova123" };
             var result = await controller.ResetPassword(resetDto);
             var ok = Assert.IsType<ObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
         }
 
         // Email test double inside the file
-        private sealed class TestEmailService : Bid_Go_Backend.Services.Interfaces.IEmailService
+        private sealed class TestEmailService : IEmailService
         {
             public List<(string to,string subject,string body)> Sent { get; } = new();
             public Task SendEmailAsync(string to, string subject, string body)

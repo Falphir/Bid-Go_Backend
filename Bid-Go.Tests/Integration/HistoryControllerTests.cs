@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
     /// <summary>
     /// Integration tests for history retrieval endpoints for drivers and companies.

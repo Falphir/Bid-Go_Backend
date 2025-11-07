@@ -28,7 +28,7 @@ namespace Bid_Go.Tests.Unit.Services
             _service = new ProfileService(_mockRepo.Object, _mockCloudflare.Object);
         }
 
-        // === GetProfileAsync ===
+      
         [Fact]
         public async Task GetProfileAsync_ReturnsUser_WhenActive()
         {
@@ -63,7 +63,7 @@ namespace Bid_Go.Tests.Unit.Services
             await Assert.ThrowsAsync<Exception>(() => _service.GetProfileAsync(1));
         }
 
-        // === UpdateDriverProfileAsync ===
+     
         [Fact]
         public async Task UpdateDriverProfileAsync_UpdatesDriverSuccessfully()
         {
@@ -113,7 +113,7 @@ namespace Bid_Go.Tests.Unit.Services
             await Assert.ThrowsAsync<Exception>(() => _service.UpdateDriverProfileAsync(1, new DriverProfileUpdateDTO()));
         }
 
-        // === UpdateCompanyProfileAsync ===
+    
         [Fact]
         public async Task UpdateCompanyProfileAsync_UpdatesCompanySuccessfully()
         {
@@ -161,7 +161,7 @@ namespace Bid_Go.Tests.Unit.Services
             await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
         }
 
-        // === ChangePasswordAsync ===
+      
         [Fact]
         public async Task ChangePasswordAsync_UpdatesPassword_WhenValid()
         {
@@ -188,7 +188,6 @@ namespace Bid_Go.Tests.Unit.Services
             await Assert.ThrowsAsync<Exception>(() => _service.ChangePasswordAsync(1, "wrong", "new"));
         }
 
-        // === DeactivateUserAsync ===
         [Fact]
         public async Task DeactivateUserAsync_Throws_WhenUserNotFound()
         {

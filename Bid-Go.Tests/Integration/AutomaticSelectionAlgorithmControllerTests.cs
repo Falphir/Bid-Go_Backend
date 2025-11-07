@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
  /// <summary>
  /// Integration tests for automatic bid selection endpoint: success and error paths.

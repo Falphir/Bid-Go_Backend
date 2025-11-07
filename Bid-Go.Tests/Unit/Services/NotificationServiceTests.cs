@@ -38,9 +38,7 @@ namespace Bid_Go.Tests.Unit.Services
             _service = new NotificationService(_mockRepo.Object, _mockHubContext.Object);
         }
 
-        // ===========================================================
-        // GetNotificationsAsync
-        // ===========================================================
+  
         [Fact]
         public async Task GetNotificationsAsync_ShouldReturnNotifications()
         {
@@ -63,9 +61,7 @@ namespace Bid_Go.Tests.Unit.Services
             Assert.Equal(expected, result);
         }
 
-        // ===========================================================
-        // CreateAndSendAsync
-        // ===========================================================
+ 
         [Fact]
         public async Task CreateAndSendAsync_ShouldCreateAndSendNotification()
         {
@@ -98,9 +94,6 @@ namespace Bid_Go.Tests.Unit.Services
                 default), Times.Once);
         }
 
-        // ===========================================================
-        // SendToMultipleUsersAsync
-        // ===========================================================
         [Fact]
         public async Task SendToMultipleUsersAsync_ShouldSendToAllUsers()
         {

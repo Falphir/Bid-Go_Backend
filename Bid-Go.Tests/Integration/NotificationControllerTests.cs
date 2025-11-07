@@ -13,7 +13,7 @@ using Moq;
 using System.Security.Claims;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
     /// <summary>
     /// Integration tests for notification retrieval and broadcast behavior.

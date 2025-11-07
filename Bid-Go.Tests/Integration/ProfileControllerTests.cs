@@ -12,7 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
     /// <summary>
     /// Integration tests for profile endpoints covering driver and company scenarios.

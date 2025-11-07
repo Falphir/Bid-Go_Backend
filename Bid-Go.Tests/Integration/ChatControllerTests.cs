@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
     /// <summary>
     /// Integration tests for ChatController validating access control, message flow and chat creation.

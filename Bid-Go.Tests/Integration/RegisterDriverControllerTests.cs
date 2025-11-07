@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Xunit;
 
-namespace Bid_Go.Tests.Integration.Controllers
+namespace Bid_Go.Tests.Integration
 {
  /// <summary>
  /// Integration tests for driver registration including document uploads and conflict scenarios.
