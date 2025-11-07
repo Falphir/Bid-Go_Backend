@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,8 @@ using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // Adicionar controllers
 builder.Services.AddControllers();
@@ -194,6 +197,16 @@ builder.Services.AddControllers()
 
 
 var app = builder.Build();
+
+var fwd = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+};
+fwd.KnownNetworks.Clear();
+fwd.KnownProxies.Clear();
+app.UseForwardedHeaders(fwd);
+
+app.UseHttpsRedirection();
 
 
 app.UseSwagger();
