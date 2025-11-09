@@ -2,7 +2,7 @@ name: Integration Tests
 
 on:
   pull_request:
-    branches: [ master, develop, 'feature/**', 'changerequest/**', 'hotfix/**' ]
+    branches: [ 'main', 'develop', 'feature/**', 'changerequest/**', 'hotfix/**' ]
 
 jobs:
   integration-tests:
