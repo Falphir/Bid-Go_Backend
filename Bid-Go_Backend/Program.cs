@@ -44,6 +44,22 @@ using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MyCors = "Frontend";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyCors, p => p
+        .WithOrigins(
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://<o-teu-front-end>"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+    );
+});
+
+
 // Add controllers
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
@@ -245,6 +261,8 @@ app.UseExceptionHandler(config =>
 });
 
 // Authentication and authorization
+app.UseRouting();
+app.UseCors(MyCors);
 app.UseAuthentication();
 app.UseAuthorization();
 
