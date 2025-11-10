@@ -39,6 +39,7 @@ namespace Bid_Go_Backend.Controllers
 
                 var dtoList = requests.Select(tr => new TransportRequestsPageDTO
                 {
+                    id = tr.TransportRequestId,
                     Origin = tr.Origin,
                     Destination = tr.Destination,
                     Package = tr.Package,
@@ -78,6 +79,7 @@ namespace Bid_Go_Backend.Controllers
 
                 var responseDto = new TransportRequestResponseDTO
                 {
+                    id = target.TransportRequestId,
                     Origin = target.Origin,
                     Destination = target.Destination,
                     Package = target.Package,

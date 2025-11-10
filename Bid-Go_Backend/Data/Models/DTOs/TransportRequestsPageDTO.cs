@@ -9,6 +9,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs
 {
     public class TransportRequestsPageDTO
     {
+        public int id {  get; set; }
         public string Origin { get; set; }
         public string Destination { get; set; }
         public string Package { get; set; }
