@@ -18,6 +18,7 @@ namespace Bid_Go_Backend.Repositories.Review
     {
         private readonly BidGoDbContext _context;
         private readonly ILogger<ReviewRequestRepository> _logger;
+        
         public ReviewRequestRepository(BidGoDbContext context, ILogger<ReviewRequestRepository> logger)
         {
             _context = context;
@@ -113,5 +114,26 @@ namespace Bid_Go_Backend.Repositories.Review
 
             return companyReviews.Concat(driverReviews);
         }
+
+        public async Task<decimal?> GetAverageDriverRatingAsync(int driverId)
+        {
+            return await _context.Reviews
+                .OfType<ReviewDriver>() // apenas reviews de motoristas
+                .Where(r => r.DriverId == driverId)
+                .Select(r => (decimal?)r.Classification)
+                .AverageAsync();
+        }
+
+        public async Task<decimal?> GetAverageCompanyRatingAsync(int companyId)
+        {
+            return await _context.Reviews
+                .OfType<ReviewCompany>() // apenas reviews de empresas
+                .Where(r => r.CompanyId == companyId)
+                .Select(r => (decimal?)r.Classification)
+                .AverageAsync();
+        }
+
+
+
     }
 }

@@ -8,5 +8,8 @@ namespace Bid_Go_Backend.Services.Interfaces
     {
         Task<bool> SubmitReviewAsync(ReviewRequestServiceDTO reviewDTO);
         Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId);
-    }
+        Task<decimal?> GetAverageDriverRatingAsync(int driverId);
+
+        Task<decimal?> GetAverageCompanyRatingAsync(int companyId);
+    };
 }

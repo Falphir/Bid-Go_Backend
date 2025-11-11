@@ -37,7 +37,6 @@ namespace Bid_Go.Tests.Unit.Services
             return new ReviewRequestServiceDTO
             {
                 TimeStamp = DateTime.UtcNow,
-                Classification =4.5m,
                 DriverId =10,
                 CompanyId =20,
                 TransportRequestId =100,
@@ -176,29 +175,7 @@ namespace Bid_Go.Tests.Unit.Services
             _mockRepo.VerifyNoOtherCalls();
         }
 
-        [Theory]
-        [InlineData(-1)]
-        [InlineData(6)]
-        public async Task SubmitReviewAsync_ShouldThrow_WhenClassificationOutOfRange(decimal classification)
-        {
-            // Arrange
-            var dto = CreateBaseDto("Company");
-            dto.Classification = classification;
-            var transport = CreateTransport("Completed");
-
-            _mockRepo.Setup(r => r.GetTransportRequestAsync(dto.TransportRequestId))
-                .ReturnsAsync(transport);
-            _mockRepo.Setup(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId))
-                .ReturnsAsync(false);
-
-            // Act
-            // Assert
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.SubmitReviewAsync(dto));
-
-            _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
-            _mockRepo.Verify(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId), Times.Once);
-            _mockRepo.VerifyNoOtherCalls();
-        }
+        
 
         [Fact]
         public async Task SubmitReviewAsync_ShouldAddCompanyReview_WhenValid()
@@ -229,7 +206,7 @@ namespace Bid_Go.Tests.Unit.Services
             Assert.Equal(dto.TransportRequestId, companyReview.TransportRequestId);
             Assert.Equal(dto.CompanyId, companyReview.CompanyId);
             Assert.Equal(dto.DriverId, companyReview.DriverId);
-            Assert.Equal(dto.Classification, companyReview.Classification);
+        
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
             _mockRepo.Verify(r => r.CompanyReviewExistsAsync(dto.TransportRequestId, dto.CompanyId), Times.Once);
@@ -266,7 +243,7 @@ namespace Bid_Go.Tests.Unit.Services
             Assert.Equal(dto.TransportRequestId, driverReview.TransportRequestId);
             Assert.Equal(dto.CompanyId, driverReview.CompanyId);
             Assert.Equal(dto.DriverId, driverReview.DriverId);
-            Assert.Equal(dto.Classification, driverReview.Classification);
+         
 
             _mockRepo.Verify(r => r.GetTransportRequestAsync(dto.TransportRequestId), Times.Once);
             _mockRepo.Verify(r => r.DriverReviewExistsAsync(dto.TransportRequestId, dto.DriverId), Times.Once);

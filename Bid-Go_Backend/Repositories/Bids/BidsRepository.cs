@@ -65,8 +65,12 @@ namespace Bid_Go_Backend.Repositories.Bids
         /// </remarks>
         public async Task<List<Bid>> GetActiveBidsAsync(int transportRequestId, string? orderBy = "value", bool descending = false)
         {
-            var query = _ctx.Bids.Include(b => b.Driver).AsNoTracking()
-                .Where(b => b.TransportRequestId == transportRequestId && b.Status == EBidStatus.Pendent);
+            var query = _ctx.Bids
+      .Include(b => b.Driver)
+          .ThenInclude(d => d.ReviewsDriver) 
+      .AsNoTracking()
+      .Where(b => b.TransportRequestId == transportRequestId && b.Status == EBidStatus.Pendent);
+
 
             query = (orderBy?.ToLower(), descending) switch
             {

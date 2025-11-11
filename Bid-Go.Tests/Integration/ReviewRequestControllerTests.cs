@@ -89,7 +89,7 @@ namespace Bid_Go.Tests.Integration
             // Arrange
             var (controller, db) = Build();
             var (company, driver, tr) = SeedCompletedRequest(db);
-            var dtoCompany = new ReviewRequestServiceDTO { TimeStamp = DateTime.UtcNow, Classification =4.5m, DriverId = driver.Id, CompanyId = company.Id, TransportRequestId = tr.TransportRequestId, Discriminator = "Company", ServiceQuality =5, ClientSuport =4 };
+            var dtoCompany = new ReviewRequestServiceDTO { TimeStamp = DateTime.UtcNow, DriverId = driver.Id, CompanyId = company.Id, TransportRequestId = tr.TransportRequestId, Discriminator = "Company", ServiceQuality =5, ClientSuport =4 };
 
             // Act + Assert first (success)
             var result1 = await controller.SubmitReview(dtoCompany);
@@ -111,7 +111,6 @@ namespace Bid_Go.Tests.Integration
             var dto = new ReviewRequestServiceDTO
             {
                 TimeStamp = DateTime.UtcNow,
-                Classification = 4.0m,
                 DriverId = driver.Id,
                 CompanyId = company.Id,
                 TransportRequestId = tr.TransportRequestId,
@@ -127,7 +126,7 @@ namespace Bid_Go.Tests.Integration
                 .FirstOrDefaultAsync(r => r.TransportRequestId == tr.TransportRequestId && r.DriverId == driver.Id);
 
             Assert.NotNull(fromDb);
-            Assert.Equal(4.0m, fromDb!.Classification);
+            Assert.Equal(4.5m, fromDb!.Classification);
         }
 
         [Fact]

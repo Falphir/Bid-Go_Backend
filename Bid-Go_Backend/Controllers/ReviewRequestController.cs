@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System;
 using System.Threading.Tasks;
 
@@ -78,5 +79,26 @@ namespace Bid_Go_Backend.Controllers
                 return StatusCode(500, new { message = "An unexpected error occurred.", detail = ex.Message });
             }
         }
+
+        [HttpGet("average/driver/{driverId}")]
+        public async Task<IActionResult> GetAverageDriverRating(int driverId)
+        {
+            var avg = await _service.GetAverageDriverRatingAsync(driverId);
+            if (avg == null)
+                return Ok(new { driverId, average = 0, message = "Sem avaliações" });
+            return Ok(new { driverId, average = avg });
+        }
+
+        [HttpGet("average/company/{companyId}")]
+        public async Task<IActionResult> GetAverageCompanyRating(int companyId)
+        {
+            var avg = await _service.GetAverageCompanyRatingAsync(companyId);
+            if (avg == null)
+                return Ok(new { companyId, average = 0, message = "Sem avaliações" });
+            return Ok(new { companyId, average = avg });
+        }
+
+
+
     }
 }
