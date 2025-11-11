@@ -93,7 +93,7 @@ namespace Bid_Go_Backend.Data
 
             modelBuilder.Entity<ReviewCompany>()
                 .HasOne(r => r.Company)
-                .WithMany()
+                .WithMany(c => c.ReviewsCompany)
                 .HasForeignKey(r => r.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -111,7 +111,7 @@ namespace Bid_Go_Backend.Data
 
             modelBuilder.Entity<ReviewDriver>()
                 .HasOne(r => r.Driver)
-                .WithMany()
+                .WithMany(d => d.ReviewsDriver)
                 .HasForeignKey(r => r.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
