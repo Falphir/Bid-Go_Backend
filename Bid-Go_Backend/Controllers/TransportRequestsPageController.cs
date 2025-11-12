@@ -45,6 +45,8 @@ namespace Bid_Go_Backend.Controllers
                     Package = tr.Package,
                     PickupDate = tr.PickupDate,
                     DeliveryDate = tr.DeliveryDate,
+                    BiddingStartDate = tr.BiddingStartDate,
+                    BiddingEndDate = tr.BiddingEndDate,
                     Image = tr.Image,
                     MaxPrice = tr.MaxPrice
                 });
