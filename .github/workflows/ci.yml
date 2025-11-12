@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "master", "develop", "feature/*", "changerequest/*", "hotfix/*" ]
+    branches: [ "main", "develop", "feature/*", "changerequest/*", "hotfix/*" ]
   pull_request:
-    branches: [ "master", "develop", "feature/*", "changerequest/*", "hotfix/*" ]
+    branches: [ "main", "develop", "feature/*", "changerequest/*", "hotfix/*" ]
 
 jobs:
   build-and-unit:
