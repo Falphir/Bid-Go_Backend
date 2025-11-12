@@ -12,6 +12,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs
     {
         [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string? Name { get; set; }
+        public IFormFile? ProfileImage { get; set; }
         public IFormFile? DriverLicense { get; set; }  
         public IFormFile? Insurance { get; set; }
 

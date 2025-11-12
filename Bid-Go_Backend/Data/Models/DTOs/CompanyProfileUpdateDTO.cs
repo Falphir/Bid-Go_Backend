@@ -4,15 +4,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Bid_Go_Backend.Data.Models.DTOs
 {
   
-        public class CompanyProfileDTO
+        public class CompanyProfileUpdateDTO
         {
             [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
             public string? Name { get; set; }
-            public string? ProfileImage { get; set; }
+            public IFormFile? ProfileImage { get; set; }
 
             [MaxLength(100, ErrorMessage = "Company name cannot exceed 100 characters.")]
             public string? CompanyName { get; set; }
