@@ -1,8 +1,9 @@
 ﻿using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
+using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using IAuthorizationService = Bid_Go_Backend.Services.Interfaces.IAuthorizationService;
 
@@ -127,5 +128,27 @@ namespace Bid_Go_Backend.Controllers
             var requests = await _service.GetByCompanyAsync(companyId);
             return Ok(requests);
         }
+
+        [Authorize(Policy = "CompanyOnly")]
+        [HttpPut("company/publish/{id}")]
+        public async Task<IActionResult> PublishAsync(int id)
+        {
+            var companyId = int.Parse(User.FindFirst("userId")!.Value);
+
+            if (!await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, id))
+                return Forbid();
+
+            var request = await _service.GetByIdAsync(id);
+            if (request == null)
+                return NotFound(new { message = "Pedido não encontrado." });
+
+            if (request.Status != ERequestStatus.Draft)
+                return BadRequest(new { message = "Apenas pedidos em DRAFT podem ser publicados." });
+
+            var updated = await _service.PublishAsync(id); 
+            return Ok(updated);
+        }
+
+
     }
 }

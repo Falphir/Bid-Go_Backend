@@ -16,5 +16,8 @@ namespace Bid_Go_Backend.Services.Interfaces
         Task<bool> DeleteAsync(int id);
         Task<TransportRequest?> GetByIdAsync(int id);
         Task<List<TransportRequest>> GetByCompanyAsync(int companyId);
+
+        Task<TransportRequest> CreateDraftAsync(CreateTransportRequestDTO dto, IFormFile imageFile);
+        Task<TransportRequest> PublishAsync(int id);
     }
 }

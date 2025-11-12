@@ -73,6 +73,57 @@ namespace Bid_Go_Backend.Services.Transport_Request
             return await _repository.CreateAsync(request);
         }
 
+
+        public async Task<TransportRequest> CreateDraftAsync(CreateTransportRequestDTO dto, IFormFile imageFile)
+        {
+
+            if (imageFile == null || imageFile.Length == 0)
+                throw new ArgumentException("A imagem é obrigatória.");
+
+            // Salva a imagem localmente e obtém o caminho relativo
+            string imageUrl = await _r2Service.UploadImageAsync(imageFile);
+
+            if (dto.PickupDate >= dto.DeliveryDate)
+                throw new ArgumentException("A data de recolha deve ser anterior à data de entrega.");
+            if (dto.BiddingStartDate >= dto.BiddingEndDate)
+                throw new ArgumentException("A data de início das licitações deve ser anterior à data de fim.");
+            if (dto.PickupDate <= dto.BiddingEndDate)
+                throw new ArgumentException("A data de recolha deve ser posterior ao fim das licitações.");
+            if (dto.Weight <= 0 || dto.Volume <= 0)
+                throw new ArgumentException("Peso e volume devem ser superiores a zero.");
+            if (dto.MaxPrice < 20)
+                throw new ArgumentException("O preço deve ser igual ou superior a 20.");
+            if (dto.Length <= 0 || dto.Width <= 0 || dto.Height <= 0)
+                throw new ArgumentException("As dimensões devem ser superiores a zero.");
+
+            var request = new TransportRequest
+            {
+                Origin = dto.Origin,
+                Destination = dto.Destination,
+                Package = dto.Package,
+                Weight = dto.Weight,
+                Volume = dto.Volume,
+                Length = dto.Length,
+                Width = dto.Width,
+                Height = dto.Height,
+                PickupDate = dto.PickupDate,
+                DeliveryDate = dto.DeliveryDate,
+                BiddingStartDate = dto.BiddingStartDate,
+                BiddingEndDate = dto.BiddingEndDate,
+                IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled,
+                Image = imageUrl,
+                MaxPrice = dto.MaxPrice,
+                CompanyId = dto.CompanyId,
+                Status = ERequestStatus.Draft
+            };
+
+            return await _repository.CreateAsync(request);
+        }
+
+
+
+
+
         /// <summary>
         /// Update a draft transport request applying provided fields and optionally replacing the image.
         /// </summary>
@@ -167,6 +218,21 @@ namespace Bid_Go_Backend.Services.Transport_Request
         public async Task<List<TransportRequest>> GetByCompanyAsync(int companyId)
         {
             return await _repository.GetAllByCompanyAsync(companyId);
+        }
+
+        // Publish a draft transport request (sets status to Active and persists)
+        public async Task<TransportRequest> PublishAsync(int id)
+        {
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing == null)
+                throw new KeyNotFoundException("Pedido não encontrado.");
+
+            if (existing.Status != ERequestStatus.Draft)
+                throw new InvalidOperationException("Apenas pedidos em rascunho podem ser publicados.");
+
+            existing.Status = ERequestStatus.Active;
+
+            return await _repository.UpdateAsync(id, existing);
         }
 
     }
