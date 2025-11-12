@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
-namespace BidGo.Tests.Unit.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     /// <summary>
     /// Unit tests for EmailService. This test only ensures no unexpected exception is thrown with provided config.
