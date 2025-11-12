@@ -11,6 +11,7 @@ namespace Bid_Go_Backend.Data.Models.DTOs
     {
         [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string? Name { get; set; }
+        public string? ProfileImage { get; set; }
         public string? DriverLicense { get; set; }
         public string? Insurance { get; set; }
 
