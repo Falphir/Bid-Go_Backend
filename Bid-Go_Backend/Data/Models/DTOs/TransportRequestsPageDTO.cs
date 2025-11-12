@@ -15,6 +15,8 @@ namespace Bid_Go_Backend.Data.Models.DTOs
         public string Package { get; set; }
         public DateTime PickupDate { get; set; }
         public DateTime DeliveryDate { get; set; }
+        public DateTime BiddingStartDate { get; set; }
+        public DateTime BiddingEndDate { get; set; }
         public string Image { get; set; }
         public decimal MaxPrice { get; set; }
     }
