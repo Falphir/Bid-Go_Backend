@@ -74,7 +74,7 @@ namespace Bid_Go_Backend.Services.Transport_Request
         }
 
 
-        public async Task<TransportRequest> CreateDraftAsync(CreateTransportRequestDTO dto, IFormFile imageFile)
+        public async Task<TransportRequest> CreateDraftAsync(int CompanyId,CreateTransportRequestDTO dto, IFormFile imageFile)
         {
 
             if (imageFile == null || imageFile.Length == 0)
@@ -113,7 +113,7 @@ namespace Bid_Go_Backend.Services.Transport_Request
                 IsAutomaticSelectionEnabled = dto.IsAutomaticSelectionEnabled,
                 Image = imageUrl,
                 MaxPrice = dto.MaxPrice,
-                CompanyId = dto.CompanyId,
+                CompanyId = CompanyId,
                 Status = ERequestStatus.Draft
             };
 

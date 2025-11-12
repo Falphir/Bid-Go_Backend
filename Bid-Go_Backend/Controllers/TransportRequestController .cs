@@ -48,6 +48,29 @@ namespace Bid_Go_Backend.Controllers
             }
         }
 
+
+
+        [Authorize(Policy = "CompanyOnly")]
+        [HttpPost("createDRAFTTransport")]
+        public async Task<IActionResult> CreateDraft([FromForm] CreateTransportRequestDTO dto, IFormFile image)
+        {
+            var companyId = int.Parse(User.FindFirst("userId")!.Value);
+
+            try
+            {
+                var created = await _service.CreateDraftAsync(companyId, dto, image);
+                return CreatedAtAction(nameof(GetById), new { id = created.TransportRequestId }, created);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
+
+
+
         /// <summary>
         /// Update an existing transport request. Caller must be the owning company.
         /// </summary>
