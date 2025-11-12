@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class BidGo : Migration
+    public partial class BidandGoV1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,9 +36,9 @@ namespace Bid_Go_Backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Address = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DriverLicense = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                    DriverLicense = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Insurance = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                    Insurance = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -90,7 +90,7 @@ namespace Bid_Go_Backend.Migrations
                     Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PickupDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DeliveryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Image = table.Column<string>(type: "longtext", nullable: false)
+                    Image = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     MaxPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),

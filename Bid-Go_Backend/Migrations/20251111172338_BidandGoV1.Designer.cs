@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251105004514_BidGo")]
-    partial class BidGo
+    [Migration("20251111172338_BidandGoV1")]
+    partial class BidandGoV1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -247,10 +247,6 @@ namespace Bid_Go_Backend.Migrations
 
                     b.HasKey("ReviewId");
 
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("DriverId");
-
                     b.HasIndex("TransportRequestId");
 
                     b.ToTable("Reviews");
@@ -289,7 +285,8 @@ namespace Bid_Go_Backend.Migrations
 
                     b.Property<string>("Image")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
                     b.Property<bool>("IsAutomaticSelectionEnabled")
                         .HasColumnType("tinyint(1)");
@@ -399,6 +396,10 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<int>("ServiceQuality")
                         .HasColumnType("int");
 
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DriverId");
+
                     b.HasDiscriminator().HasValue("Driver");
                 });
 
@@ -411,6 +412,10 @@ namespace Bid_Go_Backend.Migrations
 
                     b.Property<int>("Punctuality")
                         .HasColumnType("int");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DriverId");
 
                     b.HasDiscriminator().HasValue("Company");
                 });
@@ -438,13 +443,13 @@ namespace Bid_Go_Backend.Migrations
 
                     b.Property<string>("DriverLicense")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
                     b.Property<string>("Insurance")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
                     b.HasDiscriminator().HasValue("Driver");
                 });
@@ -558,27 +563,11 @@ namespace Bid_Go_Backend.Migrations
 
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Review", b =>
                 {
-                    b.HasOne("Bid_Go_Backend.Data.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
-                        .WithMany()
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Bid_Go_Backend.Data.Models.TransportRequest", "TransportRequest")
                         .WithMany("Reviews")
                         .HasForeignKey("TransportRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Company");
-
-                    b.Navigation("Driver");
 
                     b.Navigation("TransportRequest");
                 });
@@ -601,6 +590,44 @@ namespace Bid_Go_Backend.Migrations
                     b.Navigation("SelectedBid");
                 });
 
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.ReviewCompany", b =>
+                {
+                    b.HasOne("Bid_Go_Backend.Data.Models.Company", "Company")
+                        .WithMany("ReviewsCompany")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.ReviewDriver", b =>
+                {
+                    b.HasOne("Bid_Go_Backend.Data.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Bid_Go_Backend.Data.Models.Driver", "Driver")
+                        .WithMany("ReviewsDriver")
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Driver");
+                });
+
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Chats", b =>
                 {
                     b.Navigation("Messages");
@@ -618,9 +645,16 @@ namespace Bid_Go_Backend.Migrations
                     b.Navigation("Reviews");
                 });
 
+            modelBuilder.Entity("Bid_Go_Backend.Data.Models.Company", b =>
+                {
+                    b.Navigation("ReviewsCompany");
+                });
+
             modelBuilder.Entity("Bid_Go_Backend.Data.Models.Driver", b =>
                 {
                     b.Navigation("Bids");
+
+                    b.Navigation("ReviewsDriver");
                 });
 #pragma warning restore 612, 618
         }
