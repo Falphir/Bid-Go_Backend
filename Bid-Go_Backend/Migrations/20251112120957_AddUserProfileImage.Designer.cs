@@ -4,6 +4,7 @@ using Bid_Go_Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    partial class BidGoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112120957_AddUserProfileImage")]
+    partial class AddUserProfileImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -365,6 +368,10 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<int>("PhoneNumber")
                         .HasMaxLength(9)
                         .HasColumnType("int");
+
+                    b.Property<string>("ProfileImage")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar(512)");
 
                     b.Property<string>("UserType")
                         .IsRequired()
