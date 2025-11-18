@@ -157,6 +157,8 @@ builder.Services.Configure<StripeSettings>(
 var stripeSection = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSection["SecretKey"];
 
+builder.Services.AddHostedService<AutomaticSelectionBackgroundService>();
+
 //Repositories
 builder.Services.AddScoped<IBidsService, BidsService>();
 builder.Services.AddScoped<IBidsRepository, BidsRepository>();

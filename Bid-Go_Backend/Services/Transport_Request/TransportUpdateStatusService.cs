@@ -137,6 +137,8 @@ namespace Bid_Go_Backend.Services
                 {
                     ERequestStatus.Active => target is ERequestStatus.Pending or ERequestStatus.Canceled,
                     ERequestStatus.Pending => target == ERequestStatus.WaitingPickup,
+                    ERequestStatus.WaitingPickup => target is ERequestStatus.Canceled,
+                    ERequestStatus.InTransit => target is ERequestStatus.Canceled,
                     _ => false
                 };
             }
