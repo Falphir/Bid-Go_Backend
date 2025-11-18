@@ -145,5 +145,9 @@ namespace Bid_Go_Backend.Services
         /// </summary>
         public Task<List<Bid>> GetActiveBidsAsync(int transportRequestId, string? orderBy = "value", bool descending = false) =>
             _repo.GetActiveBidsAsync(transportRequestId, orderBy, descending);
+
+        public Task<List<Bid>> GetBidsByDriverId(int driverId) =>
+             _repo.GetBidsByDriverId(driverId);
+
     }
 }

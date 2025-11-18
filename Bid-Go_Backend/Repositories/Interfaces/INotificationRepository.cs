@@ -11,5 +11,9 @@ namespace Bid_Go_Backend.Repositories.Interfaces
                                        int? bidId = null, int? transportRequestId = null);
 
         Task<List<Notification>> GetNotificationsAsync(int userId, ENotificationType? type = null, string order = "desc");
+
+        Task MarkAsReadAsync(int notificationId);
+        Task MarkAllAsReadAsync(int userId);
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using Bid_Go_Backend.Data.Models;
+﻿using Bid_Go_Backend.Data;
+using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Services.Interfaces;
@@ -13,10 +14,11 @@ namespace Bid_Go_Backend.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _service;
-
-        public NotificationController(INotificationService service)
+        private readonly BidGoDbContext _ctx;
+        public NotificationController(INotificationService service, BidGoDbContext ctx)
         {
             _service = service;
+            _ctx = ctx;
         }
 
         /// <summary>
@@ -39,5 +41,40 @@ namespace Bid_Go_Backend.Controllers
             var notifications = await _service.GetNotificationsAsync(userId, type, order);
             return Ok(notifications);
         }
+
+        [Authorize]
+        [HttpPatch("mark-read/{id}")]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            int userId = int.Parse(User.FindFirst("userId")!.Value);
+
+            // 1️⃣ Verifica se existe
+            var notif = await _ctx.Notifications.FindAsync(id);
+
+            if (notif == null)
+                return NotFound(new { message = "Notification not found." });
+
+            // 2️⃣ Verifica se pertence ao user
+            if (notif.UserId != userId)
+                return Forbid("You cannot modify another user's notification.");
+
+            // 3️⃣ Marca como lida
+            await _service.MarkAsReadAsync(id);
+
+            return Ok(new { message = "Notification marked as read." });
+        }
+
+
+        [Authorize]
+        [HttpPatch("mark-all-read")]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            int userId = int.Parse(User.FindFirst("userId")!.Value);
+
+            await _service.MarkAllAsReadAsync(userId);
+
+            return Ok(new { message = "All notifications marked as read." });
+        }
+
     }
 }

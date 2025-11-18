@@ -68,5 +68,8 @@ namespace Bid_Go_Backend.Services.Interfaces
         /// <param name="descending">Whether to sort descending.</param>
         /// <returns>List of active bids.</returns>
         Task<List<Bid>> GetActiveBidsAsync(int transportRequestId, string? orderBy = "value", bool descending = false);
+
+
+        Task<List<Bid>> GetBidsByDriverId(int driverId);
     }
 }

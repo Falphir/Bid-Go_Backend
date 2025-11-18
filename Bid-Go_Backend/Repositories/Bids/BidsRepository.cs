@@ -82,6 +82,17 @@ namespace Bid_Go_Backend.Repositories.Bids
 
             return await query.ToListAsync();
         }
+
+
+        public async Task<List<Bid>> GetBidsByDriverId(int driverId)
+        {
+            var query = _ctx.Bids
+             .Include(b => b.TransportRequest)
+             .AsNoTracking()
+             .Where(b => b.DriverId == driverId);
+
+            return await query.ToListAsync();
+        }
     }
 }
 

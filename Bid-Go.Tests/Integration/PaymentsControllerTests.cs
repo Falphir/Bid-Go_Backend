@@ -258,6 +258,16 @@ namespace Bid_Go.Tests.Integration
 
                 return Task.CompletedTask;
             }
+
+            public Task MarkAsReadAsync(int notificationId)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task MarkAllAsReadAsync(int userId)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
