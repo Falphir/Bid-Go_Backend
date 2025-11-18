@@ -37,7 +37,7 @@ namespace Bid_Go.Tests.Integration
             hub.Setup(h => h.Clients).Returns(clients.Object);
 
             var service = new NotificationService(repo, hub.Object);
-            var controller = new NotificationController(service);
+            var controller = new NotificationController(service, db);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {

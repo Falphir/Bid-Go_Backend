@@ -48,17 +48,15 @@ namespace Bid_Go_Backend.Controllers
         {
             int userId = int.Parse(User.FindFirst("userId")!.Value);
 
-            // 1️⃣ Verifica se existe
+       
             var notif = await _ctx.Notifications.FindAsync(id);
 
             if (notif == null)
                 return NotFound(new { message = "Notification not found." });
 
-            // 2️⃣ Verifica se pertence ao user
             if (notif.UserId != userId)
                 return Forbid("You cannot modify another user's notification.");
 
-            // 3️⃣ Marca como lida
             await _service.MarkAsReadAsync(id);
 
             return Ok(new { message = "Notification marked as read." });
