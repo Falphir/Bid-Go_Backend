@@ -28,6 +28,8 @@ namespace Bid_Go_Backend.Data.Models
         public int UserId { get; set; }
         public User? User { get; set; } = null;
 
+        public bool IsRead { get; set; } = false;
+
         [ForeignKey(nameof(Bid))]
         public int? BidId { get; set; }
         public Bid? Bid { get; set; } = null;

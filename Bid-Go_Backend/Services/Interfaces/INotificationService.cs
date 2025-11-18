@@ -12,5 +12,9 @@ namespace Bid_Go_Backend.Services.Interfaces
                                                            int? bidId = null, int? transportRequestId = null);
 
         Task SendToMultipleUsersAsync(IEnumerable<int> userIds, string context, ENotificationType type);
+
+        Task MarkAsReadAsync(int notificationId);
+        Task MarkAllAsReadAsync(int userId);
+
     }
 }

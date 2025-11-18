@@ -38,6 +38,9 @@ namespace Bid_Go_Backend.Repositories.Interfaces
         /// Retrieve active bids for a transport request with optional ordering.
         /// </summary>
         Task<List<Bid>> GetActiveBidsAsync(int transportRequestId, string? orderBy = "value", bool descending = false);
-    }
+
+        Task<List<Bid>> GetBidsByDriverId(int driverId);
+
+                }
 
 }

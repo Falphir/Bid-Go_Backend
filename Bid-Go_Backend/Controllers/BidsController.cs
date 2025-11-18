@@ -146,5 +146,22 @@ namespace Bid_Go_Backend.Controllers
             }).ToList<object>();
             return Ok(list);
         }
+
+        /// <returns>List of bids from one driver summary</returns>
+        [Authorize]
+        [HttpGet("bidsByDriver")]
+        public async Task<IActionResult> GetBidsByDriverId([FromQuery] int driverId){
+            var bidsByDriver = await _service.GetBidsByDriverId(driverId);
+            var list = bidsByDriver.Select(b => new
+            {
+                b.BidId,
+                b.Value,
+                b.DeliveryDeadline,
+                b.TransportRequestId,
+                b.Status,
+                TransportRequest = new { b.TransportRequest.Status}
+            }).ToList<object>();
+            return Ok(list);
+        }
     }
 }

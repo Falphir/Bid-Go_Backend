@@ -200,6 +200,7 @@ namespace Bid_Go.Tests.Integration
                     Type = type,
                     BidId = bidId,
                     TransportRequestId = transportRequestId,
+                    IsRead = true,
                     TimeStamp = DateTime.UtcNow
                 };
 
@@ -217,11 +218,23 @@ namespace Bid_Go.Tests.Integration
                         UserId = id,
                         Context = context,
                         Type = type,
-                        TimeStamp = DateTime.UtcNow
+                        TimeStamp = DateTime.UtcNow,
+                        IsRead = true
+
                     });
                 }
 
                 return Task.CompletedTask;
+            }
+
+            public Task MarkAsReadAsync(int notificationId)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task MarkAllAsReadAsync(int userId)
+            {
+                throw new NotImplementedException();
             }
         }
     }
