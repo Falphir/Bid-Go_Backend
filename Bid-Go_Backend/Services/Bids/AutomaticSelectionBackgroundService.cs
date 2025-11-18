@@ -48,23 +48,14 @@ namespace Bid_Go_Backend.Services.Bids
 
                         request.IsAutomaticSelectionExecuted = true;
 
-                        if (!success)
-                        {
-                            // aqui podes criar uma notificação à empresa a dizer
-                            // "não foi possível selecionar automaticamente"
-                            // via INotificationService
-                        }
-
                         await ctx.SaveChangesAsync(stoppingToken);
                     }
                     catch (Exception ex)
                     {
-                        // logar erro e talvez não marcar como executado,
-                        // para tentar novamente mais tarde
+                        
                     }
                 }
 
-                // espera 1 minuto
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }

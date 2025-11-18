@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using System.Security.Cryptography;
 
 namespace Bid_Go_Backend.Services.Bids
@@ -51,6 +52,9 @@ namespace Bid_Go_Backend.Services.Bids
             {
                 await _notificationService.CreateAndSendAsync(
                    transportRequest.CompanyId, $"The automatic selection process has completed, but no bids were submitted for request #{transportRequest.TransportRequestId}. Automatic selection could not be performed.", ENotificationType.New_message, null, transportRequest.TransportRequestId);
+
+
+                transportRequest.Status = ERequestStatus.Canceled;
 
                 await _repo.SaveChangesAsync();
 
