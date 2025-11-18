@@ -41,8 +41,12 @@ namespace Bid_Go_Backend.Services.Auth
         public async Task<(bool Success, string Message, string Token, DateTime? Expiration)> LoginAsync(string email, string password)
         {
             var user = await _userRepository.GetByEmailAsync(email);
+
             if (user == null)
                 return (false, "Email inválido.", null, null);
+
+            if (!user.IsActive) 
+                return (false, "Utilizador inativo.", null, null);
 
             if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
                 return (false, "Password incorreta.", null, null);

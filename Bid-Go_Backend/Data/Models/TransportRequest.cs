@@ -69,6 +69,7 @@ namespace Bid_Go_Backend.Data.Models
 
         [Required]
         public bool IsAutomaticSelectionEnabled { get; set; } = false;
+        public bool IsAutomaticSelectionExecuted { get; set; } = false;
 
         [ForeignKey(nameof(SelectedBid))]
         public int? SelectedBidId { get; set; }
