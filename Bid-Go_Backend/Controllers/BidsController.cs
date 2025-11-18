@@ -150,7 +150,7 @@ namespace Bid_Go_Backend.Controllers
         /// <returns>List of bids from one driver summary</returns>
         [Authorize]
         [HttpGet("bidsByDriver/{driverId}")]
-        public async Task<IActionResult> GetBidsByDriverId([FromQuery] int driverId){
+        public async Task<IActionResult> GetBidsByDriverId(int driverId){
             var bidsByDriver = await _service.GetBidsByDriverId(driverId);
             var list = bidsByDriver.Select(b => new
             {
