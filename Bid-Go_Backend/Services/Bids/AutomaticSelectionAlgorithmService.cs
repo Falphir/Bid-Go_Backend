@@ -105,11 +105,11 @@ namespace Bid_Go_Backend.Services.Bids
             {
                 other.Status = EBidStatus.Rejected;
                 await _notificationService.CreateAndSendAsync(
-                    other.DriverId, "Your bid was rejected.", ENotificationType.Rejected, other.BidId, transportRequest.TransportRequestId);
+                    other.DriverId, $"Your bid for the transport request #{transportRequest.TransportRequestId} was rejected.", ENotificationType.Rejected, other.BidId, transportRequest.TransportRequestId);
             }
 
             await _notificationService.CreateAndSendAsync(
-                selectedBid.DriverId, "Your bid was accepted.", ENotificationType.Accepted, selectedBid.BidId, transportRequest.TransportRequestId);
+                selectedBid.DriverId, $"Your bid for the transport request #{transportRequest.TransportRequestId} was accepted.", ENotificationType.Accepted, selectedBid.BidId, transportRequest.TransportRequestId);
 
             await _notificationService.CreateAndSendAsync(
                 transportRequest.CompanyId, $"The automatic selection process has completed. A winning bid has been chosen for request #{transportRequest.TransportRequestId}.", ENotificationType.New_message, selectedBid.BidId, transportRequest.TransportRequestId);

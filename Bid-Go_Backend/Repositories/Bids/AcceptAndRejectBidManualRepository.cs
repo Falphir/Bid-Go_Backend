@@ -39,6 +39,7 @@ namespace Bid_Go_Backend.Repositories.Bids
         public Task<List<Bid>> GetByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status) =>
        _ctx.Bids
            .AsNoTracking()
+           .Include(b => b.Driver)
            .Where(b => b.TransportRequestId == transportRequestId && b.Status == status)
            .ToListAsync();
 

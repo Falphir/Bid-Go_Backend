@@ -87,7 +87,7 @@ namespace Bid_Go_Backend.Services
                         bid.Status = EBidStatus.Canceled;
                         await _notificationService.CreateAndSendAsync(
                             bid.DriverId,
-                            "O pedido de transporte associado à sua proposta foi cancelado.",
+                            $"The transport request #{bid.TransportRequestId} associated with your bid has been canceled.",
                             ENotificationType.Canceled,
                             bid.BidId,
                             bid.TransportRequestId
