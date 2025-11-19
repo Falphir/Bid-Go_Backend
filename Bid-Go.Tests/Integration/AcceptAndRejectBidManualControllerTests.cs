@@ -1,6 +1,7 @@
 using Bid_Go_Backend.Controllers;
 using Bid_Go_Backend.Data;
 using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Authorization;
 using Bid_Go_Backend.Repositories.Bids;
@@ -75,21 +76,60 @@ namespace Bid_Go.Tests.Integration
             var (controller, db, _) = BuildController(companyId: 10);
             var (tr, b1, b2, b3) = SeedRequestWithBids(db, 10);
 
-            // set one to Accepted to test filter
+            // ensure drivers exist (use Drivers, not Users, because repository includes Driver)
+            // Driver entity requires inherited User fields and Driver-specific required fields
+            db.Drivers.Add(new Driver {
+                Id = b1.DriverId,
+                Name = "D1",
+                Email = "d1@example.com",
+                Password = "P@ssw0rd",
+                PhoneNumber = 912345678,
+                NIF = 123456789,
+                DriverLicense = "DL1",
+                Insurance = "INS1",
+                IsActive = true
+            });
+            db.Drivers.Add(new Driver {
+                Id = b2.DriverId,
+                Name = "D2",
+                Email = "d2@example.com",
+                Password = "P@ssw0rd",
+                PhoneNumber = 923456789,
+                NIF = 223456789,
+                DriverLicense = "DL2",
+                Insurance = "INS2",
+                IsActive = true
+            });
+            db.Drivers.Add(new Driver {
+                Id = b3.DriverId,
+                Name = "D3",
+                Email = "d3@example.com",
+                Password = "P@ssw0rd",
+                PhoneNumber = 934567890,
+                NIF = 323456789,
+                DriverLicense = "DL3",
+                Insurance = "INS3",
+                IsActive = true
+            });
+            await db.SaveChangesAsync();
+
+            // Accept one
             var bidToAccept = db.Bids.First(b => b.BidId == b2.BidId);
             bidToAccept.Status = EBidStatus.Accepted;
             await db.SaveChangesAsync();
 
             // Act
-            var result = await controller.GetBidsByTransportRequestAndStatus(tr.TransportRequestId, EBidStatus.Accepted);
+            var result = await controller.GetBidsByTransportRequestAndStatus(
+                tr.TransportRequestId, EBidStatus.Accepted);
 
             // Assert
             var ok = Assert.IsType<OkObjectResult>(result);
-            var list = Assert.IsType<List<Bid>>(ok.Value);
+            var list = Assert.IsType<List<BidWithDriverDTO>>(ok.Value);
 
             Assert.Single(list);
             Assert.Equal(b2.BidId, list[0].BidId);
         }
+
 
         [Fact]
         public async Task AcceptBid_ChangesStatuses_SendsNotifications()
