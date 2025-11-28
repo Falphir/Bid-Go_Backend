@@ -106,11 +106,24 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+var connectionString = builder.Configuration.GetConnectionString("default");
+
+if (builder.Environment.IsDevelopment())
+{
+    connectionString = "server=localhost;database=bidgo;user=root;password=1234";
+}
+else
+{
+    Console.WriteLine(">>> MODO PRODUCTION: USAR DB CLOUD <<<");
+}
+
+// 3. Configura o contexto com a string decidida acima
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("default");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
+// =========================================================================
 
 // JWT Authentication
 var key = builder.Configuration["Jwt:Key"];

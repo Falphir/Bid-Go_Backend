@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bid_Go_Backend.Migrations
 {
     [DbContext(typeof(BidGoDbContext))]
-    [Migration("20251118153659_BidandGoV2.1")]
-    partial class BidandGoV21
+    [Migration("20251128155731_V3")]
+    partial class V3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -292,6 +292,9 @@ namespace Bid_Go_Backend.Migrations
                         .HasColumnType("varchar(512)");
 
                     b.Property<bool>("IsAutomaticSelectionEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsAutomaticSelectionExecuted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<decimal>("Length")

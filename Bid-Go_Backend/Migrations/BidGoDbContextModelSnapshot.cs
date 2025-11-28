@@ -291,6 +291,9 @@ namespace Bid_Go_Backend.Migrations
                     b.Property<bool>("IsAutomaticSelectionEnabled")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("IsAutomaticSelectionExecuted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<decimal>("Length")
                         .HasColumnType("decimal(18,2)");
 

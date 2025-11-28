@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bid_Go_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class BidandGoV21 : Migration
+    public partial class V3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -99,6 +99,7 @@ namespace Bid_Go_Backend.Migrations
                     BiddingStartDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     BiddingEndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsAutomaticSelectionEnabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsAutomaticSelectionExecuted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     SelectedBidId = table.Column<int>(type: "int", nullable: true),
                     CompanyId = table.Column<int>(type: "int", nullable: false)
                 },
