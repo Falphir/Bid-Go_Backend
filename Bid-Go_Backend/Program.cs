@@ -111,11 +111,12 @@ var connectionString = builder.Configuration.GetConnectionString("default");
 
 if (builder.Environment.IsDevelopment())
 {
-    connectionString = "server=localhost;database=bidgo;user=root;password=1234";
+    connectionString = "server=localhost;database=bidgo;user=root;password=root";
+    Console.WriteLine(">>> MODO DEV <<<");
 }
 else
 {
-    Console.WriteLine(">>> MODO PRODUCTION: USAR DB CLOUD <<<");
+    Console.WriteLine(">>> MODO PRODUCTION <<<");
 }
 
 // 3. Configura o contexto com a string decidida acima
