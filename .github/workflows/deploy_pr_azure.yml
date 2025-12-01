@@ -14,7 +14,7 @@ permissions:
   contents: read
     
 env:
-  AZURE_WEBAPP_NAME: BidGoWebAPI
+  AZURE_WEBAPP_NAME: BidAndGoWebAPI
   AZURE_WEBAPP_PACKAGE_PATH: "./publish"
   DOTNET_VERSION: "8.x"
   SOLUTION_PATH: "Bid-Go_Backend.sln"
@@ -24,7 +24,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: ubuntu-latest
   
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
   
   deploy:
     name: Deploy to Azure
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [build]
 
     steps:
