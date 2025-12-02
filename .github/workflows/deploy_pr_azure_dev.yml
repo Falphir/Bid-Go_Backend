@@ -14,7 +14,7 @@ permissions:
   contents: read
     
 env:
-  AZURE_WEBAPP_NAME: BidAndGoDevAPI
+  AZURE_WEBAPP_NAME: BidandGoDevAPI
   AZURE_WEBAPP_PACKAGE_PATH: "./publish"
   DOTNET_VERSION: "8.x"
   SOLUTION_PATH: "Bid-Go_Backend.sln"
