@@ -21,7 +21,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         /// <summary>
-        /// Create a new bid for a transport request.
+        /// Create a new Bid for a transport request.
         /// </summary>
         /// <remarks>
         /// The driverId is taken from the JWT token. Controllers should remain thin: validation and business rules are implemented in the service layer.
