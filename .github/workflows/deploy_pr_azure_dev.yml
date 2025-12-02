@@ -5,9 +5,6 @@ name: DEV Build and deploy ASP.Net Core app to Azure Web App - BidGoDevAPI
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - develop
 
 permissions:
   id-token: write
