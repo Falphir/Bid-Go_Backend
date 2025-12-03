@@ -51,7 +51,7 @@ builder.Services.AddCors(options =>
         .WithOrigins(
             "http://localhost:3000",
             "http://localhost:5173",
-            "https://<o-teu-front-end>"
+            "https://happy-coast-0547d9303.3.azurestaticapps.net"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
