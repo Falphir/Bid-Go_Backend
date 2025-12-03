@@ -58,19 +58,17 @@ namespace Bid_Go_Backend.Services.Review
                 throw new InvalidOperationException($"Já existe uma avaliação do tipo {reviewDto.Discriminator} para este serviço.");
             }
 
-            if (reviewDto.Classification < 0 || reviewDto.Classification > 5)
-            {
-                throw new ArgumentOutOfRangeException(nameof(reviewDto.Classification),
-                    "A classificação deve estar entre 0 e 5.");
-            }
-
             Bid_Go_Backend.Data.Models.Review review;
+
             if (reviewDto.Discriminator == "Company")
             {
+           
+                var avg = (reviewDto.ServiceQuality + reviewDto.ClientSuport) / 2m;
+
                 review = new ReviewCompany
                 {
                     TimeStamp = reviewDto.TimeStamp,
-                    Classification = reviewDto.Classification,
+                    Classification = Math.Round(avg, 2),
                     DriverId = reviewDto.DriverId,
                     CompanyId = reviewDto.CompanyId,
                     TransportRequestId = reviewDto.TransportRequestId,
@@ -80,10 +78,13 @@ namespace Bid_Go_Backend.Services.Review
             }
             else if (reviewDto.Discriminator == "Driver")
             {
+               
+                var avg = (reviewDto.Punctuality + reviewDto.Behavior) / 2m;
+
                 review = new ReviewDriver
                 {
                     TimeStamp = reviewDto.TimeStamp,
-                    Classification = reviewDto.Classification,
+                    Classification = Math.Round(avg, 2),
                     DriverId = reviewDto.DriverId,
                     CompanyId = reviewDto.CompanyId,
                     TransportRequestId = reviewDto.TransportRequestId,
@@ -100,6 +101,7 @@ namespace Bid_Go_Backend.Services.Review
             return true;
         }
 
+
         /// <summary>
         /// Get reviews by transport request identifier.
         /// </summary>
@@ -108,5 +110,27 @@ namespace Bid_Go_Backend.Services.Review
             _logger.LogDebug("Getting reviews for transport request {RequestId}", transportRequestId);
             return await _repository.GetReviewByServiceIdAsync(transportRequestId);
         }
+
+        /// <summary>
+        /// Get average rating by driver.
+        /// </summary>
+
+        public async Task<decimal?> GetAverageDriverRatingAsync(int driverId)
+        {
+            var avg = await _repository.GetAverageDriverRatingAsync(driverId);
+            return avg.HasValue ? Math.Round(avg.Value, 1) : (decimal?)null;
+        }
+
+        /// <summary>
+        /// Get average rating by company.
+        /// </summary>
+
+        public async Task<decimal?> GetAverageCompanyRatingAsync(int companyId)
+        {
+            var avg = await _repository.GetAverageCompanyRatingAsync(companyId);
+            return avg.HasValue ? Math.Round(avg.Value, 1) : (decimal?)null;
+        }
+
+
     }
 }

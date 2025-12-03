@@ -176,7 +176,7 @@ namespace Bid_Go.Tests.Integration
                 new Claim("userType", "Company")
             }, "TestAuth"));
 
-            var dto = new CompanyProfileDTO
+            var dto = new CompanyProfileUpdateDTO
             {
                 Name = "C2",
                 CompanyName = "CC2",

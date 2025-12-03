@@ -1,4 +1,5 @@
 ﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Bid_Go_Backend.Services.Interfaces
 
         Task<Bid?> GetBidByIdAsync(int id);
         Task<List<Bid>> GetBidsByTransportRequestAsync(int transportRequestId);
-        Task<List<Bid>> GetBidsByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status);
+        Task<List<BidWithDriverDTO>> GetBidsByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status);
         Task AcceptBidAsync(int id);
         Task RejectBidAsync(int id);
     }

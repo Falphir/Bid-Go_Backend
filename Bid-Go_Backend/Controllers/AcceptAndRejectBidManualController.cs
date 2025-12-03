@@ -45,17 +45,10 @@ namespace Bid_Go_Backend.Controllers
         /// <summary>
         /// Get bids filtered by transport request and status. Restricted to the owning company.
         /// </summary>
-        [Authorize(Policy = "CompanyOnly")]
+        [Authorize]
         [HttpGet("byrequest/{transportRequestId}/{status}")]
         public async Task<IActionResult> GetBidsByTransportRequestAndStatus(int transportRequestId, EBidStatus status)
         {
-            var companyId = int.Parse(User.FindFirst("userId")!.Value);
-
-            var hasPermission = await _authorizationService.CompanyOwnsTransportRequestAsync(companyId, transportRequestId);
-            if (!hasPermission)
-                return Forbid();
-
-
             var bids = await _service.GetBidsByTransportRequestAndStatusAsync(transportRequestId, status);
             if (!bids.Any())
                 return NotFound("No bids found for the given transport request ID and status.");

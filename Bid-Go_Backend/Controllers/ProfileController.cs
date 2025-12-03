@@ -39,6 +39,7 @@ namespace Bid_Go_Backend.Controllers
                     return Ok(new DriverProfileDTO
                     {
                         Name = driver.Name,
+                        ProfileImage = driver.ProfileImage,
                         Email = driver.Email,
                         PhoneNumber = driver.PhoneNumber,
                         NIF = driver.NIF,
@@ -50,6 +51,7 @@ namespace Bid_Go_Backend.Controllers
                     return Ok(new CompanyProfileDTO
                     {
                         Name = company.Name,
+                        ProfileImage = company.ProfileImage,
                         Email = company.Email,
                         PhoneNumber = company.PhoneNumber,
                         NIF = company.NIF,
@@ -70,6 +72,7 @@ namespace Bid_Go_Backend.Controllers
         /// </summary>
         [Authorize(Policy = "DriverOnly")]
         [HttpPut("updateDriver/{id}")]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateDriverProfile(int id, [FromForm] DriverProfileUpdateDTO dto)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
@@ -96,7 +99,8 @@ namespace Bid_Go_Backend.Controllers
         /// </summary>
         [Authorize(Policy = "CompanyOnly")]
         [HttpPut("updateCompany/{id}")]
-        public async Task<IActionResult> UpdateCompanyProfile(int id, [FromBody] CompanyProfileDTO dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateCompanyProfile(int id, [FromForm] CompanyProfileUpdateDTO dto)
         {
             var userIdClaim = User.FindFirst("userId")?.Value;
 

@@ -1,20 +1,20 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - BidGoWebAPI
+name: DEV Build and deploy ASP.Net Core app to Azure Web App - BidGoDevAPI
 
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - main
-
+      - develop
+      
 permissions:
   id-token: write
   contents: read
     
 env:
-  AZURE_WEBAPP_NAME: BidAndGoWebAPI
+  AZURE_WEBAPP_NAME: BidandGoDevAPI
   AZURE_WEBAPP_PACKAGE_PATH: "./publish"
   DOTNET_VERSION: "8.x"
   SOLUTION_PATH: "Bid-Go_Backend.sln"
@@ -64,7 +64,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_DEV_PUBLISH_PROFILE }}
           package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
       
 

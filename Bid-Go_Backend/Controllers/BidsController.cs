@@ -21,7 +21,7 @@ namespace Bid_Go_Backend.Controllers
         }
 
         /// <summary>
-        /// Create a new bid for a transport request.
+        /// Create a new Bid for a transport request.
         /// </summary>
         /// <remarks>
         /// The driverId is taken from the JWT token. Controllers should remain thin: validation and business rules are implemented in the service layer.
@@ -143,6 +143,23 @@ namespace Bid_Go_Backend.Controllers
                 b.Value,
                 b.DeliveryDeadline,
                 Driver = new { b.DriverId, b.Driver.Name, b.Driver.Email }
+            }).ToList<object>();
+            return Ok(list);
+        }
+
+        /// <returns>List of bids from one driver summary</returns>
+        [Authorize]
+        [HttpGet("bidsByDriver/{driverId}")]
+        public async Task<IActionResult> GetBidsByDriverId(int driverId){
+            var bidsByDriver = await _service.GetBidsByDriverId(driverId);
+            var list = bidsByDriver.Select(b => new
+            {
+                b.BidId,
+                b.Value,
+                b.DeliveryDeadline,
+                b.TransportRequestId,
+                b.Status,
+                TransportRequest = new { b.TransportRequest.Status}
             }).ToList<object>();
             return Ok(list);
         }

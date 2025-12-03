@@ -25,7 +25,6 @@ namespace Bid_Go_Backend.Repositories.Transport_Request
         /// <returns>The created entity with keys populated.</returns>
         public async Task<TransportRequest> CreateAsync(TransportRequest request)
         {
-            // Do not override status here; keep what the service decided (e.g., Draft)
             _context.TransportRequests.Add(request);
             await _context.SaveChangesAsync();
             return request;

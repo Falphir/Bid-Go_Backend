@@ -3,12 +3,6 @@ using Bid_Go_Backend.Data.Models;
 using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bid_Go_Backend.Services.Profile
 {
@@ -69,8 +63,20 @@ namespace Bid_Go_Backend.Services.Profile
  anyChange = true;
  }
 
- // Upload new insurance image if provided
- if (dto.Insurance != null && dto.Insurance.Length >0)
+if (dto.ProfileImage != null && dto.ProfileImage.Length > 0)
+{
+var allowedExt = new[] { ".jpg", ".jpeg", ".png" };
+var ext = Path.GetExtension(dto.ProfileImage.FileName).ToLowerInvariant();
+if (!allowedExt.Contains(ext))
+    throw new Exception("Only .jpg, .jpeg or .png are allowed.");
+
+var imageUrl = await _cloudflareR2.UploadImageAsync(dto.ProfileImage);
+driver.ProfileImage = imageUrl;
+anyChange = true;
+}
+
+// Upload new insurance image if provided
+if (dto.Insurance != null && dto.Insurance.Length >0)
  {
  var insuranceUrl = await _cloudflareR2.UploadImageAsync(dto.Insurance);
  driver.Insurance = insuranceUrl;
@@ -87,7 +93,7 @@ namespace Bid_Go_Backend.Services.Profile
  /// <summary>
  /// Update company profile fields.
  /// </summary>
- public async Task<bool> UpdateCompanyProfileAsync(int id, CompanyProfileDTO dto)
+ public async Task<bool> UpdateCompanyProfileAsync(int id, CompanyProfileUpdateDTO dto)
  {
  var user = await _repo.GetUserByIdAsync(id);
  if (user is not Company company)
@@ -114,7 +120,19 @@ namespace Bid_Go_Backend.Services.Profile
  if (!string.IsNullOrEmpty(dto.Address) && dto.Address != company.Address)
  { company.Address = dto.Address; anyChange = true; }
 
- if (!anyChange)
+if (dto.ProfileImage != null && dto.ProfileImage.Length > 0)
+{
+var allowedExt = new[] { ".jpg", ".jpeg", ".png" };
+var ext = Path.GetExtension(dto.ProfileImage.FileName).ToLowerInvariant();
+if (!allowedExt.Contains(ext))
+throw new Exception("Only .jpg, .jpeg or .png are allowed.");
+
+var imageUrl = await _cloudflareR2.UploadImageAsync(dto.ProfileImage);
+company.ProfileImage = imageUrl;
+anyChange = true;
+}
+
+if (!anyChange)
  throw new Exception("No valid fields provided to update.");
 
  await _repo.UpdateCompanyAsync(company);

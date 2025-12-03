@@ -70,5 +70,27 @@ namespace Bid_Go_Backend.Repositories.Notifications
 
             return await query.ToListAsync();
         }
+
+        public async Task MarkAsReadAsync(int notificationId)
+        {
+            var notification = await _ctx.Notifications.FindAsync(notificationId);
+            if (notification == null) return;
+
+            notification.IsRead = true;
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task MarkAllAsReadAsync(int userId)
+        {
+            var notifications = await _ctx.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            foreach (var n in notifications)
+                n.IsRead = true;
+
+            await _ctx.SaveChangesAsync();
+        }
+
     }
 }

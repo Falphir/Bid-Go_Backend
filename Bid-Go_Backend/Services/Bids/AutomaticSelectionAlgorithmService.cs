@@ -2,6 +2,7 @@
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using System.Security.Cryptography;
 
 namespace Bid_Go_Backend.Services.Bids
@@ -48,7 +49,18 @@ namespace Bid_Go_Backend.Services.Bids
                 return (false, "There is already an accepted bid for this request.", null);
 
             if (!transportRequest.Bids.Any())
+            {
+                await _notificationService.CreateAndSendAsync(
+                   transportRequest.CompanyId, $"The automatic selection process has completed, but no bids were submitted for request #{transportRequest.TransportRequestId}. Automatic selection could not be performed.", ENotificationType.New_message, null, transportRequest.TransportRequestId);
+
+
+                transportRequest.Status = ERequestStatus.Canceled;
+
+                await _repo.SaveChangesAsync();
+
                 return (false, "No bids submitted.", null);
+            }
+                
 
             // Reputation filter (>=3)
             var driverIds = transportRequest.Bids.Select(b => b.DriverId).Distinct();
@@ -59,7 +71,15 @@ namespace Bid_Go_Backend.Services.Bids
                 .ToList();
 
             if (!eligibleBids.Any())
+            {
+                await _notificationService.CreateAndSendAsync(
+                  transportRequest.CompanyId, $"The automatic selection process has completed, but no eligible bids were submitted for request #{transportRequest.TransportRequestId}. Manual selection required.", ENotificationType.New_message, null, transportRequest.TransportRequestId);
+
+                await _repo.SaveChangesAsync();
+
                 return (false, "No eligible bids.", null);
+            }
+                
 
             // Lowest price, then highest reputation, then smallest id
             var minPrice = eligibleBids.Min(b => b.Value);
@@ -70,6 +90,7 @@ namespace Bid_Go_Backend.Services.Bids
 
             if (selectedBid.Status != EBidStatus.Pendent)
                 return (false, "The selected bid is not pending and cannot be accepted.", null);
+                
 
             // Update states
             transportRequest.SelectedBidId = selectedBid.BidId;
@@ -84,11 +105,14 @@ namespace Bid_Go_Backend.Services.Bids
             {
                 other.Status = EBidStatus.Rejected;
                 await _notificationService.CreateAndSendAsync(
-                    other.DriverId, "Your bid was rejected.", ENotificationType.Rejected, other.BidId, transportRequest.TransportRequestId);
+                    other.DriverId, $"Your bid for the transport request #{transportRequest.TransportRequestId} was rejected.", ENotificationType.Rejected, other.BidId, transportRequest.TransportRequestId);
             }
 
             await _notificationService.CreateAndSendAsync(
-                selectedBid.DriverId, "Your bid was accepted.", ENotificationType.Accepted, selectedBid.BidId, transportRequest.TransportRequestId);
+                selectedBid.DriverId, $"Your bid for the transport request #{transportRequest.TransportRequestId} was accepted.", ENotificationType.Accepted, selectedBid.BidId, transportRequest.TransportRequestId);
+
+            await _notificationService.CreateAndSendAsync(
+                transportRequest.CompanyId, $"The automatic selection process has completed. A winning bid has been chosen for request #{transportRequest.TransportRequestId}.", ENotificationType.New_message, selectedBid.BidId, transportRequest.TransportRequestId);
 
             await _repo.SaveChangesAsync();
 

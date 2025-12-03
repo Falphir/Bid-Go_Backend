@@ -69,6 +69,17 @@ namespace Bid_Go_Backend.Services
                     .SendAsync("ReceiveNotification", new { context, type, TimeStamp = DateTime.UtcNow });
             }
         }
+
+        public async Task MarkAsReadAsync(int notificationId)
+        {
+            await _repo.MarkAsReadAsync(notificationId);
+        }
+
+        public async Task MarkAllAsReadAsync(int userId)
+        {
+            await _repo.MarkAllAsReadAsync(userId);
+        }
+
     }
 
 }

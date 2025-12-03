@@ -87,7 +87,7 @@ namespace Bid_Go_Backend.Services
                         bid.Status = EBidStatus.Canceled;
                         await _notificationService.CreateAndSendAsync(
                             bid.DriverId,
-                            "O pedido de transporte associado à sua proposta foi cancelado.",
+                            $"The transport request #{bid.TransportRequestId} associated with your bid has been canceled.",
                             ENotificationType.Canceled,
                             bid.BidId,
                             bid.TransportRequestId
@@ -137,6 +137,8 @@ namespace Bid_Go_Backend.Services
                 {
                     ERequestStatus.Active => target is ERequestStatus.Pending or ERequestStatus.Canceled,
                     ERequestStatus.Pending => target == ERequestStatus.WaitingPickup,
+                    ERequestStatus.WaitingPickup => target is ERequestStatus.Canceled,
+                    ERequestStatus.InTransit => target is ERequestStatus.Canceled,
                     _ => false
                 };
             }

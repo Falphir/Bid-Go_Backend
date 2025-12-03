@@ -18,6 +18,7 @@ namespace Bid_Go_Backend.Data.Models
         public string Address { get; set; } = string.Empty;
 
 
+        public ICollection<ReviewCompany> ReviewsCompany { get; set; } = new List<ReviewCompany>();
 
     }
 }

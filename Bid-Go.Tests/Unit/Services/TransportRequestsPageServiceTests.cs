@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Bid_Go_Backend.Tests.Unit.Services
+namespace Bid_Go.Tests.Unit.Services
 {
     /// <summary>
     /// Unit tests for TransportRequestsPageService validating filtering logic and repository delegation.

@@ -53,7 +53,7 @@ namespace Bid_Go_Backend.Repositories.History
                     Destination = transport.Destination,
                     Value = bid.Value,
                     Status = bid.Status,
-                    Date = new DateTime(2024, 1, 1),
+                    Date = bid.DeliveryDeadline,
                     Rating = review != null ? review.Classification : null
 
                 }
@@ -91,7 +91,7 @@ namespace Bid_Go_Backend.Repositories.History
                     TransportRequestId = transport.TransportRequestId,
                     Package = transport.Package,
                     Name = driver != null ? driver.Name : "No assigned driver",
-                    Date = new DateTime(2024, 1, 1), 
+                    Date = transport.BiddingStartDate,
                     Destination = transport.Destination,
                     Price = bid != null ? bid.Value : 0,
                     Status = transport.Status.ToString()

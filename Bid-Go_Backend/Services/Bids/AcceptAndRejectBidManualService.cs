@@ -1,7 +1,10 @@
 ﻿using Bid_Go_Backend.Data.Models;
+using Bid_Go_Backend.Data.Models.DTOs;
 using Bid_Go_Backend.Data.Models.Enums;
 using Bid_Go_Backend.Repositories.Interfaces;
 using Bid_Go_Backend.Services.Interfaces;
+using Microsoft.OpenApi.Expressions;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
 namespace Bid_Go_Backend.Services.Bids
 {
@@ -33,8 +36,20 @@ namespace Bid_Go_Backend.Services.Bids
         /// <summary>
         /// List bids for a transport request filtered by status.
         /// </summary>
-        public Task<List<Bid>> GetBidsByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status) =>
-    _repo.GetByTransportRequestAndStatusAsync(transportRequestId, status);
+        public async Task<List<BidWithDriverDTO>> GetBidsByTransportRequestAndStatusAsync(int transportRequestId, EBidStatus status)
+        {
+            var bids = await _repo.GetByTransportRequestAndStatusAsync(transportRequestId, status);
+
+            return bids.Select(b => new BidWithDriverDTO
+            {
+                BidId = b.BidId,
+                Value = b.Value,
+                DriverId = b.DriverId,
+                DriverName = b.Driver?.Name,
+                DriverEmail = b.Driver?.Email,
+                Deadline = b.DeliveryDeadline
+            }).ToList();
+        }
 
         /// <summary>
         /// Accept a bid, reject other pending bids, and send notifications.
@@ -77,7 +92,7 @@ namespace Bid_Go_Backend.Services.Bids
             // Notifications
             await _notificationService.CreateAndSendAsync(
             bid.DriverId,
-            "Your bid was accepted.",
+             $"Your bid for the transport request #{bid.TransportRequestId} was accepted.",
             ENotificationType.Accepted,
             bid.BidId,
             bid.TransportRequestId
@@ -87,7 +102,7 @@ namespace Bid_Go_Backend.Services.Bids
             {
                 await _notificationService.CreateAndSendAsync(
                     other.DriverId,
-                    "Your bid was rejected.",
+                     $"Your bid for the transport request #{bid.TransportRequestId} was rejected.",
                     ENotificationType.Rejected,
                     other.BidId,
                     other.TransportRequestId
@@ -118,7 +133,7 @@ namespace Bid_Go_Backend.Services.Bids
 
             await _notificationService.CreateAndSendAsync(
                    bid.DriverId,
-                   "Your bid was rejected.",
+                   $"Your bid for the transport request #{bid.TransportRequestId} was rejected.",
                    ENotificationType.Rejected,
                    bid.BidId,
                    bid.TransportRequestId

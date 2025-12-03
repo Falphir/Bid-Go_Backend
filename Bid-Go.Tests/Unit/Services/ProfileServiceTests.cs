@@ -140,7 +140,7 @@ namespace Bid_Go.Tests.Unit.Services
                 CompanyName = "Old Company"
             };
 
-            var dto = new CompanyProfileDTO
+            var dto = new CompanyProfileUpdateDTO
             {
                 Name = "NewCo",
                 CompanyName = "New Company"
@@ -169,7 +169,7 @@ namespace Bid_Go.Tests.Unit.Services
 
             // Act
             // Assert
-            await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
+            await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileUpdateDTO()));
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Bid_Go.Tests.Unit.Services
 
             // Act
             // Assert
-            await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileDTO()));
+            await Assert.ThrowsAsync<Exception>(() => _service.UpdateCompanyProfileAsync(1, new CompanyProfileUpdateDTO()));
         }
 
       

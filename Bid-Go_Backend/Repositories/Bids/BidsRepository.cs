@@ -65,8 +65,12 @@ namespace Bid_Go_Backend.Repositories.Bids
         /// </remarks>
         public async Task<List<Bid>> GetActiveBidsAsync(int transportRequestId, string? orderBy = "value", bool descending = false)
         {
-            var query = _ctx.Bids.Include(b => b.Driver).AsNoTracking()
-                .Where(b => b.TransportRequestId == transportRequestId && b.Status == EBidStatus.Pendent);
+            var query = _ctx.Bids
+      .Include(b => b.Driver)
+          .ThenInclude(d => d.ReviewsDriver) 
+      .AsNoTracking()
+      .Where(b => b.TransportRequestId == transportRequestId && b.Status == EBidStatus.Pendent);
+
 
             query = (orderBy?.ToLower(), descending) switch
             {
@@ -75,6 +79,17 @@ namespace Bid_Go_Backend.Repositories.Bids
                 ("value", true) => query.OrderByDescending(b => b.Value),
                 _ => query.OrderBy(b => b.Value)
             };
+
+            return await query.ToListAsync();
+        }
+
+
+        public async Task<List<Bid>> GetBidsByDriverId(int driverId)
+        {
+            var query = _ctx.Bids
+             .Include(b => b.TransportRequest)
+             .AsNoTracking()
+             .Where(b => b.DriverId == driverId);
 
             return await query.ToListAsync();
         }

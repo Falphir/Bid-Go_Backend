@@ -17,5 +17,9 @@ namespace Bid_Go_Backend.Repositories.Interfaces
 
         // Read projection for listing reviews by service
         Task<IEnumerable<ReviewByServiceDTO>> GetReviewByServiceIdAsync(int transportRequestId);
+
+        Task<decimal?> GetAverageDriverRatingAsync(int driverId);
+
+        Task<decimal?> GetAverageCompanyRatingAsync(int companyId);
     }
 }

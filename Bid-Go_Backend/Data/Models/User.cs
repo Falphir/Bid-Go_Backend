@@ -14,6 +14,9 @@ namespace Bid_Go_Backend.Data.Models
         [Key] 
         public int Id { get; set; }
 
+        [MaxLength(512)]
+        public string? ProfileImage { get; set; } = string.Empty;
+
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;

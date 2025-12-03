@@ -21,7 +21,6 @@ namespace Bid_Go_Backend.Services
         public async Task<bool> CompanyOwnsTransportRequestAsync(int companyId, int transportRequestId)
         {
             var request = await _repo.GetTransportRequestAsync(transportRequestId);
-            Console.WriteLine("Request company ID" + request.CompanyId);
             Console.WriteLine("Company ID" + companyId);
             return request != null && request.CompanyId == companyId;
             

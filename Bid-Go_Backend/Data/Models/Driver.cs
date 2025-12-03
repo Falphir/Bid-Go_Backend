@@ -18,5 +18,8 @@ namespace Bid_Go_Backend.Data.Models
         public string Insurance { get; set; } = string.Empty;
 
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+
+        public ICollection<ReviewDriver> ReviewsDriver { get; set; } = new List<ReviewDriver>();
+
     }
 }
