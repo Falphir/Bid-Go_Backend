@@ -48,14 +48,9 @@ var MyCors = "Frontend";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(MyCors, p => p
-        .WithOrigins(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "https://happy-coast-0547d9303.3.azurestaticapps.net"
-        )
+        .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials()
     );
 });
 
