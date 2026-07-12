@@ -1,0 +1,32 @@
+name: Reset demo data
+
+# Visitors can create and delete whatever they like on the public demo, so wipe it back to a
+# presentable state every night. Also doubles as a keep-alive: the request wakes the Render
+# service, which otherwise sleeps.
+on:
+  schedule:
+    - cron: "0 4 * * *" # 04:00 UTC daily
+  workflow_dispatch: # allows a manual reset from the Actions tab
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the reset endpoint
+        env:
+          DEMO_URL: ${{ secrets.DEMO_BACKEND_URL }}
+          DEMO_RESET_TOKEN: ${{ secrets.DEMO_RESET_TOKEN }}
+        run: |
+          # The free Render instance may be asleep; --max-time covers the cold start.
+          status=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -X POST "$DEMO_URL/api/demo/reset" \
+            -H "X-Demo-Token: $DEMO_RESET_TOKEN" \
+            --max-time 180)
+
+          echo "HTTP $status"
+          cat /tmp/body
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Demo reset failed with HTTP $status"
+            exit 1
+          fi

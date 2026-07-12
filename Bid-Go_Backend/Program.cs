@@ -251,6 +251,14 @@ if (!string.Equals(Environment.GetEnvironmentVariable("RUN_MIGRATIONS"), "false"
     db.Database.Migrate();
 }
 
+// Only the public demo sets this. Seeding is idempotent, so it is safe on every cold start.
+if (string.Equals(Environment.GetEnvironmentVariable("SEED_DEMO_DATA"), "true", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<BidGoDbContext>();
+    await DemoDataSeeder.SeedAsync(db);
+}
+
 var fwd = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
@@ -307,5 +315,23 @@ app.UseAuthorization();
 // Map controllers
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
+
+// Wipes and reseeds the demo, so visitors' leftovers do not accumulate forever. Only exists when
+// the demo is seeded AND a token is set, so it can never appear on a real deployment by accident.
+var resetToken = Environment.GetEnvironmentVariable("DEMO_RESET_TOKEN");
+if (string.Equals(Environment.GetEnvironmentVariable("SEED_DEMO_DATA"), "true", StringComparison.OrdinalIgnoreCase)
+    && !string.IsNullOrWhiteSpace(resetToken))
+{
+    app.MapPost("/api/demo/reset", async (HttpContext http, BidGoDbContext db) =>
+    {
+        if (!http.Request.Headers.TryGetValue("X-Demo-Token", out var supplied) || supplied != resetToken)
+        {
+            return Results.Unauthorized();
+        }
+
+        await DemoDataSeeder.SeedAsync(db, force: true);
+        return Results.Ok(new { message = "Demo data reset." });
+    });
+}
 
 app.Run();
