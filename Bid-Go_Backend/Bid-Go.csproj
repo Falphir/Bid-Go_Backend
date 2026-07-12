@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <!-- Generate XML documentation file for API documentation and Swagger -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>bin\$(Configuration)\net8.0\$(AssemblyName).xml</DocumentationFile>

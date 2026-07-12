@@ -24,6 +24,7 @@ using Bid_Go_Backend.Services.Review;
 using Bid_Go_Backend.Services.Transport_Request;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -43,6 +44,13 @@ using ITransportRequestsPageService = Bid_Go_Backend.Services.Transport_Request.
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Container hosts (Railway, Render, Fly) assign the listening port at runtime.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 
 var MyCors = "Frontend";
 builder.Services.AddCors(options =>
@@ -104,20 +112,24 @@ builder.Services.AddSwaggerGen(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("default");
 
-if (builder.Environment.IsDevelopment())
+if (string.IsNullOrWhiteSpace(connectionString) && builder.Environment.IsDevelopment())
 {
     connectionString = "server=localhost;database=bidgo;user=root;password=root";
-    Console.WriteLine(">>> MODO DEV <<<");
-}
-else
-{
-    Console.WriteLine(">>> MODO PRODUCTION <<<");
 }
 
-// 3. Configura o contexto com a string decidida acima
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "No database connection string. Set ConnectionStrings__default in the environment.");
+}
+
+// Pinned rather than AutoDetect: AutoDetect opens a connection at startup, which crash-loops
+// the container whenever the database is slower to come up than the app.
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
+
 builder.Services.AddDbContext<BidGoDbContext>(options =>
 {
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    options.UseMySql(connectionString, serverVersion, mysql => mysql.EnableRetryOnFailure());
 });
 // =========================================================================
 
@@ -125,6 +137,11 @@ builder.Services.AddDbContext<BidGoDbContext>(options =>
 var key = builder.Configuration["Jwt:Key"];
 var issuer = builder.Configuration["Jwt:Issuer"];
 var audience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(key))
+{
+    throw new InvalidOperationException("No JWT signing key. Set Jwt__Key in the environment.");
+}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -225,6 +242,15 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
+// The demo deploys against an empty database, so bring the schema up on boot.
+// Set RUN_MIGRATIONS=false to skip.
+if (!string.Equals(Environment.GetEnvironmentVariable("RUN_MIGRATIONS"), "false", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<BidGoDbContext>();
+    db.Database.Migrate();
+}
+
 var fwd = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
@@ -233,7 +259,8 @@ fwd.KnownNetworks.Clear();
 fwd.KnownProxies.Clear();
 app.UseForwardedHeaders(fwd);
 
-app.UseHttpsRedirection();
+// No HTTPS redirection: the platform terminates TLS at the edge and forwards plain HTTP to the
+// container, so redirecting here only produces loops and breaks the SignalR websocket handshake.
 
 
 app.UseSwagger();

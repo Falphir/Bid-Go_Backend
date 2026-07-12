@@ -10,19 +10,19 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Bid-Go_Backend/Bid-Go_Backend.csproj", "Bid-Go_Backend/"]
-RUN dotnet restore "./Bid-Go_Backend/Bid-Go_Backend.csproj"
+COPY ["Bid-Go_Backend/Bid-Go.csproj", "Bid-Go_Backend/"]
+RUN dotnet restore "./Bid-Go_Backend/Bid-Go.csproj"
 COPY . .
 WORKDIR "/src/Bid-Go_Backend"
-RUN dotnet build "./Bid-Go_Backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Bid-Go.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Bid-Go_Backend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Bid-Go.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Bid-Go_Backend.dll"]
+ENTRYPOINT ["dotnet", "Bid-Go.dll"]

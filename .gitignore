@@ -363,3 +363,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local secrets - appsettings.json is committed with empty placeholders only;
+# real values come from environment variables (see README).
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.Local.json
+.env
+.env.*
+!.env.example
