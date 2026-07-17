@@ -316,6 +316,21 @@ app.UseAuthorization();
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 
+// Lightweight liveness probe for an external cron job (e.g. cron-job.org / UptimeRobot).
+// The round-trip keeps the free-tier Aiven MySQL instance from idling to sleep.
+app.MapGet("/health", async (BidGoDbContext db) =>
+{
+    try
+    {
+        await db.Database.ExecuteSqlRawAsync("SELECT 1");
+        return Results.Ok(new { status = "healthy" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"DB unreachable: {ex.Message}", statusCode: 503);
+    }
+});
+
 // Wipes and reseeds the demo, so visitors' leftovers do not accumulate forever. Only exists when
 // the demo is seeded AND a token is set, so it can never appear on a real deployment by accident.
 var resetToken = Environment.GetEnvironmentVariable("DEMO_RESET_TOKEN");
